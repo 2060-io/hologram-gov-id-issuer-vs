@@ -32,7 +32,7 @@ Note: at the moment face capture/verification is performed by connecting to a we
 
 Several use cases of Citizen Registries have been deployed for your convenience. Just download the Hologram Messenger in the App Store or Google play and scan the QR code of the service you would like to try. All these demos are just an instance of the same citizen-registry service with customized settings. You can easily create your own demo for your country by jumping to the [kubernetes howto]() documentation.
 
-### GaiaID Identity Registry
+### Unicid Identity Registry
 
 a government-like registry service. Test URL: [https://gaiaid.io](https://gaiaid.io)
 

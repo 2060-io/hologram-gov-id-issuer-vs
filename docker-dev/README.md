@@ -172,9 +172,9 @@ edit src/main/resources/application.properties so that the vision service will k
 
 ```
 # here replace p3001.testing.2060.io with the ngrok domain name that will forward to port 2903 (the quarkus backend) 
-%dev.io.gaiaid.vision.redirdomain.q=p2603.testing.2060.io
+%dev.io.unicid.vision.redirdomain.q=p2603.testing.2060.io
 # here replace p3001.testing.2060.io with the ngrok domain name that will forward to port 2904 (the datastore container) 
-%dev.io.gaiaid.vision.redirdomain.d=p2604.testing.2060.io
+%dev.io.unicid.vision.redirdomain.d=p2604.testing.2060.io
 ```
 start quarkus:
 
