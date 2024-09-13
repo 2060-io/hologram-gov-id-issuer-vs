@@ -16,7 +16,7 @@ import io.twentysixty.sa.client.model.event.ConnectionStateUpdated;
 import io.twentysixty.sa.client.model.event.DidExchangeState;
 import io.twentysixty.sa.client.res.s.ConnectionEventInterface;
 import io.twentysixty.sa.client.util.JsonUtil;
-import io.unicid.registry.svc.GaiaService;
+import io.unicid.registry.svc.Service;
 
 @Path("")
 public class ConnectionEventResource implements ConnectionEventInterface {
@@ -24,7 +24,7 @@ public class ConnectionEventResource implements ConnectionEventInterface {
 	
 	private static Logger logger = Logger.getLogger(ConnectionEventResource.class);
 
-	@Inject GaiaService service;
+	@Inject Service service;
 	@ConfigProperty(name = "io.unicid.debug")
 	Boolean debug;
 

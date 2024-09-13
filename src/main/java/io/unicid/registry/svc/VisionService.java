@@ -25,7 +25,7 @@ import io.unicid.registry.model.Token;
 public class VisionService {
 
 	
-	@Inject GaiaService service;
+	@Inject Service service;
 	
 	@Inject EntityManager em;
 	

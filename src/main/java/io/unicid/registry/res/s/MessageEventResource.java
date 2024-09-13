@@ -12,6 +12,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,11 +24,8 @@ import io.twentysixty.sa.client.model.message.MessageReceiptOptions;
 import io.twentysixty.sa.client.model.message.ReceiptsMessage;
 import io.twentysixty.sa.client.res.s.MessageEventInterface;
 import io.twentysixty.sa.client.util.JsonUtil;
-import io.unicid.registry.jms.MoProducer;
-import io.unicid.registry.jms.MtProducer;
-
-
-
+import io.twentysixty.sa.res.c.MessageResource;
+import io.unicid.registry.svc.Service;
 
 @Path("")
 public class MessageEventResource implements MessageEventInterface {
@@ -35,9 +33,8 @@ public class MessageEventResource implements MessageEventInterface {
 	private static Logger logger = Logger.getLogger(MessageEventResource.class);
 
 	
-
-	@Inject MoProducer moProducer;
-	@Inject MtProducer mtProducer;
+	@Inject Service service;
+	@RestClient @Inject MessageResource messageResource;
 
 	@ConfigProperty(name = "io.unicid.debug")
 	Boolean debug;
@@ -77,7 +74,7 @@ public class MessageEventResource implements MessageEventInterface {
 		r.setReceipts(receipts);
 		
 		try {
-			mtProducer.sendMessage(r);
+			messageResource.sendMessage(r);
 			
 			
 			//messageResource.sendMessage(r);
@@ -95,7 +92,7 @@ public class MessageEventResource implements MessageEventInterface {
 		}
 		
 		try {
-			moProducer.sendMessage(event);
+			service.userInput(event.getMessage());
 		} catch (Exception e) {
 			logger.error("", e);
 			return  Response.status(Status.INTERNAL_SERVER_ERROR).build();

@@ -9,13 +9,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -31,7 +29,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.CriteriaBuilder.In;
 import jakarta.transaction.Transactional;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -42,9 +39,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.graalvm.collections.Pair;
 import org.jboss.logging.Logger;
 import org.jgroups.util.Base64;
 
@@ -69,6 +64,7 @@ import io.twentysixty.sa.client.model.message.TextMessage;
 import io.twentysixty.sa.client.util.Aes256cbc;
 import io.twentysixty.sa.client.util.JsonUtil;
 import io.twentysixty.sa.res.c.CredentialTypeResource;
+import io.twentysixty.sa.res.c.MessageResource;
 import io.unicid.registry.enums.CreateStep;
 import io.unicid.registry.enums.IdentityClaim;
 import io.unicid.registry.enums.IssueStep;
@@ -79,7 +75,6 @@ import io.unicid.registry.enums.SessionType;
 import io.unicid.registry.enums.TokenType;
 import io.unicid.registry.ex.NoMediaException;
 import io.unicid.registry.ex.TokenException;
-import io.unicid.registry.jms.MtProducer;
 import io.unicid.registry.model.Identity;
 import io.unicid.registry.model.Media;
 import io.unicid.registry.model.Session;
@@ -91,9 +86,9 @@ import io.unicid.registry.res.c.Resource;
 
 
 @ApplicationScoped
-public class GaiaService {
+public class Service {
 
-	private static Logger logger = Logger.getLogger(GaiaService.class);
+	private static Logger logger = Logger.getLogger(Service.class);
 
 	@Inject EntityManager em;
 	
@@ -101,7 +96,7 @@ public class GaiaService {
 	@Inject MediaResource mediaResource;
 	
 	
-	@Inject MtProducer mtProducer;
+	@RestClient @Inject MessageResource messageResource;
 	
 	@RestClient
 	@Inject CredentialTypeResource credentialTypeResource;
@@ -541,14 +536,14 @@ public class GaiaService {
 							session.setType(SessionType.EDIT);
 							session.setIdentity(identity);
 							session = em.merge(session);
-							mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_SELECTED").replace("IDENTITY", this.getIdentityLabel(identity))));
+							messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_SELECTED").replace("IDENTITY", this.getIdentityLabel(identity))));
 							found = true;
 						}
 					}
 				}
 			}
 			if (!found) {
-				mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_NOT_FOUND")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_NOT_FOUND")));
 				em.remove(session);
 				session = null;
 			}
@@ -596,7 +591,7 @@ public class GaiaService {
 				em.remove(session);
 				session = null;
 			}
-			mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_CREATE_ABORTED")));
+			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_CREATE_ABORTED")));
 
 			logger.info("userInput: CMD_CREATE_ABORT : session after: " + session);
 		} else if (content.equals(CMD_RESTORE_ABORT)) {
@@ -605,16 +600,16 @@ public class GaiaService {
 				em.remove(session);
 				session = null;
 			}
-			mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_RESTORE_ABORTED")));
+			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_RESTORE_ABORTED")));
 
 		} else if (content.equals(CMD_VIEW_ID)) {
 			logger.info("userInput: CMD_VIEW_ID : session before: " + session);
 			if ( (session != null)  && (session.getType() != null) && (session.getType().equals(SessionType.EDIT)) && (identity != null)) {
 				
 				String idstr = this.getIdentityDataString(identity);
-				mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), idstr));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), idstr));
 			} else {
-				mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
 			}
 			
 		} else if (content.equals(CMD_UNDELETE)) {
@@ -623,13 +618,13 @@ public class GaiaService {
 				if (identity.getDeletedTs().plusSeconds(86400).compareTo(Instant.now())>0) {
 					identity.setDeletedTs(null);
 					identity = em.merge(identity);
-					mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_UNDELETED").replace("IDENTITY", this.getIdentityLabel(identity))));
+					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_UNDELETED").replace("IDENTITY", this.getIdentityLabel(identity))));
 
 				} else {
-					mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_IDENTITY_UNDELETE").replace("IDENTITY", this.getIdentityLabel(identity))));
+					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_IDENTITY_UNDELETE").replace("IDENTITY", this.getIdentityLabel(identity))));
 				}
 			} else {
-				mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
 			}
 			
 			
@@ -639,7 +634,7 @@ public class GaiaService {
 				em.remove(session);
 				session = null;
 			}
-			mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_EDIT_ABORTED")));
+			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_EDIT_ABORTED")));
 
 		} else if (content.equals(CMD_ISSUE)) {
 			logger.info("userInput: CMD_ISSUE : session before: " + session);
@@ -651,7 +646,7 @@ public class GaiaService {
 				this.issueEntryPoint(message.getConnectionId(), message.getThreadId(), session, null);
 				
 			} else {
-				mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
 			}
 			
 		} else if (content.equals(CMD_ISSUE_ABORT)) {
@@ -661,7 +656,7 @@ public class GaiaService {
 				session = em.merge(session);
 				
 			}
-			mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_ISSUANCE_ABORTED")));
+			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_ISSUANCE_ABORTED")));
 
 		} else if (content.equals(CMD_DELETE)) {
 			logger.info("userInput: CMD_DELETE : session before: " + session);
@@ -674,11 +669,11 @@ public class GaiaService {
 					
 					identity.setDeletedTs(Instant.now());
 					em.merge(identity);
-					mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_DELETED").replace("IDENTITY", this.getIdentityLabel(identity))));
+					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_DELETED").replace("IDENTITY", this.getIdentityLabel(identity))));
 				}
 				
 			} else {
-				mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
 			}
 			
 			
@@ -689,10 +684,10 @@ public class GaiaService {
 				if (identity.getIssuedTs() != null) {
 					identity.setRevokedTs(Instant.now());
 					identity = em.merge(identity);
-					mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_REVOKED").replace("IDENTITY", this.getIdentityLabel(identity))));
+					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_REVOKED").replace("IDENTITY", this.getIdentityLabel(identity))));
 				}
 			} else {
-				mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
 			}
 			
 		} else if ((session != null) && (session.getType()!= null) && (session.getType().equals(SessionType.CREATE))) {
@@ -708,12 +703,12 @@ public class GaiaService {
 			
 			this.issueEntryPoint(message.getConnectionId(), message.getThreadId(), session, content);
 		} else {
-			mtProducer.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("HELP")));
+			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("HELP")));
 		}
 		
 		logger.info("userInput: sending menu content: " + content + " session: " + session + " identity: " + identity  );
 		
-		mtProducer.sendMessage(this.getRootMenu(message.getConnectionId(), session, identity));
+		messageResource.sendMessage(this.getRootMenu(message.getConnectionId(), session, identity));
 	}
 	
 	// ?token=TOKEN&d=D_DOMAIN&q=Q_DOMAIN
@@ -796,7 +791,7 @@ public class GaiaService {
 					session = em.merge(session);
 				} catch (Exception e) {
 					logger.error("", e);
-					mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR")));
 				}
 				
 			}
@@ -849,7 +844,7 @@ public class GaiaService {
 						
 					} catch (Exception e) {
 						logger.error("", e);
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR")));
 						this.restoreSendMessage(connectionId, threadId, session);
 					}
 					
@@ -878,8 +873,8 @@ public class GaiaService {
 			case FACE_VERIFICATION: {
 				
 				Token token = this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
-				mtProducer.sendMessage(generateFaceVerificationMediaMessage(connectionId, threadId, token));
-				/*mtProducer.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
+				messageResource.sendMessage(generateFaceVerificationMediaMessage(connectionId, threadId, token));
+				/*messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
 						.replaceFirst("REDIRDOMAIN", redirDomain)
 						.replaceFirst("Q_DOMAIN", qRedirDomain)
 						.replaceFirst("D_DOMAIN", dRedirDomain)
@@ -910,8 +905,8 @@ public class GaiaService {
 							identity.setConnectionId(connectionId);
 							identity.setAuthenticatedTs(Instant.now());
 							identity = em.merge(identity);
-							mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL")));
-							mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_RESTORED").replaceFirst("IDENTITY", this.getIdentityLabel(identity))));
+							messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL")));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_RESTORED").replaceFirst("IDENTITY", this.getIdentityLabel(identity))));
 							session = this.issueCredentialAndSetEditMenu(session, identity);
 							
 							restored = true;
@@ -927,8 +922,8 @@ public class GaiaService {
 					}
 					
 					if (!restored) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_NOT_FOUND")));
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PASSWORD")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_NOT_FOUND")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PASSWORD")));
 					}
 					
 					
@@ -996,7 +991,7 @@ public class GaiaService {
 				}
 			}
 			if (res == null) {
-				mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_NOT_FOUND")));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_NOT_FOUND")));
 				this.purgeSession(session);
 				session.setType(SessionType.RESTORE);
 				session.setRestoreStep(getNextRestoreStep(null));
@@ -1023,8 +1018,8 @@ public class GaiaService {
 					Token token = this.getToken(connectionId, TokenType.FACE_VERIFICATION, res);
 					
 					
-					mtProducer.sendMessage(generateFaceVerificationMediaMessage(connectionId, threadId, token));
-					/*mtProducer.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
+					messageResource.sendMessage(generateFaceVerificationMediaMessage(connectionId, threadId, token));
+					/*messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
 							.replaceFirst("REDIRDOMAIN", redirDomain)
 							.replaceFirst("Q_DOMAIN", qRedirDomain)
 							.replaceFirst("D_DOMAIN", dRedirDomain)
@@ -1061,43 +1056,43 @@ public class GaiaService {
 		
 		if (session.getRestoreStep() == null) {
 			
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRSTNAME")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRSTNAME")));
 		} 
 		
 		else switch (session.getRestoreStep()) {
 		
 		case CITIZEN_ID:
 		{
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_CITIZEN_ID")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_CITIZEN_ID")));
 			break;
 		} 
 		
 		case FIRSTNAME:
 		{
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRSTNAME")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRSTNAME")));
 			break;
 		} 
 		case LASTNAME:
 		{
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_LASTNAME")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_LASTNAME")));
 			break;
 		}
 		case AVATARNAME:
 		{
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_AVATARNAME")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_AVATARNAME")));
 			break;
 		}
 		case BIRTHDATE: {
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_BIRTHDATE")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_BIRTHDATE")));
 			break;
 		}
 		case PLACE_OF_BIRTH: {
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PLACE_OF_BIRTH")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PLACE_OF_BIRTH")));
 			break;
 		}
 		
 		case PASSWORD: {
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PASSWORD")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PASSWORD")));
 			break;
 		}
 		
@@ -1343,17 +1338,17 @@ public class GaiaService {
 					
 				} catch (Exception e) {
 					logger.error("", e);
-					mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR")));
 				}
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 						if (session.getAvatarPic() == null) {
-							mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
 							MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-							mtProducer.sendMessage(mms);
+							messageResource.sendMessage(mms);
 							
 						}
 						
@@ -1372,12 +1367,12 @@ public class GaiaService {
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 						if (session.getAvatarPic() == null) {
-							mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
 							MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-							mtProducer.sendMessage(mms);
+							messageResource.sendMessage(mms);
 							
 						}
 						session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1395,12 +1390,12 @@ public class GaiaService {
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 						if (session.getAvatarPic() == null) {
-							mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
 							MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-							mtProducer.sendMessage(mms);
+							messageResource.sendMessage(mms);
 							
 						}
 						session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1419,12 +1414,12 @@ public class GaiaService {
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 						if (session.getAvatarPic() == null) {
-							mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
 							MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-							mtProducer.sendMessage(mms);
+							messageResource.sendMessage(mms);
 							
 						}
 						session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1446,12 +1441,12 @@ public class GaiaService {
 					if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 						
 						if (this.identityAlreadyExists(session)) {
-							mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 							if (session.getAvatarPic() == null) {
-								mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+								messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 							} else {
 								MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-								mtProducer.sendMessage(mms);
+								messageResource.sendMessage(mms);
 								
 							}
 							session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1477,18 +1472,18 @@ public class GaiaService {
 					session = em.merge(session);
 				} catch (Exception e) {
 					logger.error("", e);
-					mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR")));
 				}
 				
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 						if (session.getAvatarPic() == null) {
-							mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
 							MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-							mtProducer.sendMessage(mms);
+							messageResource.sendMessage(mms);
 							
 						}
 						session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1509,12 +1504,12 @@ public class GaiaService {
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 						if (session.getAvatarPic() == null) {
-							mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
 							MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-							mtProducer.sendMessage(mms);
+							messageResource.sendMessage(mms);
 							
 						}
 						session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1564,10 +1559,10 @@ public class GaiaService {
 					session.setCreateStep(CreateStep.WANT_TO_CHANGE);
 					session = em.merge(session);
 					if (session.getAvatarPic() == null) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 					} else {
 						MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-						mtProducer.sendMessage(mms);
+						messageResource.sendMessage(mms);
 						
 					}
 					this.createSendMessage(connectionId, threadId, session);
@@ -1591,7 +1586,7 @@ public class GaiaService {
 						session.setCreateStep(CreateStep.PASSWORD);
 						session = em.merge(session);
 						
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST")));
 						
 						break;
 					}
@@ -1601,10 +1596,10 @@ public class GaiaService {
 						session = em.merge(session);
 						
 						Token token = this.getToken(connectionId, TokenType.FACE_CAPTURE, session.getIdentity());
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FACE_CAPTURE_REQUIRED")));
-						mtProducer.sendMessage(generateFaceCaptureMediaMessage(connectionId, threadId, token));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FACE_CAPTURE_REQUIRED")));
+						messageResource.sendMessage(generateFaceCaptureMediaMessage(connectionId, threadId, token));
 						/*
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, FACE_CAPTURE_REQUEST.replaceFirst("URL", faceCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_CAPTURE_REQUEST.replaceFirst("URL", faceCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
 								.replaceFirst("REDIRDOMAIN", redirDomain)
 								.replaceFirst("Q_DOMAIN", qRedirDomain)
 								.replaceFirst("D_DOMAIN", dRedirDomain)
@@ -1618,8 +1613,8 @@ public class GaiaService {
 						session = em.merge(session);
 						
 						Token token = this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FINGERPRINT_CAPTURE_REQUIRED")));
-					/*	mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FINGERPRINT_CAPTURE_REQUEST").replaceFirst("URL", fingerprintsCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FINGERPRINT_CAPTURE_REQUIRED")));
+					/*	messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FINGERPRINT_CAPTURE_REQUEST").replaceFirst("URL", fingerprintsCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
 								.replaceFirst("REDIRDOMAIN", redirDomain)
 								.replaceFirst("Q_DOMAIN", qRedirDomain)
 								.replaceFirst("D_DOMAIN", dRedirDomain))));*/
@@ -1681,18 +1676,18 @@ public class GaiaService {
 						session.setCitizenId(citizenId.toString());
 					} catch (Exception e) {
 						logger.error("", e);
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR")));
 					}
 					
 				}
 				
 				if (this.identityAlreadyExists(session)) {
-					mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 					if (session.getAvatarPic() == null) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 					} else {
 						MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-						mtProducer.sendMessage(mms);
+						messageResource.sendMessage(mms);
 						
 					}
 					session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1713,12 +1708,12 @@ public class GaiaService {
 				session.setFirstname(content);
 				
 				if (this.identityAlreadyExists(session)) {
-					mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 					if (session.getAvatarPic() == null) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 					} else {
 						MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-						mtProducer.sendMessage(mms);
+						messageResource.sendMessage(mms);
 						
 					}
 					session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1740,12 +1735,12 @@ public class GaiaService {
 				
 				
 				if (this.identityAlreadyExists(session)) {
-					mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 					if (session.getAvatarPic() == null) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 					} else {
 						MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-						mtProducer.sendMessage(mms);
+						messageResource.sendMessage(mms);
 						
 					}
 					session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1767,12 +1762,12 @@ public class GaiaService {
 				
 				
 				if (this.identityAlreadyExists(session)) {
-					mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 					if (session.getAvatarPic() == null) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 					} else {
 						MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-						mtProducer.sendMessage(mms);
+						messageResource.sendMessage(mms);
 						
 					}
 					session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1799,12 +1794,12 @@ public class GaiaService {
 					
 						
 					if (this.identityAlreadyExists(session)) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 						if (session.getAvatarPic() == null) {
-							mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
 							MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-							mtProducer.sendMessage(mms);
+							messageResource.sendMessage(mms);
 							
 						}
 						
@@ -1836,12 +1831,12 @@ public class GaiaService {
 					
 					
 					if (this.identityAlreadyExists(session)) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 						if (session.getAvatarPic() == null) {
-							mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
 							MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-							mtProducer.sendMessage(mms);
+							messageResource.sendMessage(mms);
 							
 						}
 						session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1855,7 +1850,7 @@ public class GaiaService {
 					
 				} catch (Exception e) {
 					logger.error("", e);
-					mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR")));
 				}
 				
 			}
@@ -1871,12 +1866,12 @@ public class GaiaService {
 				session.setPlaceOfBirth(content);
 				
 				if (this.identityAlreadyExists(session)) {
-					mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
 					if (session.getAvatarPic() == null) {
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 					} else {
 						MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-						mtProducer.sendMessage(mms);
+						messageResource.sendMessage(mms);
 						
 					}
 					session.setCreateStep(CreateStep.NEED_TO_CHANGE);
@@ -1906,7 +1901,7 @@ public class GaiaService {
 				
 				
 				
-				mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_CONFIRM")));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_CONFIRM")));
 
 				this.purgeSession(session);
 				session.setType(SessionType.ISSUE);
@@ -1915,15 +1910,15 @@ public class GaiaService {
 				this.issueEntryPoint(connectionId, threadId, session, content);
 				
 			} else {
-				mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST")));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST")));
 			}
 			break;
 		} case FACE_CAPTURE: {
 			Token token = this.getToken(connectionId, TokenType.FACE_CAPTURE, session.getIdentity());
 			
-			mtProducer.sendMessage(generateFaceCaptureMediaMessage(connectionId, threadId, token));
+			messageResource.sendMessage(generateFaceCaptureMediaMessage(connectionId, threadId, token));
 
-			/*mtProducer.sendMessage(TextMessage.build(connectionId, threadId, FACE_CAPTURE_REQUEST.replaceFirst("URL", faceCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
+			/*messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_CAPTURE_REQUEST.replaceFirst("URL", faceCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
 					.replaceFirst("REDIRDOMAIN", redirDomain)
 					.replaceFirst("Q_DOMAIN", qRedirDomain)
 					.replaceFirst("D_DOMAIN", dRedirDomain))));*/
@@ -2159,12 +2154,12 @@ public class GaiaService {
 	private void createSendMessage(UUID connectionId, UUID threadId, Session session) throws Exception {
 		CreateStep step = session.getCreateStep();
 		if (session.getCreateStep() == null) {
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, WELCOME));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, WELCOME));
 			if (WELCOME2.isPresent()) {
-				mtProducer.sendMessage(TextMessage.build(connectionId, threadId, WELCOME2.get()));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, WELCOME2.get()));
 			}
 			if (WELCOME3.isPresent()) {
-				mtProducer.sendMessage(TextMessage.build(connectionId, threadId, WELCOME3.get()));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, WELCOME3.get()));
 			}
 			// should not occur never
 			if (step == null) {
@@ -2178,61 +2173,61 @@ public class GaiaService {
 		case CITIZEN_ID:
 		case CHANGE_CITIZEN_ID: 
 		{
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("CITIZEN_ID_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("CITIZEN_ID_REQUEST")));
 			break;
 		} 
 		
 		case FIRSTNAME:
 		case CHANGE_FIRSTNAME:
 		{
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FIRSTNAME_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FIRSTNAME_REQUEST")));
 			break;
 		} 
 		case LASTNAME:
 		case CHANGE_LASTNAME:
 		{
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("LASTNAME_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("LASTNAME_REQUEST")));
 			break;
 		}
 		case AVATARNAME:
 		case CHANGE_AVATARNAME:
 		{
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATARNAME_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATARNAME_REQUEST")));
 			break;
 		}
 		case AVATARPIC:
 		case CHANGE_AVATARPIC:
 		{
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATARPIC_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATARPIC_REQUEST")));
 			break;
 		}
 		case BIRTHDATE: 
 		case CHANGE_BIRTHDATE: {
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_REQUEST")));
 			break;
 		}
 		case PLACE_OF_BIRTH:
 		case CHANGE_PLACE_OF_BIRTH:
 		{
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PLACE_OF_BIRTH_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PLACE_OF_BIRTH_REQUEST")));
 			break;
 		}
 		
 		
 		case PENDING_CONFIRM: {
 			if (session.getAvatarPic() == null) {
-				mtProducer.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 			} else {
 				MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-				mtProducer.sendMessage(mms);
+				messageResource.sendMessage(mms);
 				
 			}
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("CONFIRM_DATA_IMMUTABLE")));
-			mtProducer.sendMessage(this.getConfirmData(connectionId, threadId));	
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("CONFIRM_DATA_IMMUTABLE")));
+			messageResource.sendMessage(this.getConfirmData(connectionId, threadId));	
 			break;
 		}
 		case PASSWORD: {
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST")));
 			break;
 		}
 		
@@ -2242,12 +2237,12 @@ public class GaiaService {
 		}
 		
 		case WANT_TO_CHANGE: {
-			mtProducer.sendMessage(this.getWhichToChangeUserRequested(connectionId, threadId));
+			messageResource.sendMessage(this.getWhichToChangeUserRequested(connectionId, threadId));
 			break;
 		}
 		
 		case NEED_TO_CHANGE: {
-			mtProducer.sendMessage(this.getWhichToChangeNeeded(connectionId, threadId));
+			messageResource.sendMessage(this.getWhichToChangeNeeded(connectionId, threadId));
 			break;
 		}
 		}
@@ -2287,7 +2282,7 @@ public class GaiaService {
 				
 				) {
 			
-			mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_LOCKED")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_LOCKED")));
 			
 			switch (identity.getProtection()) {
 			
@@ -2295,7 +2290,7 @@ public class GaiaService {
 				
 				session.setIssueStep(IssueStep.PASSWORD_AUTH);
 				session = em.merge(session);
-				mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST")));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST")));
 				
 				break;
 			}
@@ -2304,8 +2299,8 @@ public class GaiaService {
 				session = em.merge(session);
 				
 				Token token = this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
-				mtProducer.sendMessage(generateFaceVerificationMediaMessage(connectionId, threadId, token));
-				/*mtProducer.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
+				messageResource.sendMessage(generateFaceVerificationMediaMessage(connectionId, threadId, token));
+				/*messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
 						.replaceFirst("REDIRDOMAIN", redirDomain)
 						.replaceFirst("Q_DOMAIN", qRedirDomain)
 						.replaceFirst("D_DOMAIN", dRedirDomain))));*/
@@ -2333,26 +2328,26 @@ public class GaiaService {
 						
 						identity.setAuthenticatedTs(Instant.now());
 						identity = em.merge(identity);
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AUTHENTICATION_SUCCESSFULL")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AUTHENTICATION_SUCCESSFULL")));
 						
 						session = this.issueCredentialAndSetEditMenu(session, identity);
 						session = em.merge(session);
 						
 					} else {
 						
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("INVALID_PASSWORD")));						
-						mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("INVALID_PASSWORD")));						
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST")));
 
 					}
 				} else {
-					mtProducer.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST")));
 				}
 				break;
 			}
 			case FACE_AUTH: {
 				Token token = this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
-				mtProducer.sendMessage(generateFaceVerificationMediaMessage(connectionId, threadId, token));
-				/*mtProducer.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
+				messageResource.sendMessage(generateFaceVerificationMediaMessage(connectionId, threadId, token));
+				/*messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
 						.replaceFirst("REDIRDOMAIN", redirDomain)
 						.replaceFirst("Q_DOMAIN", qRedirDomain)
 						.replaceFirst("D_DOMAIN", dRedirDomain))));*/
@@ -2729,20 +2724,20 @@ public class GaiaService {
 			logger.info("sendCredential: " + JsonUtil.serialize(cred, false));
 		} catch (JsonProcessingException e) {
 		}
-		mtProducer.sendMessage(cred);
+		messageResource.sendMessage(cred);
 	}
 	
 	public void newConnection(ConnectionStateUpdated csu) throws Exception {
 		UUID threadId = UUID.randomUUID();
 		this.getConnection(csu.getConnectionId());
-		mtProducer.sendMessage(TextMessage.build(csu.getConnectionId(),threadId , WELCOME));
+		messageResource.sendMessage(TextMessage.build(csu.getConnectionId(),threadId , WELCOME));
 		if (WELCOME2.isPresent()) {
-			mtProducer.sendMessage(TextMessage.build(csu.getConnectionId(), threadId, WELCOME2.get()));
+			messageResource.sendMessage(TextMessage.build(csu.getConnectionId(), threadId, WELCOME2.get()));
 		}
 		if (WELCOME3.isPresent()) {
-			mtProducer.sendMessage(TextMessage.build(csu.getConnectionId(), threadId, WELCOME3.get()));
+			messageResource.sendMessage(TextMessage.build(csu.getConnectionId(), threadId, WELCOME3.get()));
 		}
-		mtProducer.sendMessage(this.getRootMenu(csu.getConnectionId(), null, null));
+		messageResource.sendMessage(this.getRootMenu(csu.getConnectionId(), null, null));
 		
 		//entryPointCreate(connectionId, null, null);
 	}
@@ -2832,7 +2827,7 @@ public class GaiaService {
 					
 					identity = em.merge(identity);
 					
-					mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_CAPTURE_SUCCESSFULL")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_CAPTURE_SUCCESSFULL")));
 					
 					this.purgeSession(session);
 					session.setType(SessionType.ISSUE);
@@ -2863,7 +2858,7 @@ public class GaiaService {
 					
 					identity = em.merge(identity);
 					
-					mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_CAPTURE_SUCCESSFULL")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_CAPTURE_SUCCESSFULL")));
 					
 					this.purgeSession(session);
 					session.setType(SessionType.ISSUE);
@@ -2894,11 +2889,11 @@ public class GaiaService {
 					
 					identity = em.merge(identity);
 					
-					mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL")));
 					
 					session = this.issueCredentialAndSetEditMenu(session, identity);
 					
-					mtProducer.sendMessage(this.getRootMenu(session.getConnectionId(), session, identity));
+					messageResource.sendMessage(this.getRootMenu(session.getConnectionId(), session, identity));
 					
 				
 				} else {
@@ -2923,11 +2918,11 @@ public class GaiaService {
 					identity.setConnectionId(session.getConnectionId());
 					identity = em.merge(identity);
 					
-					mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL")));
 					
 					session = this.issueCredentialAndSetEditMenu(session, identity);
 					
-					mtProducer.sendMessage(this.getRootMenu(session.getConnectionId(), session, identity));
+					messageResource.sendMessage(this.getRootMenu(session.getConnectionId(), session, identity));
 				
 				} else {
 					throw new TokenException();
@@ -2965,7 +2960,7 @@ public class GaiaService {
 					
 					
 					
-					mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_CAPTURE_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_CAPTURE_ERROR")));
 					
 					this.createEntryPoint(session.getConnectionId(), null, session, null, null);
 				
@@ -2990,7 +2985,7 @@ public class GaiaService {
 					
 
 					
-					mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_CAPTURE_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_CAPTURE_ERROR")));
 					
 					this.createEntryPoint(session.getConnectionId(), null, session, null, null);
 				
@@ -3012,7 +3007,7 @@ public class GaiaService {
 						) {
 					
 					
-					mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_AUTHENTICATION_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_AUTHENTICATION_ERROR")));
 					
 					if (session.getType().equals(SessionType.ISSUE)) {
 						this.issueEntryPoint(session.getConnectionId(), null, session, null);
@@ -3038,7 +3033,7 @@ public class GaiaService {
 						&& (identity.getProtectedTs() != null)
 						) {
 					
-					mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_AUTHENTICATION_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_AUTHENTICATION_ERROR")));
 					
 					if (session.getType().equals(SessionType.ISSUE)) {
 						this.issueEntryPoint(session.getConnectionId(), null, session, null);
@@ -3076,7 +3071,7 @@ public class GaiaService {
 		
 		if (items.size() == 0) {
 			logger.info("incomingAvatarPicture: no items");
-			mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_NO_ATTACHMENT_ERROR")));
+			messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_NO_ATTACHMENT_ERROR")));
 			session.setAvatarPic(null);
 			session.setAvatarPicCiphAlg(null);
 			session.setAvatarPicCiphIv(null);
@@ -3198,7 +3193,7 @@ public class GaiaService {
 							} catch (Exception e) {
 								logger.error("incomingAvatarPicture", e);
 								logger.info("incomingAvatarPicture: could not save avatar");
-								mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_SAVE_ERROR")));
+								messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_SAVE_ERROR")));
 								session.setAvatarPic(null);
 								session.setAvatarPicCiphAlg(null);
 								session.setAvatarPicCiphIv(null);
@@ -3210,7 +3205,7 @@ public class GaiaService {
 						} else {
 							
 							logger.info("incomingAvatarPicture: no uri");
-							mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_URI_ERROR")));
+							messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_URI_ERROR")));
 							session.setAvatarPic(null);
 							session.setAvatarPicCiphAlg(null);
 							session.setAvatarPicCiphIv(null);
@@ -3224,7 +3219,7 @@ public class GaiaService {
 						
 					} else {
 						logger.info("incomingAvatarPicture: invalid type: " + mediaType);
-						mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_TYPE_ERROR")));
+						messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_TYPE_ERROR")));
 						session.setAvatarPic(null);
 						session.setAvatarPicCiphAlg(null);
 						session.setAvatarPicCiphIv(null);
@@ -3235,7 +3230,7 @@ public class GaiaService {
 					} 
 				} else {
 					logger.info("incomingAvatarPicture: invalid type: " + mediaType);
-					mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_TYPE_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_TYPE_ERROR")));
 					session.setAvatarPic(null);
 					session.setAvatarPicCiphAlg(null);
 					session.setAvatarPicCiphIv(null);
@@ -3248,7 +3243,7 @@ public class GaiaService {
 			} else {
 				// too big too big ;-)
 				logger.info("incomingAvatarPicture: no items");
-				mtProducer.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_SIZE_ERROR")));
+				messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_SIZE_ERROR")));
 				session.setAvatarPic(null);
 				session.setAvatarPicCiphAlg(null);
 				session.setAvatarPicCiphIv(null);
