@@ -2727,6 +2727,7 @@ public class Service {
 		messageResource.sendMessage(cred);
 	}
 	
+	@Transactional
 	public void newConnection(ConnectionStateUpdated csu) throws Exception {
 		UUID threadId = UUID.randomUUID();
 		this.getConnection(csu.getConnectionId());
