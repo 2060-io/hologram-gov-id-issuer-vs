@@ -10,8 +10,10 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import io.unicid.registry.enums.MediaType;
 import io.unicid.registry.enums.TokenType;
@@ -20,6 +22,7 @@ import io.unicid.registry.ex.TokenException;
 import io.unicid.registry.model.Identity;
 import io.unicid.registry.model.Media;
 import io.unicid.registry.model.Token;
+import io.unicid.registry.res.c.VisionResource;
 
 @ApplicationScoped
 public class VisionService {
@@ -28,6 +31,8 @@ public class VisionService {
 	@Inject Service service;
 	
 	@Inject EntityManager em;
+
+	@Inject @RestClient VisionResource vs;
 	
 	
 	@ConfigProperty(name = "io.unicid.create.token.lifetimeseconds")
@@ -183,5 +188,11 @@ public class VisionService {
 		em.persist(token);
 		
 		return token;
+	}
+	
+	
+	public Response connectToRoom(String wsUrl) {
+		
+		return vs.connectToRoom(wsUrl);
 	}
 }

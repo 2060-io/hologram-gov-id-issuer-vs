@@ -7,6 +7,7 @@ public enum TokenType {
 	
 	FINGERPRINT_CAPTURE("Fingerprint Capture"),
 	FINGERPRINT_VERIFICATION("Fingerprint Verification"),
+	WEBRTC_VERIFICATION("WebRTC Verification"),
 	
 	
 	;

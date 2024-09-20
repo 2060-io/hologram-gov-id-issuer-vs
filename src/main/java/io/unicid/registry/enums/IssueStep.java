@@ -1,5 +1,5 @@
 package io.unicid.registry.enums;
 
 public enum IssueStep {
-	PASSWORD_AUTH, FACE_AUTH, FINGERPRINT_AUTH
+	PASSWORD_AUTH, FACE_AUTH, FINGERPRINT_AUTH, WEBRTC_AUTH
 }

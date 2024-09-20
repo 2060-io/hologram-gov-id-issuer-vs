@@ -80,8 +80,10 @@ import io.unicid.registry.model.Media;
 import io.unicid.registry.model.Session;
 import io.unicid.registry.model.Token;
 import io.unicid.registry.model.dts.Connection;
+import io.unicid.registry.model.objects.DataWsUrl;
 import io.unicid.registry.res.c.MediaResource;
 import io.unicid.registry.res.c.Resource;
+import io.unicid.registry.res.c.WebRTCResource;
 
 
 
@@ -95,6 +97,8 @@ public class Service {
 	@RestClient
 	@Inject MediaResource mediaResource;
 	
+	@RestClient
+	@Inject WebRTCResource webRTCResource;	
 	
 	@RestClient @Inject MessageResource messageResource;
 	
@@ -889,6 +893,12 @@ public class Service {
 				
 				break;
 			}
+			case WEBRTC_VERIFICATION: {
+				Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+				
+				
+				break;
+			}
 			case PASSWORD: {
 				if (content != null) {
 					logger.info("restoreEntryPoint: password: " + content);
@@ -1045,6 +1055,20 @@ public class Service {
 					
 					
 				}
+				case WEBRTC: {
+					
+					logger.info("restoreEntryPoint: found fingerprint verification method for identity " + this.getIdentityDataString(res));
+					
+					session.setRestoreStep(RestoreStep.WEBRTC_VERIFICATION);
+					session = em.merge(session);
+					
+					Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res);
+					
+					
+					break;
+					
+					
+				}
 					
 				}
 			}
@@ -1098,6 +1122,7 @@ public class Service {
 		
 		case FACE_VERIFICATION:
 		case FINGERPRINT_VERIFICATION:
+		case WEBRTC_VERIFICATION:
 		default:
 		{
 			
@@ -1621,6 +1646,25 @@ public class Service {
 						
 						break;
 					}
+					case WEBRTC: {
+						
+						session.setCreateStep(CreateStep.WEBRTC_VERIFICATION);
+						session = em.merge(session);
+						
+						Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WEBRTC_REQUIRED")));
+						DataWsUrl wsUrl = webRTCResource.createRoom("/notificationUri");
+						// messageResource.sendMessage(generateFaceCaptureMediaMessage(connectionId, threadId, token));
+						// aqui se debe enviar el primer mensaje para iniciar todo el proceso
+						/*
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_CAPTURE_REQUEST.replaceFirst("URL", faceCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
+								.replaceFirst("REDIRDOMAIN", redirDomain)
+								.replaceFirst("Q_DOMAIN", qRedirDomain)
+								.replaceFirst("D_DOMAIN", dRedirDomain)
+								)));
+						*/
+						break;
+					}
 					}
 					
 				}  else {
@@ -1980,7 +2024,8 @@ public class Service {
 				break;
 			}
 			case FACE_VERIFICATION: 
-			case FINGERPRINT_VERIFICATION: {
+			case FINGERPRINT_VERIFICATION:
+			case WEBRTC_VERIFICATION: {
 				token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
 				break;
 			}
@@ -1997,7 +2042,8 @@ public class Service {
 				break;
 			}
 			case FACE_VERIFICATION: 
-			case FINGERPRINT_VERIFICATION: {
+			case FINGERPRINT_VERIFICATION:
+			case WEBRTC_VERIFICATION: {
 				token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
 				break;
 			}
@@ -2317,6 +2363,16 @@ public class Service {
 
 				break;
 			}
+			case WEBRTC: {
+	
+				session.setIssueStep(IssueStep.WEBRTC_AUTH);
+				session = em.merge(session);
+				
+				Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+				
+
+				break;
+			}
 			}
 		} else switch (session.getIssueStep()) {
 			case PASSWORD_AUTH: {
@@ -2357,6 +2413,12 @@ public class Service {
 			
 			case FINGERPRINT_AUTH: {
 				Token token = this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
+				
+				break;
+			}
+
+			case WEBRTC_AUTH: {
+				Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
 				
 				break;
 			}
@@ -3035,6 +3097,32 @@ public class Service {
 						) {
 					
 					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_AUTHENTICATION_ERROR")));
+					
+					if (session.getType().equals(SessionType.ISSUE)) {
+						this.issueEntryPoint(session.getConnectionId(), null, session, null);
+					} else {
+						this.restoreEntryPoint(session.getConnectionId(), null, session, null);
+					}
+					
+				
+				} else {
+					throw new TokenException();
+				}
+			} else {
+				throw new TokenException();
+			}
+			break;
+		}
+		
+		case WEBRTC_VERIFICATION: {
+			if (session != null) {
+				if ((session.getType() != null) 
+						&& (session.getType().equals(SessionType.ISSUE) || session.getType().equals(SessionType.RESTORE)) 
+						&& (identity.getProtection().equals(Protection.WEBRTC))
+						&& (identity.getProtectedTs() != null)
+						) {
+					
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("WEBRTC_AUTHENTICATION_ERROR")));
 					
 					if (session.getType().equals(SessionType.ISSUE)) {
 						this.issueEntryPoint(session.getConnectionId(), null, session, null);
