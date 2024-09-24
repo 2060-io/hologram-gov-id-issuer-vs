@@ -12,6 +12,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -31,6 +33,8 @@ import io.unicid.registry.enums.TokenType;
 	@NamedQuery(name="Token.findForConnection", query="SELECT t FROM Token t where t.connectionId=:connectionId and t.type=:type "),
 	
 })
+@Setter
+@Getter
 public class Token implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -53,57 +57,6 @@ public class Token implements Serializable {
 	private UUID threadId;
 	
 	private TokenType type;
-	
-	public UUID getId() {
-		return id;
-	}
-
-	public void setId(UUID id) {
-		this.id = id;
-	}
-
-	public Instant getExpireTs() {
-		return expireTs;
-	}
-
-	public void setExpireTs(Instant expireTs) {
-		this.expireTs = expireTs;
-	}
-
-	public Identity getIdentity() {
-		return identity;
-	}
-
-	public void setIdentity(Identity identity) {
-		this.identity = identity;
-	}
-
-	public UUID getConnectionId() {
-		return connectionId;
-	}
-
-	public void setConnectionId(UUID connectionId) {
-		this.connectionId = connectionId;
-	}
-
-	public UUID getThreadId() {
-		return threadId;
-	}
-
-	public void setThreadId(UUID threadId) {
-		this.threadId = threadId;
-	}
-
-	
-
-	public TokenType getType() {
-		return type;
-	}
-
-	public void setType(TokenType type) {
-		this.type = type;
-	}
-
 	
 	
 }

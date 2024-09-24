@@ -3,6 +3,7 @@ package io.unicid.registry.svc;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -10,8 +11,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.core.Response;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -19,10 +18,14 @@ import io.unicid.registry.enums.MediaType;
 import io.unicid.registry.enums.TokenType;
 import io.unicid.registry.ex.MediaAlreadyLinkedException;
 import io.unicid.registry.ex.TokenException;
+import io.unicid.registry.model.CallRegistry;
 import io.unicid.registry.model.Identity;
 import io.unicid.registry.model.Media;
 import io.unicid.registry.model.Token;
+import io.unicid.registry.model.res.JoinCallRequest;
+import io.unicid.registry.model.res.NotificationRequest;
 import io.unicid.registry.res.c.VisionResource;
+import io.unicid.registry.res.c.WebRTCResource;
 
 @ApplicationScoped
 public class VisionService {
@@ -33,6 +36,8 @@ public class VisionService {
 	@Inject EntityManager em;
 
 	@Inject @RestClient VisionResource vs;
+	@Inject @RestClient WebRTCResource wb;
+	@Inject RegisterService registerService;
 	
 	
 	@ConfigProperty(name = "io.unicid.create.token.lifetimeseconds")
@@ -40,6 +45,10 @@ public class VisionService {
 	
 	@ConfigProperty(name = "io.unicid.verify.token.lifetimeseconds")
 	Long verifyTokenLifetimeSec;
+
+
+	@ConfigProperty(name = "io.unicid.vision.redirdomain")
+	Optional<String> redirDomain;
 	
 	
 	
@@ -191,8 +200,29 @@ public class VisionService {
 	}
 	
 	
-	public Response connectToRoom(String wsUrl) {
+	public void connectToRoom(NotificationRequest notificationRequest) {
 		
-		return vs.connectToRoom(wsUrl);
+		// return vs.connectToRoom(wsUrl);
+		CallRegistry cr = updateCallRegistry(notificationRequest);
+		JoinCallRequest jc = new JoinCallRequest();
+		jc.setWsUrl(cr.getWsUrl());
+		jc.setSuccessUrl(redirDomain+"/success/"+cr.getTokenId());
+		jc.setFailureUrl(redirDomain+"/failure/"+cr.getTokenId());
+		
+		wb.joinCall(jc);
+	}
+
+	public void leftToRoom(NotificationRequest notificationRequest) {
+		updateCallRegistry(notificationRequest);
+	}
+
+	private CallRegistry updateCallRegistry(NotificationRequest notificationRequest){
+		CallRegistry cr = registerService.getCallByPeer(notificationRequest.peerId);
+		if(cr == null) {
+			throw new IllegalArgumentException("No call found for peerId: " + notificationRequest.getPeerId());
+		}
+		cr.setEvent(notificationRequest.event);
+		em.merge(cr);
+		return cr;
 	}
 }

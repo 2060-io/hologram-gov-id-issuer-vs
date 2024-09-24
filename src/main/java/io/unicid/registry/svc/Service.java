@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.UUID;
@@ -44,6 +45,7 @@ import org.jboss.logging.Logger;
 import org.jgroups.util.Base64;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.twentysixty.sa.client.model.credential.CredentialType;
 import io.twentysixty.sa.client.model.event.ConnectionStateUpdated;
@@ -61,6 +63,7 @@ import io.twentysixty.sa.client.model.message.MenuItem;
 import io.twentysixty.sa.client.model.message.MenuSelectMessage;
 import io.twentysixty.sa.client.model.message.Parameters;
 import io.twentysixty.sa.client.model.message.TextMessage;
+import io.twentysixty.sa.client.model.message.calls.CallOfferRequestMessage;
 import io.twentysixty.sa.client.util.Aes256cbc;
 import io.twentysixty.sa.client.util.JsonUtil;
 import io.twentysixty.sa.res.c.CredentialTypeResource;
@@ -75,12 +78,14 @@ import io.unicid.registry.enums.SessionType;
 import io.unicid.registry.enums.TokenType;
 import io.unicid.registry.ex.NoMediaException;
 import io.unicid.registry.ex.TokenException;
+import io.unicid.registry.model.CallRegistry;
 import io.unicid.registry.model.Identity;
 import io.unicid.registry.model.Media;
 import io.unicid.registry.model.Session;
 import io.unicid.registry.model.Token;
 import io.unicid.registry.model.dts.Connection;
-import io.unicid.registry.model.objects.DataWsUrl;
+import io.unicid.registry.model.res.CreateRoomRequest;
+import io.unicid.registry.model.res.DataWsUrl;
 import io.unicid.registry.res.c.MediaResource;
 import io.unicid.registry.res.c.Resource;
 import io.unicid.registry.res.c.WebRTCResource;
@@ -104,6 +109,8 @@ public class Service {
 	
 	@RestClient
 	@Inject CredentialTypeResource credentialTypeResource;
+
+	@Inject RegisterService registerService;
 	
 	@ConfigProperty(name = "io.unicid.debug")
 	Boolean debug;
@@ -214,6 +221,7 @@ public class Service {
 	private static CredentialType type = null;
 	private static Object lockObj = new Object();
 	private static DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	ObjectMapper objectMapper = new ObjectMapper();
 	
 	
 	//private static String ROOT_MENU_TITLE = "🌎 Gaia Identity Registry";
@@ -1647,15 +1655,34 @@ public class Service {
 						break;
 					}
 					case WEBRTC: {
-						
 						session.setCreateStep(CreateStep.WEBRTC_VERIFICATION);
 						session = em.merge(session);
 						
 						Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
 						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WEBRTC_REQUIRED")));
-						DataWsUrl wsUrl = webRTCResource.createRoom("/notificationUri");
+
+						CreateRoomRequest request = new CreateRoomRequest(redirDomain+"/notificationUri", 50);
+						DataWsUrl wsUrl = webRTCResource.createRoom(UUID.randomUUID(), request);
+						String peerId = UUID.randomUUID().toString();
+						Map<String, Object> wsUrlMap = objectMapper.convertValue(wsUrl, Map.class);
+						wsUrlMap.put("peerId", peerId);
+						try {
+							logger.info("webRTCResource: createRoom: " + JsonUtil.serialize(wsUrl, false));
+						} catch (JsonProcessingException e) {
+							
+						}
+
+						// Create registry
+						CallRegistry cr = new CallRegistry();
+						cr.setIdentity(identity);
+						cr.setPeerId(peerId);
+						cr.setRoomId(wsUrl.getRoomId());
+						cr.setWsUrl(wsUrl.getWsUrl());
+						cr.setTokenId(token.getId());
+						em.persist(cr);
+						
+						messageResource.sendMessage(this.generateOfferMessage(connectionId, threadId, wsUrlMap));
 						// messageResource.sendMessage(generateFaceCaptureMediaMessage(connectionId, threadId, token));
-						// aqui se debe enviar el primer mensaje para iniciar todo el proceso
 						/*
 						messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_CAPTURE_REQUEST.replaceFirst("URL", faceCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
 								.replaceFirst("REDIRDOMAIN", redirDomain)
@@ -1979,6 +2006,19 @@ public class Service {
 	}
 	
 
+	private CallOfferRequestMessage generateOfferMessage(UUID connectionId, UUID threadId, Map<String, Object> wsUrlMap) {
+		CallOfferRequestMessage co = new CallOfferRequestMessage();
+		co.setConnectionId(connectionId);
+		co.setId(UUID.randomUUID());
+		co.setThreadId(threadId);
+		co.setItems(wsUrlMap);
+		try {
+			logger.info("generateOfferMessage: " + JsonUtil.serialize(co, false));
+		} catch (JsonProcessingException e) {
+			
+		}
+		return co;
+	}
 	
 
 	private MediaMessage buildSessionIdentityMediaMessage(UUID connectionId, UUID threadId, Session session) {
@@ -2988,6 +3028,37 @@ public class Service {
 					messageResource.sendMessage(this.getRootMenu(session.getConnectionId(), session, identity));
 				
 				} else {
+					throw new TokenException();
+				}
+			} else {
+				throw new TokenException();
+			}
+			break;
+		}
+		
+		case WEBRTC_VERIFICATION: {
+			if (session != null) {
+				if ((session.getType() != null) 
+						&& (session.getType().equals(SessionType.ISSUE) 
+								|| session.getType().equals(SessionType.RESTORE)) 
+						&& (identity.getProtection().equals(Protection.WEBRTC))
+						&& (identity.getProtectedTs() != null)
+						) {
+					
+					identity.setAuthenticatedTs(Instant.now());
+					identity.setConnectionId(session.getConnectionId());
+					
+					identity = em.merge(identity);
+					
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL")));
+					
+					session = this.issueCredentialAndSetEditMenu(session, identity);
+					
+					messageResource.sendMessage(this.getRootMenu(session.getConnectionId(), session, identity));
+					
+				
+				} else {
+					logger.info("notifySuccess: session: " + JsonUtil.serialize(session, false));
 					throw new TokenException();
 				}
 			} else {

@@ -1,4 +1,4 @@
-package io.unicid.registry.model.objects;
+package io.unicid.registry.model.res;
 
 import java.io.Serializable;
 
@@ -13,12 +13,10 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @Setter
-public class NotificationRequest implements Serializable {
-
+public class DataWsUrl implements Serializable {
 	private static final long serialVersionUID = 1L;
-
-    public boolean peerJoined;
-    public String roomId;
-    public String peerId;
-
+  
+    private String roomId;
+    private String wsUrl;
+    
 }

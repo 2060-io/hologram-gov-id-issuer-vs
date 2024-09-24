@@ -6,7 +6,8 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.logging.Logger;
 
-import io.unicid.registry.model.objects.NotificationRequest;
+import io.unicid.registry.enums.EventNotificationType;
+import io.unicid.registry.model.res.NotificationRequest;
 import io.unicid.registry.svc.VisionService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -38,12 +39,22 @@ public class WebRTCResource {
     )
     public Response notificationUri(NotificationRequest notificationRequest) {
         
-        if (notificationRequest.roomId == null || notificationRequest.peerId == null) {
-            return Response.status(Status.BAD_REQUEST).entity("roomId or peerId is missing").build();
+        if (notificationRequest.peerId == null || notificationRequest.event == null) {
+            return Response.status(Status.BAD_REQUEST).entity("event or peerId is missing").build();
         }
 
         try {
-            service.connectToRoom("wss://?roomId="+notificationRequest.roomId);
+            switch (notificationRequest.event) {
+                case PEER_JOINED:
+                    service.connectToRoom(notificationRequest);
+                    break;
+                case PEER_LEFT:
+                    service.leftToRoom(notificationRequest);                    
+                    break;
+            
+                default:
+                    break;
+            }
             
             return Response.status(Status.OK).entity("State successfully updated").build();
         } catch (Exception e) {
