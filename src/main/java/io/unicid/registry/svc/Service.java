@@ -1678,7 +1678,6 @@ public class Service {
 						cr.setPeerId(peerId);
 						cr.setRoomId(wsUrl.getRoomId());
 						cr.setWsUrl(wsUrl.getWsUrl());
-						cr.setTokenId(token.getId());
 						em.persist(cr);
 						
 						messageResource.sendMessage(this.generateOfferMessage(connectionId, threadId, wsUrlMap));
@@ -3037,9 +3036,10 @@ public class Service {
 		}
 		
 		case WEBRTC_VERIFICATION: {
+			identity.setProtectedTs(Instant.now());
 			if (session != null) {
 				if ((session.getType() != null) 
-						&& (session.getType().equals(SessionType.ISSUE) 
+						&& (session.getType().equals(SessionType.CREATE) 
 								|| session.getType().equals(SessionType.RESTORE)) 
 						&& (identity.getProtection().equals(Protection.WEBRTC))
 						&& (identity.getProtectedTs() != null)
@@ -3186,9 +3186,10 @@ public class Service {
 		}
 		
 		case WEBRTC_VERIFICATION: {
+			identity.setProtectedTs(Instant.now());
 			if (session != null) {
 				if ((session.getType() != null) 
-						&& (session.getType().equals(SessionType.ISSUE) || session.getType().equals(SessionType.RESTORE)) 
+						&& (session.getType().equals(SessionType.CREATE) || session.getType().equals(SessionType.RESTORE)) 
 						&& (identity.getProtection().equals(Protection.WEBRTC))
 						&& (identity.getProtectedTs() != null)
 						) {

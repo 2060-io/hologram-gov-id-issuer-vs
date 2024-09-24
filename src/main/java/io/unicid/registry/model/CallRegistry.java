@@ -59,7 +59,6 @@ public class CallRegistry implements Serializable {
 	private String peerId;
 	private String roomId;
 	private String wsUrl;
-	private UUID tokenId;
 	private Boolean isActive;
 	@CreationTimestamp
     @Column(updatable = false)

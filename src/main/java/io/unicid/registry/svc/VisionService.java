@@ -24,7 +24,6 @@ import io.unicid.registry.model.Media;
 import io.unicid.registry.model.Token;
 import io.unicid.registry.model.res.JoinCallRequest;
 import io.unicid.registry.model.res.NotificationRequest;
-import io.unicid.registry.res.c.VisionResource;
 import io.unicid.registry.res.c.WebRTCResource;
 
 @ApplicationScoped
@@ -35,7 +34,7 @@ public class VisionService {
 	
 	@Inject EntityManager em;
 
-	@Inject @RestClient VisionResource vs;
+	// @Inject @RestClient VisionResource vs;
 	@Inject @RestClient WebRTCResource wb;
 	@Inject RegisterService registerService;
 	
@@ -188,7 +187,8 @@ public class VisionService {
 			break;
 		}
 		case FACE_VERIFICATION:
-		case FINGERPRINT_VERIFICATION: {
+		case FINGERPRINT_VERIFICATION:
+		case WEBRTC_VERIFICATION: {
 			token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
 			break;
 		}
@@ -203,25 +203,28 @@ public class VisionService {
 	public void connectToRoom(NotificationRequest notificationRequest) {
 		
 		// return vs.connectToRoom(wsUrl);
-		CallRegistry cr = updateCallRegistry(notificationRequest);
+		CallRegistry cr = updateCallRegistry(notificationRequest, true);
+		Token t = registerService.getTokenByConnection(cr.getIdentity().getConnectionId());
+		
 		JoinCallRequest jc = new JoinCallRequest();
 		jc.setWsUrl(cr.getWsUrl());
-		jc.setSuccessUrl(redirDomain+"/success/"+cr.getTokenId());
-		jc.setFailureUrl(redirDomain+"/failure/"+cr.getTokenId());
+		jc.setSuccessUrl(redirDomain+"/success/"+t.getId());
+		jc.setFailureUrl(redirDomain+"/failure/"+t.getId());
 		
 		wb.joinCall(jc);
 	}
 
 	public void leftToRoom(NotificationRequest notificationRequest) {
-		updateCallRegistry(notificationRequest);
+		updateCallRegistry(notificationRequest, false);
 	}
 
-	private CallRegistry updateCallRegistry(NotificationRequest notificationRequest){
+	private CallRegistry updateCallRegistry(NotificationRequest notificationRequest, Boolean isActive){
 		CallRegistry cr = registerService.getCallByPeer(notificationRequest.peerId);
 		if(cr == null) {
 			throw new IllegalArgumentException("No call found for peerId: " + notificationRequest.getPeerId());
 		}
 		cr.setEvent(notificationRequest.event);
+		cr.setIsActive(isActive);
 		em.merge(cr);
 		return cr;
 	}
