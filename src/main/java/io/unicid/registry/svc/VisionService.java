@@ -204,7 +204,7 @@ public class VisionService {
 	public void connectToRoom(NotificationRequest notificationRequest) {
 		
 		// return vs.connectToRoom(wsUrl);
-		PeerRegistry cr = updateCallRegistry(notificationRequest, true);
+		PeerRegistry cr = updatePeerRegistry(notificationRequest, true);
 		Token t = registerService.getTokenByConnection(cr.getIdentity().getConnectionId());
 		
 		JoinCallRequest jc = new JoinCallRequest();
@@ -216,10 +216,10 @@ public class VisionService {
 	}
 
 	public void leftToRoom(NotificationRequest notificationRequest) {
-		updateCallRegistry(notificationRequest, false);
+		updatePeerRegistry(notificationRequest, false);
 	}
 
-	private PeerRegistry updateCallRegistry(NotificationRequest notificationRequest, Boolean isActive){
+	private PeerRegistry updatePeerRegistry(NotificationRequest notificationRequest, Boolean isActive){
 		PeerRegistry cr = registerService.getPeerById(notificationRequest.peerId);
 		if(cr == null) {
 			throw new IllegalArgumentException("No call found for peerId: " + notificationRequest.getPeerId());

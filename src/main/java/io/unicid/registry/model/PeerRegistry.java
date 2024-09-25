@@ -35,8 +35,8 @@ import lombok.Setter;
 @DynamicUpdate
 @DynamicInsert
 @NamedQueries({
-	@NamedQuery(name="CallRegistry.findForIdentity", query="SELECT u FROM CallRegistry u WHERE u.identity=:identity and u.isActive=TRUE ORDER by u.id ASC"),
-	@NamedQuery(name="CallRegistry.findForId", query="SELECT u FROM CallRegistry u WHERE u.id=:id and u.isActive=TRUE"),	
+	@NamedQuery(name="PeerRegistry.findForIdentity", query="SELECT u FROM PeerRegistry u WHERE u.identity=:identity and u.isActive=TRUE ORDER by u.id ASC"),
+	@NamedQuery(name="PeerRegistry.findForId", query="SELECT u FROM PeerRegistry u WHERE u.id=:id and u.isActive=TRUE"),	
 })
 @Setter
 @Getter

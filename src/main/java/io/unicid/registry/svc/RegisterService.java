@@ -27,7 +27,7 @@ public class RegisterService {
 	
 	@Transactional
 	public PeerRegistry getCallByIdentity(Identity identity) {
-		TypedQuery<PeerRegistry> q = em.createNamedQuery("CallRegistry.findForIdentity", PeerRegistry.class);
+		TypedQuery<PeerRegistry> q = em.createNamedQuery("PeerRegistry.findForIdentity", PeerRegistry.class);
 		q.setParameter("identity", identity);
 		PeerRegistry registry = q.getResultList().stream().findFirst().orElse(null);
 		if (debug){
@@ -38,7 +38,7 @@ public class RegisterService {
 
 	@Transactional
 	public PeerRegistry getPeerById(String peerId) {
-		TypedQuery<PeerRegistry> q = em.createNamedQuery("CallRegistry.findForId", PeerRegistry.class);
+		TypedQuery<PeerRegistry> q = em.createNamedQuery("PeerRegistry.findForId", PeerRegistry.class);
 		q.setParameter("id", peerId);
 		PeerRegistry registry = q.getResultList().stream().findFirst().orElse(null);
 		if (debug){
