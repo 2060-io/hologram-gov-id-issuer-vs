@@ -1,7 +1,7 @@
 package io.unicid.registry.svc;
 
 import io.unicid.registry.enums.TokenType;
-import io.unicid.registry.model.CallRegistry;
+import io.unicid.registry.model.PeerRegistry;
 import io.unicid.registry.model.Identity;
 import io.unicid.registry.model.Token;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -26,10 +26,10 @@ public class RegisterService {
 	Boolean debug;
 	
 	@Transactional
-	public CallRegistry getCallByIdentity(Identity identity) {
-		TypedQuery<CallRegistry> q = em.createNamedQuery("CallRegistry.findForIdentity", CallRegistry.class);
+	public PeerRegistry getCallByIdentity(Identity identity) {
+		TypedQuery<PeerRegistry> q = em.createNamedQuery("CallRegistry.findForIdentity", PeerRegistry.class);
 		q.setParameter("identity", identity);
-		CallRegistry registry = q.getResultList().stream().findFirst().orElse(null);
+		PeerRegistry registry = q.getResultList().stream().findFirst().orElse(null);
 		if (debug){
 			logger.info("getCallByIdentity: " + registry.getId());
 		}
@@ -37,10 +37,10 @@ public class RegisterService {
 	}
 
 	@Transactional
-	public CallRegistry getCallByPeer(String peerId) {
-		TypedQuery<CallRegistry> q = em.createNamedQuery("CallRegistry.findForPeerId", CallRegistry.class);
-		q.setParameter("peerId", peerId);
-		CallRegistry registry = q.getResultList().stream().findFirst().orElse(null);
+	public PeerRegistry getPeerById(String peerId) {
+		TypedQuery<PeerRegistry> q = em.createNamedQuery("CallRegistry.findForId", PeerRegistry.class);
+		q.setParameter("id", peerId);
+		PeerRegistry registry = q.getResultList().stream().findFirst().orElse(null);
 		if (debug){
 			logger.info("getCallByPeer: " + registry.getId());
 		}

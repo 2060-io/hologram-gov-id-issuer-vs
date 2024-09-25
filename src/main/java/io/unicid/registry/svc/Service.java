@@ -72,13 +72,14 @@ import io.unicid.registry.enums.CreateStep;
 import io.unicid.registry.enums.IdentityClaim;
 import io.unicid.registry.enums.IssueStep;
 import io.unicid.registry.enums.MediaType;
+import io.unicid.registry.enums.PeerType;
 import io.unicid.registry.enums.Protection;
 import io.unicid.registry.enums.RestoreStep;
 import io.unicid.registry.enums.SessionType;
 import io.unicid.registry.enums.TokenType;
 import io.unicid.registry.ex.NoMediaException;
 import io.unicid.registry.ex.TokenException;
-import io.unicid.registry.model.CallRegistry;
+import io.unicid.registry.model.PeerRegistry;
 import io.unicid.registry.model.Identity;
 import io.unicid.registry.model.Media;
 import io.unicid.registry.model.Session;
@@ -1658,14 +1659,15 @@ public class Service {
 						session.setCreateStep(CreateStep.WEBRTC_VERIFICATION);
 						session = em.merge(session);
 						
-						Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+						this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
 						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WEBRTC_REQUIRED")));
 
 						CreateRoomRequest request = new CreateRoomRequest(redirDomain+"/notificationUri", 50);
 						DataWsUrl wsUrl = webRTCResource.createRoom(UUID.randomUUID(), request);
-						String peerId = UUID.randomUUID().toString();
+						UUID peerId = UUID.randomUUID();
 						Map<String, Object> wsUrlMap = objectMapper.convertValue(wsUrl, Map.class);
 						wsUrlMap.put("peerId", peerId);
+						
 						try {
 							logger.info("webRTCResource: createRoom: " + JsonUtil.serialize(wsUrl, false));
 						} catch (JsonProcessingException e) {
@@ -1673,11 +1675,12 @@ public class Service {
 						}
 
 						// Create registry
-						CallRegistry cr = new CallRegistry();
+						PeerRegistry cr = new PeerRegistry();
+						cr.setId(peerId);
 						cr.setIdentity(identity);
-						cr.setPeerId(peerId);
 						cr.setRoomId(wsUrl.getRoomId());
 						cr.setWsUrl(wsUrl.getWsUrl());
+						cr.setType(PeerType.PEER_USER);
 						em.persist(cr);
 						
 						messageResource.sendMessage(this.generateOfferMessage(connectionId, threadId, wsUrlMap));

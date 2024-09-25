@@ -6,7 +6,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.logging.Logger;
 
-import io.unicid.registry.enums.EventNotificationType;
 import io.unicid.registry.model.res.NotificationRequest;
 import io.unicid.registry.svc.VisionService;
 import jakarta.inject.Inject;

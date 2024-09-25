@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -18,7 +19,7 @@ import io.unicid.registry.enums.MediaType;
 import io.unicid.registry.enums.TokenType;
 import io.unicid.registry.ex.MediaAlreadyLinkedException;
 import io.unicid.registry.ex.TokenException;
-import io.unicid.registry.model.CallRegistry;
+import io.unicid.registry.model.PeerRegistry;
 import io.unicid.registry.model.Identity;
 import io.unicid.registry.model.Media;
 import io.unicid.registry.model.Token;
@@ -203,7 +204,7 @@ public class VisionService {
 	public void connectToRoom(NotificationRequest notificationRequest) {
 		
 		// return vs.connectToRoom(wsUrl);
-		CallRegistry cr = updateCallRegistry(notificationRequest, true);
+		PeerRegistry cr = updateCallRegistry(notificationRequest, true);
 		Token t = registerService.getTokenByConnection(cr.getIdentity().getConnectionId());
 		
 		JoinCallRequest jc = new JoinCallRequest();
@@ -211,15 +212,15 @@ public class VisionService {
 		jc.setSuccessUrl(redirDomain+"/success/"+t.getId());
 		jc.setFailureUrl(redirDomain+"/failure/"+t.getId());
 		
-		wb.joinCall(jc);
+		wb.joinCall(jc); // TODO: create peer registry with room and add in the wsUrl
 	}
 
 	public void leftToRoom(NotificationRequest notificationRequest) {
 		updateCallRegistry(notificationRequest, false);
 	}
 
-	private CallRegistry updateCallRegistry(NotificationRequest notificationRequest, Boolean isActive){
-		CallRegistry cr = registerService.getCallByPeer(notificationRequest.peerId);
+	private PeerRegistry updateCallRegistry(NotificationRequest notificationRequest, Boolean isActive){
+		PeerRegistry cr = registerService.getPeerById(notificationRequest.peerId);
 		if(cr == null) {
 			throw new IllegalArgumentException("No call found for peerId: " + notificationRequest.getPeerId());
 		}

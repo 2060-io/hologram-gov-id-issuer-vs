@@ -8,6 +8,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import io.unicid.registry.enums.EventNotificationType;
+import io.unicid.registry.enums.PeerType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,8 +21,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,28 +36,26 @@ import lombok.Setter;
 @DynamicInsert
 @NamedQueries({
 	@NamedQuery(name="CallRegistry.findForIdentity", query="SELECT u FROM CallRegistry u WHERE u.identity=:identity and u.isActive=TRUE ORDER by u.id ASC"),
-	@NamedQuery(name="CallRegistry.findForPeerId", query="SELECT u FROM CallRegistry u WHERE u.peerId=:peerId and u.isActive=TRUE ORDER by u.id ASC"),
-	@NamedQuery(name="CallRegistry.findForId", query="SELECT u FROM CallRegistry u WHERE u.id=:id"),	
+	@NamedQuery(name="CallRegistry.findForId", query="SELECT u FROM CallRegistry u WHERE u.id=:id and u.isActive=TRUE"),	
 })
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CallRegistry implements Serializable {
+public class PeerRegistry implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	private UUID id;
 	
 	@ManyToOne
 	@JoinColumn(name="identity_fk")
 	private Identity identity;
 	private EventNotificationType event;
-	private String peerId;
 	private String roomId;
 	private String wsUrl;
+	private PeerType type;
 	private Boolean isActive;
 	@CreationTimestamp
     @Column(updatable = false)
