@@ -1,12 +1,9 @@
-package io.unicid.registry.model.res;
-
-import java.io.Serializable;
+package io.unicid.registry.model.res.webRtc;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,11 +11,8 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @Setter
-@AllArgsConstructor
-public class DataWsUrl implements Serializable {
+public class WebRtcCallDataV1 extends WebRtcCallData {
+    
 	private static final long serialVersionUID = 1L;
-  
-    private String roomId;
-    private String wsUrl;
     
 }

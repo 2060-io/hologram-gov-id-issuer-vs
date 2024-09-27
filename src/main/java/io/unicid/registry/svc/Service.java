@@ -86,10 +86,10 @@ import io.unicid.registry.model.Session;
 import io.unicid.registry.model.Token;
 import io.unicid.registry.model.dts.Connection;
 import io.unicid.registry.model.res.CreateRoomRequest;
-import io.unicid.registry.model.res.DataWsUrl;
+import io.unicid.registry.model.res.webRtc.WebRtcCallData;
 import io.unicid.registry.res.c.MediaResource;
 import io.unicid.registry.res.c.Resource;
-import io.unicid.registry.res.c.WebRTCResource;
+import io.unicid.registry.res.c.WebRtcResource;
 
 
 
@@ -104,7 +104,7 @@ public class Service {
 	@Inject MediaResource mediaResource;
 	
 	@RestClient
-	@Inject WebRTCResource webRTCResource;	
+	@Inject WebRtcResource webRtcResource;	
 	
 	@RestClient @Inject MessageResource messageResource;
 	
@@ -2079,14 +2079,13 @@ public class Service {
 	private void sendWebRTCCapture(Session session, UUID threadId) {
 
 		CreateRoomRequest request = new CreateRoomRequest(redirDomain.get()+"/call-event", 50);
-		DataWsUrl wsUrl = webRTCResource.createRoom(UUID.randomUUID(), request);
-		// DataWsUrl wsUrl = new DataWsUrl("1zvna1y3", "wss://v3demo.mediasoup.org:4443");
+		WebRtcCallData wsUrl = webRtcResource.createRoom(UUID.randomUUID(), request);
 		UUID peerId = UUID.randomUUID();
 		Map<String, Object> wsUrlMap = objectMapper.convertValue(wsUrl, Map.class);
 		wsUrlMap.put("peerId", peerId);
 		
 		try {
-			logger.info("webRTCResource: createRoom: " + JsonUtil.serialize(wsUrlMap, false));
+			logger.info("webRtcResource: createRoom: " + JsonUtil.serialize(wsUrlMap, false));
 		} catch (JsonProcessingException e) {
 			
 		}

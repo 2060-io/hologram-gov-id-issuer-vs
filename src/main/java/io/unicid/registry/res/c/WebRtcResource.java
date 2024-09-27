@@ -3,7 +3,8 @@ package io.unicid.registry.res.c;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import io.unicid.registry.model.res.CreateRoomRequest;
-import io.unicid.registry.model.res.DataWsUrl;
+import io.unicid.registry.model.res.webRtc.WebRtcCallData;
+
 import java.util.UUID;
 
 import jakarta.ws.rs.Consumes;
@@ -14,12 +15,12 @@ import jakarta.ws.rs.Produces;
 
 @RegisterRestClient
 @Path("")
-public interface WebRTCResource {
+public interface WebRtcResource {
 
 	@POST
 	@Path("/rooms/{roomId}")
 	@Consumes("application/json")
 	@Produces("application/json")
-	public DataWsUrl createRoom(@PathParam(value = "roomId") UUID uuid,CreateRoomRequest request);
+	public WebRtcCallData createRoom(@PathParam(value = "roomId") UUID uuid,CreateRoomRequest request);
     
 }

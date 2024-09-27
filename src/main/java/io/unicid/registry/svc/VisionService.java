@@ -215,9 +215,8 @@ public class VisionService {
 	}
 	
 	@Transactional
-	public void connectToRoom(NotificationRequest notificationRequest) {
+	public void joinCall(NotificationRequest notificationRequest) {
 		
-		// return vs.connectToRoom(wsUrl);
 		PeerRegistry cr = updatePeerRegistry(notificationRequest);
 		
 		if (cr.getType().equals(PeerType.PEER_USER)){
@@ -238,11 +237,11 @@ public class VisionService {
 			jc.setSuccessUrl(redirDomain.get()+"/success/"+t.getId());
 			jc.setFailureUrl(redirDomain.get()+"/failure/"+t.getId());
 			
-			vs.joinCall(jc); // TODO: create peer registry with room and add in the wsUrl
+			vs.joinCall(jc);
 		}
 	}
 
-	public void leftToRoom(NotificationRequest notificationRequest) {
+	public void leaveCall(NotificationRequest notificationRequest) {
 		updatePeerRegistry(notificationRequest);
 	}
 

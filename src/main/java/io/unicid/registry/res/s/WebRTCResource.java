@@ -47,11 +47,11 @@ public class WebRTCResource {
             switch (notificationRequest.event) {
                 case PEER_JOINED:
                     logger.info("callEvent: PEER_JOINED: " + JsonUtil.serialize(notificationRequest, false));
-                    service.connectToRoom(notificationRequest);
+                    service.joinCall(notificationRequest);
                     break;
                 case PEER_LEFT:
                 logger.info("callEvent: PEER_LEFT: " + JsonUtil.serialize(notificationRequest, false));
-                    service.leftToRoom(notificationRequest);                    
+                    service.leaveCall(notificationRequest);                    
                     break;
             
                 default:
