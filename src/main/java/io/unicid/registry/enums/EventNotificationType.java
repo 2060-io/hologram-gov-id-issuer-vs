@@ -1,25 +1,11 @@
 package io.unicid.registry.enums;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum EventNotificationType {
-        PEER_JOINED("peer-joined"),
-        PEER_LEFT("peer-left"),
-	
-	
+        @JsonProperty("peer-joined")
+        PEER_JOINED,
+        @JsonProperty("peer-left")
+        PEER_LEFT,	
         ;
-        
-        private String typeName;
-        
-        private EventNotificationType(String typeName) {
-            this.typeName = typeName;
-            
-        }
-    
-        public String getTypeName() {
-            return typeName;
-        }
-    
-        public void setTypeName(String typeName) {
-            this.typeName = typeName;
-        }
-        
     }

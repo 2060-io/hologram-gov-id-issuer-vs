@@ -6,6 +6,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.logging.Logger;
 
+import io.twentysixty.sa.client.util.JsonUtil;
 import io.unicid.registry.model.res.NotificationRequest;
 import io.unicid.registry.svc.VisionService;
 import jakarta.inject.Inject;
@@ -27,7 +28,7 @@ public class WebRTCResource {
 	@Inject VisionService service;
 	
 	@POST
-    @Path("/notificationUri")
+    @Path("/call-event")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update notification state",
         description = "Update the state for a peer joining a room")
@@ -36,18 +37,20 @@ public class WebRTCResource {
         @APIResponse(responseCode = "500", description = "Server error, please retry."),
         @APIResponse(responseCode = "200", description = "State successfully updated.") }
     )
-    public Response notificationUri(NotificationRequest notificationRequest) {
+    public Response callEvent(NotificationRequest notificationRequest) {
         
-        if (notificationRequest.peerId == null || notificationRequest.event == null) {
+        if (notificationRequest.peerId == null || notificationRequest.event == null || notificationRequest.roomId == null) {
             return Response.status(Status.BAD_REQUEST).entity("event or peerId is missing").build();
         }
 
         try {
             switch (notificationRequest.event) {
                 case PEER_JOINED:
+                    logger.info("callEvent: PEER_JOINED: " + JsonUtil.serialize(notificationRequest, false));
                     service.connectToRoom(notificationRequest);
                     break;
                 case PEER_LEFT:
+                logger.info("callEvent: PEER_LEFT: " + JsonUtil.serialize(notificationRequest, false));
                     service.leftToRoom(notificationRequest);                    
                     break;
             

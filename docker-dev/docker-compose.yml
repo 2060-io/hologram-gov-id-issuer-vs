@@ -34,9 +34,9 @@ services:
     environment:
       - POSTGRES_PASSWORD=2060demo
       - POSTGRES_USER=gaia 
-      - PGDATA=/var/lib/postgresql/data/pgdata
-    volumes:
-       - /tmp/citizen-registry/postgresql:/var/lib/postgresql/data
+    #   - PGDATA=/var/lib/postgresql/data/pgdata
+    # volumes:
+    #    - /tmp/citizen-registry/postgresql:/var/lib/postgresql/data
 
 # the datastore is the container that will store identity photos.
 # Normally it should not be exposed directly to a public URL, 

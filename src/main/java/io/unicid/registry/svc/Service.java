@@ -904,6 +904,7 @@ public class Service {
 			}
 			case WEBRTC_VERIFICATION: {
 				Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+				this.notifySuccess(token);
 				
 				
 				break;
@@ -1066,12 +1067,13 @@ public class Service {
 				}
 				case WEBRTC: {
 					
-					logger.info("restoreEntryPoint: found fingerprint verification method for identity " + this.getIdentityDataString(res));
+					logger.info("restoreEntryPoint: found webrtc verification method for identity " + this.getIdentityDataString(res));
 					
 					session.setRestoreStep(RestoreStep.WEBRTC_VERIFICATION);
 					session = em.merge(session);
 					
 					Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res);
+					this.notifySuccess(token);
 					
 					
 					break;
@@ -1656,42 +1658,12 @@ public class Service {
 						break;
 					}
 					case WEBRTC: {
-						session.setCreateStep(CreateStep.WEBRTC_VERIFICATION);
+						session.setCreateStep(CreateStep.WEBRTC_CAPTURE);
 						session = em.merge(session);
 						
-						this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+						this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
 						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WEBRTC_REQUIRED")));
-
-						CreateRoomRequest request = new CreateRoomRequest(redirDomain+"/notificationUri", 50);
-						DataWsUrl wsUrl = webRTCResource.createRoom(UUID.randomUUID(), request);
-						UUID peerId = UUID.randomUUID();
-						Map<String, Object> wsUrlMap = objectMapper.convertValue(wsUrl, Map.class);
-						wsUrlMap.put("peerId", peerId);
-						
-						try {
-							logger.info("webRTCResource: createRoom: " + JsonUtil.serialize(wsUrl, false));
-						} catch (JsonProcessingException e) {
-							
-						}
-
-						// Create registry
-						PeerRegistry cr = new PeerRegistry();
-						cr.setId(peerId);
-						cr.setIdentity(identity);
-						cr.setRoomId(wsUrl.getRoomId());
-						cr.setWsUrl(wsUrl.getWsUrl());
-						cr.setType(PeerType.PEER_USER);
-						em.persist(cr);
-						
-						messageResource.sendMessage(this.generateOfferMessage(connectionId, threadId, wsUrlMap));
-						// messageResource.sendMessage(generateFaceCaptureMediaMessage(connectionId, threadId, token));
-						/*
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_CAPTURE_REQUEST.replaceFirst("URL", faceCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
-								.replaceFirst("REDIRDOMAIN", redirDomain)
-								.replaceFirst("Q_DOMAIN", qRedirDomain)
-								.replaceFirst("D_DOMAIN", dRedirDomain)
-								)));
-						*/
+						this.sendWebRTCCapture(session, threadId);
 						break;
 					}
 					}
@@ -1996,9 +1968,13 @@ public class Service {
 					.replaceFirst("Q_DOMAIN", qRedirDomain)
 					.replaceFirst("D_DOMAIN", dRedirDomain))));*/
 			break;
-		}
-		case FINGERPRINT_CAPTURE: {
+		} case FINGERPRINT_CAPTURE: {
 			Token token = this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
+			
+			break;
+		} case WEBRTC_CAPTURE: {
+			Token token = this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
+			this.sendWebRTCCapture(session, threadId);
 			
 			break;
 		}
@@ -2013,7 +1989,7 @@ public class Service {
 		co.setConnectionId(connectionId);
 		co.setId(UUID.randomUUID());
 		co.setThreadId(threadId);
-		co.setItems(wsUrlMap);
+		co.setParameters(wsUrlMap);
 		try {
 			logger.info("generateOfferMessage: " + JsonUtil.serialize(co, false));
 		} catch (JsonProcessingException e) {
@@ -2061,7 +2037,8 @@ public class Service {
 			token.setIdentity(identity);
 			switch (type) {
 			case FACE_CAPTURE: 
-			case FINGERPRINT_CAPTURE: {
+			case FINGERPRINT_CAPTURE:
+			case WEBRTC_CAPTURE: {
 				token.setExpireTs(Instant.now().plus(Duration.ofSeconds(createTokenLifetimeSec)));
 				break;
 			}
@@ -2079,7 +2056,8 @@ public class Service {
 			token.setIdentity(identity);
 			switch (type) {
 			case FACE_CAPTURE: 
-			case FINGERPRINT_CAPTURE: {
+			case FINGERPRINT_CAPTURE:
+			case WEBRTC_CAPTURE: {
 				token.setExpireTs(Instant.now().plus(Duration.ofSeconds(createTokenLifetimeSec)));
 				break;
 			}
@@ -2096,6 +2074,36 @@ public class Service {
 		return token;
 				
 		
+	}
+
+	private void sendWebRTCCapture(Session session, UUID threadId) {
+
+		CreateRoomRequest request = new CreateRoomRequest(redirDomain.get()+"/call-event", 50);
+		DataWsUrl wsUrl = webRTCResource.createRoom(UUID.randomUUID(), request);
+		// DataWsUrl wsUrl = new DataWsUrl("1zvna1y3", "wss://v3demo.mediasoup.org:4443");
+		UUID peerId = UUID.randomUUID();
+		Map<String, Object> wsUrlMap = objectMapper.convertValue(wsUrl, Map.class);
+		wsUrlMap.put("peerId", peerId);
+		
+		try {
+			logger.info("webRTCResource: createRoom: " + JsonUtil.serialize(wsUrlMap, false));
+		} catch (JsonProcessingException e) {
+			
+		}
+
+		// Create registry
+		PeerRegistry cr = em.find(PeerRegistry.class, peerId);
+		if(cr==null){
+			cr = new PeerRegistry();
+			cr.setId(peerId);
+			cr.setIdentity(session.getIdentity());
+			cr.setRoomId(wsUrl.getRoomId());
+			cr.setWsUrl(wsUrl.getWsUrl());
+			cr.setType(PeerType.PEER_USER);
+			em.persist(cr);
+		}
+		
+		messageResource.sendMessage(this.generateOfferMessage(session.getConnectionId(), threadId, wsUrlMap));		
 	}
 
 	private BaseMessage getWhichToChangeUserRequested(UUID connectionId, UUID threadId) {
@@ -2411,6 +2419,7 @@ public class Service {
 				session = em.merge(session);
 				
 				Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+				this.notifySuccess(token);
 				
 
 				break;
@@ -2461,6 +2470,7 @@ public class Service {
 
 			case WEBRTC_AUTH: {
 				Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+				this.notifySuccess(token);
 				
 				break;
 			}
@@ -2979,6 +2989,36 @@ public class Service {
 			}
 			break;
 		}
+			
+		case WEBRTC_CAPTURE: {
+			if (session != null) {
+				if ((session.getType() != null) 
+						&& (session.getType().equals(SessionType.CREATE)) 
+						&& (identity.getProtection().equals(Protection.WEBRTC))
+						&& (session.getCreateStep().equals(CreateStep.WEBRTC_CAPTURE))
+						&& (identity.getProtectedTs() == null)
+						) {
+					
+					identity.setProtectedTs(Instant.now());
+					
+					identity = em.merge(identity);
+					
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("WEBRTC_CAPTURE_SUCCESSFULL")));
+					
+					this.purgeSession(session);
+					session.setType(SessionType.ISSUE);
+					session.setIdentity(identity);
+					session = em.merge(session);
+					this.issueEntryPoint(session.getConnectionId(), null, session, null);
+				
+				} else {
+					throw new TokenException();
+				}
+			} else {
+				throw new TokenException();
+			}
+			break;
+		}
 		
 		case FACE_VERIFICATION: {
 			if (session != null) {
@@ -3039,10 +3079,9 @@ public class Service {
 		}
 		
 		case WEBRTC_VERIFICATION: {
-			identity.setProtectedTs(Instant.now());
 			if (session != null) {
 				if ((session.getType() != null) 
-						&& (session.getType().equals(SessionType.CREATE) 
+						&& (session.getType().equals(SessionType.ISSUE) 
 								|| session.getType().equals(SessionType.RESTORE)) 
 						&& (identity.getProtection().equals(Protection.WEBRTC))
 						&& (identity.getProtectedTs() != null)
@@ -3123,6 +3162,30 @@ public class Service {
 
 					
 					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_CAPTURE_ERROR")));
+					
+					this.createEntryPoint(session.getConnectionId(), null, session, null, null);
+				
+				} else {
+					throw new TokenException();
+				}
+			} else {
+				throw new TokenException();
+			}
+			break;
+		}
+			
+		case WEBRTC_CAPTURE: {
+			if (session != null) {
+				if ((session.getType() != null) 
+						&& (session.getType().equals(SessionType.CREATE)) 
+						&& (identity.getProtection().equals(Protection.WEBRTC))
+						&& (session.getCreateStep().equals(CreateStep.WEBRTC_CAPTURE))
+						&& (identity.getProtectedTs() == null)
+						) {
+					
+
+					
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("WEBRTC_CAPTURE_ERROR")));
 					
 					this.createEntryPoint(session.getConnectionId(), null, session, null, null);
 				

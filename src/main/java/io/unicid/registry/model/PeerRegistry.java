@@ -35,8 +35,8 @@ import lombok.Setter;
 @DynamicUpdate
 @DynamicInsert
 @NamedQueries({
-	@NamedQuery(name="PeerRegistry.findForIdentity", query="SELECT u FROM PeerRegistry u WHERE u.identity=:identity and u.isActive=TRUE ORDER by u.id ASC"),
-	@NamedQuery(name="PeerRegistry.findForId", query="SELECT u FROM PeerRegistry u WHERE u.id=:id and u.isActive=TRUE"),	
+	@NamedQuery(name="PeerRegistry.findForIdentity", query="SELECT u FROM PeerRegistry u WHERE u.identity=:identity ORDER by u.id ASC"),
+	@NamedQuery(name="PeerRegistry.findForId", query="SELECT u FROM PeerRegistry u WHERE u.id=:id"),
 })
 @Setter
 @Getter
@@ -56,7 +56,6 @@ public class PeerRegistry implements Serializable {
 	private String roomId;
 	private String wsUrl;
 	private PeerType type;
-	private Boolean isActive;
 	@CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime created;

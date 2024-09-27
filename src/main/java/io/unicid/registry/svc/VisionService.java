@@ -16,6 +16,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import io.unicid.registry.enums.MediaType;
+import io.unicid.registry.enums.PeerType;
 import io.unicid.registry.enums.TokenType;
 import io.unicid.registry.ex.MediaAlreadyLinkedException;
 import io.unicid.registry.ex.TokenException;
@@ -25,7 +26,7 @@ import io.unicid.registry.model.Media;
 import io.unicid.registry.model.Token;
 import io.unicid.registry.model.res.JoinCallRequest;
 import io.unicid.registry.model.res.NotificationRequest;
-import io.unicid.registry.res.c.WebRTCResource;
+import io.unicid.registry.res.c.VisionResource;
 
 @ApplicationScoped
 public class VisionService {
@@ -35,8 +36,8 @@ public class VisionService {
 	
 	@Inject EntityManager em;
 
-	// @Inject @RestClient VisionResource vs;
-	@Inject @RestClient WebRTCResource wb;
+	@Inject @RestClient VisionResource vs;
+	// @Inject @RestClient WebRTCResource wb;
 	@Inject RegisterService registerService;
 	
 	
@@ -133,6 +134,18 @@ public class VisionService {
 				break;
 			}
 			
+			case WEBRTC_VERIFICATION:
+			case WEBRTC_CAPTURE: {
+				
+				media = new Media();
+				media.setId(mediaId);
+				media.setIdentity(identity);
+				media.setTs(Instant.now());
+				media.setType(MediaType.WEBRTC);
+				em.persist(media);
+				break;
+			}
+			
 			
 			}
 		} else {
@@ -183,6 +196,7 @@ public class VisionService {
 		switch (tokenType) {
 		case FACE_CAPTURE:
 		case FINGERPRINT_CAPTURE:
+		case WEBRTC_CAPTURE:
 		{
 			token.setExpireTs(Instant.now().plus(Duration.ofSeconds(createTokenLifetimeSec)));
 			break;
@@ -200,32 +214,45 @@ public class VisionService {
 		return token;
 	}
 	
-	
+	@Transactional
 	public void connectToRoom(NotificationRequest notificationRequest) {
 		
 		// return vs.connectToRoom(wsUrl);
-		PeerRegistry cr = updatePeerRegistry(notificationRequest, true);
-		Token t = registerService.getTokenByConnection(cr.getIdentity().getConnectionId());
+		PeerRegistry cr = updatePeerRegistry(notificationRequest);
 		
-		JoinCallRequest jc = new JoinCallRequest();
-		jc.setWsUrl(cr.getWsUrl());
-		jc.setSuccessUrl(redirDomain+"/success/"+t.getId());
-		jc.setFailureUrl(redirDomain+"/failure/"+t.getId());
-		
-		wb.joinCall(jc); // TODO: create peer registry with room and add in the wsUrl
+		if (cr.getType().equals(PeerType.PEER_USER)){
+			Token t = registerService.getTokenByConnection(cr.getIdentity().getConnectionId(), TokenType.WEBRTC_CAPTURE);
+
+			// Create registry vision
+			PeerRegistry crv = new PeerRegistry();
+			UUID peerId = UUID.randomUUID();
+			crv.setId(peerId);
+			crv.setIdentity(null);
+			crv.setRoomId(cr.getRoomId());
+			crv.setWsUrl(cr.getWsUrl());
+			crv.setType(PeerType.PEER_VISION);
+			em.persist(crv);
+
+			JoinCallRequest jc = new JoinCallRequest();
+			jc.setWsUrl(cr.getWsUrl()+"/?roomId="+cr.getRoomId()+"&peerId="+peerId);
+			jc.setSuccessUrl(redirDomain.get()+"/success/"+t.getId());
+			jc.setFailureUrl(redirDomain.get()+"/failure/"+t.getId());
+			
+			vs.joinCall(jc); // TODO: create peer registry with room and add in the wsUrl
+		}
 	}
 
 	public void leftToRoom(NotificationRequest notificationRequest) {
-		updatePeerRegistry(notificationRequest, false);
+		updatePeerRegistry(notificationRequest);
 	}
 
-	private PeerRegistry updatePeerRegistry(NotificationRequest notificationRequest, Boolean isActive){
-		PeerRegistry cr = registerService.getPeerById(notificationRequest.peerId);
+	@Transactional
+	public PeerRegistry updatePeerRegistry(NotificationRequest notificationRequest){
+		PeerRegistry cr = registerService.getPeerById(UUID.fromString(notificationRequest.peerId));
 		if(cr == null) {
 			throw new IllegalArgumentException("No call found for peerId: " + notificationRequest.getPeerId());
 		}
 		cr.setEvent(notificationRequest.event);
-		cr.setIsActive(isActive);
 		em.merge(cr);
 		return cr;
 	}

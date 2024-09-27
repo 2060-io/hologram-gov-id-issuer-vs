@@ -37,7 +37,7 @@ public class RegisterService {
 	}
 
 	@Transactional
-	public PeerRegistry getPeerById(String peerId) {
+	public PeerRegistry getPeerById(UUID peerId) {
 		TypedQuery<PeerRegistry> q = em.createNamedQuery("PeerRegistry.findForId", PeerRegistry.class);
 		q.setParameter("id", peerId);
 		PeerRegistry registry = q.getResultList().stream().findFirst().orElse(null);
@@ -48,10 +48,10 @@ public class RegisterService {
 	}
 
 	@Transactional
-	public Token getTokenByConnection(UUID connectionId) {
+	public Token getTokenByConnection(UUID connectionId, TokenType token) {
 		TypedQuery<Token> q = em.createNamedQuery("Token.findForConnection", Token.class);
 		q.setParameter("connectionId", connectionId);
-		q.setParameter("type", TokenType.WEBRTC_VERIFICATION);
+		q.setParameter("type", token);
 		Token registry = q.getResultList().stream().findFirst().orElse(null);
 		if (debug){
 			logger.info("getTokenByConnection: " + registry.getId());
