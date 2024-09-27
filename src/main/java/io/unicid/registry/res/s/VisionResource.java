@@ -122,6 +122,7 @@ public class VisionResource {
 		}
 		
 		try {
+			logger.info("Vision: success: tokenId: " + token);
 			service.success(token);
 			
 			return Response.status(Status.OK).build();
@@ -154,6 +155,7 @@ public class VisionResource {
 		}
 		
 		try {
+			logger.info("Vision: failure: tokenId: " + token);
 			service.failure(token);
 			
 			return Response.status(Status.OK).build();

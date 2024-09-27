@@ -3,6 +3,7 @@ package io.unicid.registry.svc;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -12,14 +13,20 @@ import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import io.unicid.registry.enums.MediaType;
+import io.unicid.registry.enums.PeerType;
 import io.unicid.registry.enums.TokenType;
 import io.unicid.registry.ex.MediaAlreadyLinkedException;
 import io.unicid.registry.ex.TokenException;
+import io.unicid.registry.model.PeerRegistry;
 import io.unicid.registry.model.Identity;
 import io.unicid.registry.model.Media;
 import io.unicid.registry.model.Token;
+import io.unicid.registry.model.res.JoinCallRequest;
+import io.unicid.registry.model.res.NotificationRequest;
+import io.unicid.registry.res.c.VisionResource;
 
 @ApplicationScoped
 public class VisionService {
@@ -28,6 +35,10 @@ public class VisionService {
 	@Inject Service service;
 	
 	@Inject EntityManager em;
+
+	@Inject @RestClient VisionResource vs;
+	// @Inject @RestClient WebRTCResource wb;
+	@Inject RegisterService registerService;
 	
 	
 	@ConfigProperty(name = "io.unicid.create.token.lifetimeseconds")
@@ -35,6 +46,10 @@ public class VisionService {
 	
 	@ConfigProperty(name = "io.unicid.verify.token.lifetimeseconds")
 	Long verifyTokenLifetimeSec;
+
+
+	@ConfigProperty(name = "io.unicid.vision.redirdomain")
+	Optional<String> redirDomain;
 	
 	
 	
@@ -119,6 +134,18 @@ public class VisionService {
 				break;
 			}
 			
+			case WEBRTC_VERIFICATION:
+			case WEBRTC_CAPTURE: {
+				
+				media = new Media();
+				media.setId(mediaId);
+				media.setIdentity(identity);
+				media.setTs(Instant.now());
+				media.setType(MediaType.WEBRTC);
+				em.persist(media);
+				break;
+			}
+			
 			
 			}
 		} else {
@@ -169,12 +196,14 @@ public class VisionService {
 		switch (tokenType) {
 		case FACE_CAPTURE:
 		case FINGERPRINT_CAPTURE:
+		case WEBRTC_CAPTURE:
 		{
 			token.setExpireTs(Instant.now().plus(Duration.ofSeconds(createTokenLifetimeSec)));
 			break;
 		}
 		case FACE_VERIFICATION:
-		case FINGERPRINT_VERIFICATION: {
+		case FINGERPRINT_VERIFICATION:
+		case WEBRTC_VERIFICATION: {
 			token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
 			break;
 		}
@@ -183,5 +212,47 @@ public class VisionService {
 		em.persist(token);
 		
 		return token;
+	}
+	
+	@Transactional
+	public void joinCall(NotificationRequest notificationRequest) {
+		
+		PeerRegistry cr = updatePeerRegistry(notificationRequest);
+		
+		if (cr.getType().equals(PeerType.PEER_USER)){
+			Token t = registerService.getTokenByConnection(cr.getIdentity().getConnectionId(), TokenType.WEBRTC_CAPTURE);
+
+			// Create registry vision
+			PeerRegistry crv = new PeerRegistry();
+			UUID peerId = UUID.randomUUID();
+			crv.setId(peerId);
+			crv.setIdentity(null);
+			crv.setRoomId(cr.getRoomId());
+			crv.setWsUrl(cr.getWsUrl());
+			crv.setType(PeerType.PEER_VISION);
+			em.persist(crv);
+
+			JoinCallRequest jc = new JoinCallRequest();
+			jc.setWsUrl(cr.getWsUrl()+"/?roomId="+cr.getRoomId()+"&peerId="+peerId);
+			jc.setSuccessUrl(redirDomain.get()+"/success/"+t.getId());
+			jc.setFailureUrl(redirDomain.get()+"/failure/"+t.getId());
+			
+			vs.joinCall(jc);
+		}
+	}
+
+	public void leaveCall(NotificationRequest notificationRequest) {
+		updatePeerRegistry(notificationRequest);
+	}
+
+	@Transactional
+	public PeerRegistry updatePeerRegistry(NotificationRequest notificationRequest){
+		PeerRegistry cr = registerService.getPeerById(UUID.fromString(notificationRequest.peerId));
+		if(cr == null) {
+			throw new IllegalArgumentException("No call found for peerId: " + notificationRequest.getPeerId());
+		}
+		cr.setEvent(notificationRequest.event);
+		em.merge(cr);
+		return cr;
 	}
 }

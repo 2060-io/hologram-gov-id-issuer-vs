@@ -4,6 +4,7 @@ public enum MediaType {
 
 	FACE("Face"),
 	FINGERPRINT("Fingerprint"),
+	WEBRTC("WebRTC"),
 	AVATAR("Avatar"),
 	;
 	
