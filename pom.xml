@@ -3,10 +3,10 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.unicid</groupId>
-  <artifactId>citizen-registry</artifactId>
+  <artifactId>unicid-issuer-dts</artifactId>
   <version>1.0.0</version>
-  <name>Citizen Registry</name>
-  <description>A real DIDcomm citizen registry</description>
+  <name>UnicId Issuer DTS</name>
+  <description>A real DIDcomm unicid issuer dts</description>
   <url>https://github.com/2060-io/2060-demos</url>
   <licenses>
     <license>
