@@ -6,7 +6,7 @@
   <artifactId>unicid-issuer-dts</artifactId>
   <version>0.1.0</version>
   <name>UnicID Issuer DTS</name>
-  <description>A real DIDcomm unicid issuer dts</description>
+  <description>Decentralised Trust Service for issuing UnicID Verifiable Credentials</description>
   <url>https://github.com/2060-io/2060-demos</url>
   <licenses>
     <license>
