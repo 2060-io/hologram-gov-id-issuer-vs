@@ -5,7 +5,7 @@
   <groupId>io.unicid</groupId>
   <artifactId>unicid-issuer-dts</artifactId>
   <version>0.1.0</version>
-  <name>UnicId Issuer DTS</name>
+  <name>UnicID Issuer DTS</name>
   <description>A real DIDcomm unicid issuer dts</description>
   <url>https://github.com/2060-io/2060-demos</url>
   <licenses>
