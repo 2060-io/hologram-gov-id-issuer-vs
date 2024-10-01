@@ -13,7 +13,6 @@ import org.jboss.logging.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.twentysixty.sa.client.model.event.ConnectionStateUpdated;
-import io.twentysixty.sa.client.model.event.DidExchangeState;
 import io.twentysixty.sa.client.res.s.ConnectionEventInterface;
 import io.twentysixty.sa.client.util.JsonUtil;
 import io.unicid.registry.svc.Service;
