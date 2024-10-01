@@ -74,7 +74,7 @@ import io.twentysixty.sa.res.c.MessageResource;
 import io.unicid.registry.enums.CreateStep;
 import io.unicid.registry.enums.IdentityClaim;
 import io.unicid.registry.enums.IssueStep;
-import io.unicid.registry.enums.MainText;
+import io.unicid.registry.enums.ConfigProperties;
 import io.unicid.registry.enums.MediaType;
 import io.unicid.registry.enums.PeerType;
 import io.unicid.registry.enums.Protection;
@@ -289,7 +289,7 @@ public class Service {
 		}
 		
 		try {
-			if(MainText.valueOf(messageName)!=null) return this.getConfigValue(retval);
+			if(ConfigProperties.valueOf(messageName)!=null) return this.getConfigValue(retval);
 		} catch (Exception e) {}
 
 		return retval;
