@@ -54,7 +54,7 @@
   <dependency> 
  <groupId>io.2060</groupId>
   <artifactId>service-agent-java-client</artifactId>
-  <version>2.0.9</version>
+  <version>2.0.10</version>
   </dependency>
      <dependency>
       <groupId>io.quarkus</groupId>

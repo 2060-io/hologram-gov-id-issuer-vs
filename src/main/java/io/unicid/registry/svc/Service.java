@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import javax.imageio.ImageIO;
 import jakarta.inject.Inject;
@@ -67,6 +68,8 @@ import io.twentysixty.sa.client.model.message.Parameters;
 import io.twentysixty.sa.client.model.message.ProfileMessage;
 import io.twentysixty.sa.client.model.message.TextMessage;
 import io.twentysixty.sa.client.model.message.calls.CallOfferRequestMessage;
+import io.twentysixty.sa.client.model.message.mrtd.MrzDataRequestMessage;
+import io.twentysixty.sa.client.model.message.mrtd.MrzDataSubmitMessage;
 import io.twentysixty.sa.client.util.Aes256cbc;
 import io.twentysixty.sa.client.util.JsonUtil;
 import io.twentysixty.sa.res.c.CredentialTypeResource;
@@ -153,25 +156,20 @@ public class Service {
 	
 	@ConfigProperty(name = "io.unicid.identity.def.claim.citizenid")
 	Boolean enableCitizenIdClaim;
-	
 	@ConfigProperty(name = "io.unicid.identity.def.claim.firstname")
 	Boolean enableFirstnameClaim;
-	
 	@ConfigProperty(name = "io.unicid.identity.def.claim.lastname")
 	Boolean enableLastnameClaim;
-	
 	@ConfigProperty(name = "io.unicid.identity.def.claim.avatarname")
 	Boolean enableAvatarnameClaim;
-	
 	@ConfigProperty(name = "io.unicid.identity.def.claim.avatarpic")
 	Boolean enableAvatarpicClaim;
-	
 	@ConfigProperty(name = "io.unicid.identity.def.claim.birthdate")
 	Boolean enableBirthdateClaim;
-	
 	@ConfigProperty(name = "io.unicid.identity.def.claim.birthplace")
 	Boolean enableBirthplaceClaim;
-	
+	@ConfigProperty(name = "io.unicid.identity.def.claim.mrz")
+	Boolean enableMrzClaim;	
 	@ConfigProperty(name = "io.unicid.identity.def.claim.photo")
 	Boolean enablePhotoClaim;
 	
@@ -187,6 +185,8 @@ public class Service {
 	Boolean restoreBirthdateClaim;
 	@ConfigProperty(name = "io.unicid.identity.restore.claim.birthplace")
 	Boolean restoreBirthplaceClaim;
+	@ConfigProperty(name = "io.unicid.identity.restore.claim.mrz")
+	Boolean restoreMrzClaim;
 
 	@ConfigProperty(name = "io.unicid.identity.def.claim.avatarpic.maxdimension")
 	Integer avatarMaxDim;
@@ -257,7 +257,28 @@ public class Service {
 	
 	private static String COMPLETE_IDENTITY_CONFIRM_YES_VALUE = "CI_Yes";
 	private static String COMPLETE_IDENTITY_CONFIRM_NO_VALUE = "CI_No";
-	
+
+	@PostConstruct
+    void init() {
+        if (Boolean.TRUE.equals(enableMrzClaim)) {
+			enableCitizenIdClaim = false;
+			enableFirstnameClaim = false;
+			enableLastnameClaim = false;
+			enableAvatarnameClaim = false;
+			enableAvatarpicClaim = false;
+			enableBirthdateClaim = false;
+			enableBirthplaceClaim = false;
+			enablePhotoClaim = false;
+        }
+        if (Boolean.TRUE.equals(restoreMrzClaim)) {
+			restoreCitizenidClaim = false;
+			restoreFirstnameClaim = false;
+			restoreLastnameClaim = false;
+			restoreAvatarnameClaim = false;
+			restoreBirthdateClaim = false;
+			restoreBirthplaceClaim = false;
+        }
+    }
 		
 	ResourceBundle currentBundle = null; 
 	Map<UUID, ResourceBundle> bundles = new HashMap<>();
@@ -502,6 +523,9 @@ public class Service {
 		} else if ((message instanceof ProfileMessage)) {
 			ProfileMessage profile = (ProfileMessage) message;
 			this.updatePreferLanguage(profile);
+		} else if ((message instanceof MrzDataSubmitMessage)) {
+			MrzDataSubmitMessage mrz = (MrzDataSubmitMessage) message;
+			content = JsonUtil.serialize(mrz, false);
 		}
 		
 		if (content != null) {
@@ -910,6 +934,16 @@ public class Service {
 				break;
 			} 
 			
+			case MRZ: {
+				if (content != null) {
+					session.updateSessionWithMrzData(objectMapper.readValue(content, MrzDataSubmitMessage.class), session);
+					session.setRestoreStep(getNextRestoreStep(session.getRestoreStep()));
+					session = em.merge(session);
+				}
+				this.restoreSendMessage(connectionId, threadId, session);
+				break;
+			} 
+			
 			case FACE_VERIFICATION: {
 				
 				Token token = this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
@@ -1020,6 +1054,10 @@ public class Service {
 			}
 			if (restoreBirthplaceClaim) {
 				Predicate predicate = builder.equal(root.get("placeOfBirth"), session.getPlaceOfBirth());
+				allPredicates.add(predicate);
+			}
+			if (restoreMrzClaim) {
+				Predicate predicate = builder.equal(root.get("mrz"), session.getMrz());
 				allPredicates.add(predicate);
 			}
 			
@@ -1152,6 +1190,11 @@ public class Service {
 			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PLACE_OF_BIRTH", connectionId)));
 			break;
 		}
+		case MRZ: {
+			messageResource.sendMessage(MrzDataRequestMessage.build(connectionId, threadId));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_MRZ", connectionId)));
+			break;
+		}
 		
 		case PASSWORD: {
 			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PASSWORD", connectionId)));
@@ -1211,6 +1254,12 @@ public class Service {
 			allPredicates.add(predicate);
 			if (debug) logger.info("identityAlreadyExists: birthdate: " + session.getBirthdate());
 		}
+		
+		if (restoreMrzClaim) {
+			Predicate predicate = builder.equal(root.get("mrz"), session.getMrz());
+			allPredicates.add(predicate);
+			if (debug) logger.info("identityAlreadyExists: mrz: " + session.getMrz());
+		}
 		if (restoreBirthplaceClaim) {
 			Predicate predicate = builder.equal(root.get("placeOfBirth"), session.getPlaceOfBirth());
 			allPredicates.add(predicate);
@@ -1264,6 +1313,7 @@ public class Service {
 	private CreateStep getNextCreateStep(CreateStep current) throws Exception {
 		
 		if (current == null) {
+			if(enableMrzClaim) return CreateStep.MRZ;
 			if(enableCitizenIdClaim) return CreateStep.CITIZEN_ID;
 			if(enableFirstnameClaim) return CreateStep.FIRSTNAME;
 			if(enableLastnameClaim) return CreateStep.LASTNAME;
@@ -1315,6 +1365,7 @@ public class Service {
 				return CreateStep.PENDING_CONFIRM;
 			}
 			case PLACE_OF_BIRTH:
+			case MRZ:
 			default:
 			{
 				return CreateStep.PENDING_CONFIRM;
@@ -1328,6 +1379,7 @@ public class Service {
 	private RestoreStep getNextRestoreStep(RestoreStep current) throws Exception {
 		
 		if (current == null) {
+			if(restoreMrzClaim) return RestoreStep.MRZ;
 			if(restoreCitizenidClaim) return RestoreStep.CITIZEN_ID;
 			if(restoreFirstnameClaim) return RestoreStep.FIRSTNAME;
 			if(restoreLastnameClaim) return RestoreStep.LASTNAME;
@@ -1371,6 +1423,7 @@ public class Service {
 				return RestoreStep.DONE;
 			}
 			case PLACE_OF_BIRTH:
+			case MRZ:
 			default:
 			{
 				return RestoreStep.DONE;
@@ -1584,6 +1637,31 @@ public class Service {
 			this.createSendMessage(connectionId, threadId, session);
 			break;
 		}
+		case MRZ: {
+			if (content != null) {
+				session.updateSessionWithMrzData(objectMapper.readValue(content, MrzDataSubmitMessage.class), session);
+				session.setCreateStep(getNextCreateStep(session.getCreateStep()));
+				
+				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
+					
+					if (this.identityAlreadyExists(session)) {
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
+						if (session.getAvatarPic() == null) {
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+						} else {
+							MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
+							messageResource.sendMessage(mms);
+							
+						}
+						session.setCreateStep(CreateStep.NEED_TO_CHANGE);
+					} 
+				}
+				
+				session = em.merge(session);
+			}
+			this.createSendMessage(connectionId, threadId, session);
+			break;
+		}
 		
 		case PENDING_CONFIRM: {
 			
@@ -1605,6 +1683,9 @@ public class Service {
 						identity.setAvatarname(session.getAvatarname());
 						identity.setBirthdate(session.getBirthdate());
 						identity.setPlaceOfBirth(session.getPlaceOfBirth());
+						identity.setMrz(session.getMrz());
+						identity.setDocumentType(session.getDocumentType());
+						identity.setDocumentNumber(session.getDocumentNumber());
 						identity.setCitizenSinceTs(Instant.now());
 						identity.setConnectionId(connectionId);
 						identity.setProtection(protection);
@@ -1727,6 +1808,9 @@ public class Service {
 					session = em.merge(session);
 				} else if (content.equals(IdentityClaim.PLACE_OF_BIRTH.toString())) {
 					session.setCreateStep(CreateStep.CHANGE_PLACE_OF_BIRTH);
+					session = em.merge(session);
+				} else if (content.equals(IdentityClaim.MRZ.toString())) {
+					session.setCreateStep(CreateStep.CHANGE_MRZ);
 					session = em.merge(session);
 				} 
 			} 
@@ -1958,6 +2042,27 @@ public class Service {
 			
 			break;
 		}
+		case CHANGE_MRZ: {
+			if (content != null) {
+				session.updateSessionWithMrzData(objectMapper.readValue(content, MrzDataSubmitMessage.class), session);
+				
+				if (this.identityAlreadyExists(session)) {
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
+					if (session.getAvatarPic() == null) {
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
+					} else {
+						MediaMessage mms = this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
+						messageResource.sendMessage(mms);
+					}
+					session.setCreateStep(CreateStep.NEED_TO_CHANGE);
+				} else {
+					session.setCreateStep(CreateStep.PENDING_CONFIRM);
+				}
+				session = em.merge(session);
+			} 
+			this.createSendMessage(connectionId, threadId, session);
+			break;
+		}
 		
 		case PASSWORD: {
 			
@@ -2186,6 +2291,13 @@ public class Service {
 			menuItems.add(placeOfBirth);
 		}
 		
+		if (enableMrzClaim) {
+			MenuItem mrz = new MenuItem();
+			mrz.setId(IdentityClaim.MRZ.toString());
+			mrz.setText(IdentityClaim.MRZ.getClaimLabel());
+			menuItems.add(mrz);
+		}
+		
 		confirm.setConnectionId(connectionId);
 		confirm.setThreadId(threadId);
 		confirm.setMenuItems(menuItems);
@@ -2239,6 +2351,13 @@ public class Service {
 			placeOfBirth.setId(IdentityClaim.PLACE_OF_BIRTH.toString());
 			placeOfBirth.setText(IdentityClaim.PLACE_OF_BIRTH.getClaimLabel());
 			menuItems.add(placeOfBirth);
+		}
+		
+		if (restoreMrzClaim) {
+			MenuItem mrz = new MenuItem();
+			mrz.setId(IdentityClaim.MRZ.toString());
+			mrz.setText(IdentityClaim.MRZ.getClaimLabel());
+			menuItems.add(mrz);
 		}
 		
 		confirm.setConnectionId(connectionId);
@@ -2332,6 +2451,13 @@ public class Service {
 		case CHANGE_PLACE_OF_BIRTH:
 		{
 			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PLACE_OF_BIRTH_REQUEST", connectionId)));
+			break;
+		}
+		case MRZ:
+		case CHANGE_MRZ:
+		{
+			messageResource.sendMessage(MrzDataRequestMessage.build(connectionId, threadId));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("MRZ_REQUEST", connectionId)));
 			break;
 		}
 		
@@ -2581,6 +2707,14 @@ public class Service {
 			
 		}
 		
+		if (enableMrzClaim) {
+			data.append(IdentityClaim.MRZ.getClaimLabel()).append(": ");
+			if (identity.getMrz() != null) {
+				data.append(identity.getMrz()).append("\n");
+			} else {
+				data.append("<unset mrz>").append("\n");
+			}			
+		}		
 		
 		
 		
@@ -2660,6 +2794,14 @@ public class Service {
 			}
 			
 		}
+		if (enableMrzClaim) {
+			data.append(IdentityClaim.MRZ.getClaimLabel()).append(": ");
+			if (session.getMrz() != null) {
+				data.append(session.getMrz()).append("\n");
+			} else {
+				data.append("<unset mrz>").append("\n");
+			}			
+		}
 		
 		return data.toString();
 		
@@ -2686,6 +2828,15 @@ public class Service {
 					if (enableBirthdateClaim) attributes.add("birthdate");
 					if (enableBirthplaceClaim) attributes.add("placeOfBirth");
 					if (enablePhotoClaim) attributes.add("photo");
+					if (enableMrzClaim) {
+						attributes.add("documentType");
+						attributes.add("country");
+						attributes.add("firstname");
+						attributes.add("lastname");
+						attributes.add("birthdate");
+						attributes.add("documentNumber");
+						attributes.add("photo");
+					}
 					attributes.add("citizenSince");
 					attributes.add("issued");
 					
@@ -2803,6 +2954,15 @@ public class Service {
 			
 			claims.add(placeOfBirth);
 		}
+		if (enableMrzClaim) {
+			this.addClaim(claims, "documentType", Optional.ofNullable(id.getDocumentType()).map(Object::toString).orElse("null"));
+			this.addClaim(claims, "country", Optional.ofNullable(id.getPlaceOfBirth()).map(Object::toString).orElse("null"));
+			this.addClaim(claims, "firstname", Optional.ofNullable(id.getFirstname()).map(Object::toString).orElse("null"));
+			this.addClaim(claims, "lastname", Optional.ofNullable(id.getLastname()).map(Object::toString).orElse("null"));
+			this.addClaim(claims, "birthdate", Optional.ofNullable(id.getBirthdate()).map(Object::toString).orElse("null"));
+			this.addClaim(claims, "documentNumber", Optional.ofNullable(id.getDocumentNumber()).map(Object::toString).orElse("null"));
+			this.addClaim(claims, "photo", Optional.ofNullable(null).map(Object::toString).orElse("null"));
+		}
 		
 		
 		
@@ -2867,6 +3027,13 @@ public class Service {
 		messageResource.sendMessage(cred);
 	}
 	
+	private void addClaim(List<Claim> claims, String name, String value) {
+		Claim claim = new Claim();
+		claim.setName(name);
+		claim.setValue(value);
+		claims.add(claim);
+	}
+
 	@Transactional
 	public void newConnection(ConnectionStateUpdated csu) throws Exception {
 		this.getConnection(csu.getConnectionId());
@@ -2905,6 +3072,9 @@ public class Service {
 			session.setIdentity(null);
 			session.setLastname(null);
 			session.setPlaceOfBirth(null);
+			session.setMrz(null);
+			session.setDocumentType(null);
+			session.setDocumentNumber(null);
 			session.setRestoreStep(null);
 			session.setType(null);
 		}
@@ -2925,6 +3095,9 @@ public class Service {
 			session.setIdentity(null);
 			session.setLastname(null);
 			session.setPlaceOfBirth(null);
+			session.setMrz(null);
+			session.setDocumentType(null);
+			session.setDocumentNumber(null);
 			session.setRestoreStep(null);
 			session.setType(null);
 		}
@@ -3267,7 +3440,6 @@ public class Service {
 		}
 		
 		case WEBRTC_VERIFICATION: {
-			identity.setProtectedTs(Instant.now());
 			if (session != null) {
 				if ((session.getType() != null) 
 						&& (session.getType().equals(SessionType.CREATE) || session.getType().equals(SessionType.RESTORE)) 

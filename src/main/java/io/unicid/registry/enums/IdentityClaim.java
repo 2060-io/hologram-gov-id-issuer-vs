@@ -11,6 +11,7 @@ public enum IdentityClaim {
 	AVATARPIC("avatarpic", "Avatarpic"),
 	BIRTHDATE("birthdate", "Birthdate"),
 	PLACE_OF_BIRTH("placeOfBirth", "Place of Birth"),
+	MRZ("mrz", "mrz"),
 	GENRE("genre", "Genre"),
 	CITIZEN_SINCE("citizenSince", "Citizen Since"),
 	PHOTO("photo", "Photo");
@@ -34,11 +35,12 @@ public enum IdentityClaim {
 		case "lastname": return LASTNAME;
 		case "avatarname": return AVATARNAME;
 		case "avatarpic": return AVATARPIC;
-			case "birthdate": return BIRTHDATE;
-			case "placeOfBirth": return PLACE_OF_BIRTH;
-			case "sex": return GENRE;
-			case "citizenSince": return CITIZEN_SINCE;
-			case "photo": return PHOTO;
+		case "birthdate": return BIRTHDATE;
+		case "placeOfBirth": return PLACE_OF_BIRTH;
+		case "mrz": return MRZ;
+		case "sex": return GENRE;
+		case "citizenSince": return CITIZEN_SINCE;
+		case "photo": return PHOTO;
 			
 			default: return null;
 		}

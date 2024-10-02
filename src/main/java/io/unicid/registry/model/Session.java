@@ -11,10 +11,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import io.twentysixty.sa.client.enums.Mrz;
+import io.twentysixty.sa.client.model.message.mrtd.MrzDataSubmitMessage;
 import io.unicid.registry.enums.CreateStep;
 import io.unicid.registry.enums.IssueStep;
 import io.unicid.registry.enums.RestoreStep;
@@ -32,6 +37,9 @@ import io.unicid.registry.enums.SessionType;
 @NamedQueries({
 	
 })
+@Getter
+@Setter
+@ToString
 public class Session implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -59,6 +67,11 @@ public class Session implements Serializable {
 	private String lastname;
 	@Column(columnDefinition="text")
 	private String avatarname;
+	@Column(columnDefinition="text")
+	private String mrz;
+	private Mrz.Format documentType;
+	@Column(columnDefinition="text")
+	private String documentNumber;
 	private UUID avatarPic;
 	@Column(columnDefinition="text")
 	private String avatarURI;
@@ -80,120 +93,15 @@ public class Session implements Serializable {
 	private LocalDate birthdate;
 	@Column(columnDefinition="text")
 	private String placeOfBirth;
-	
-	
-	public UUID getConnectionId() {
-		return connectionId;
-	}
-	public void setConnectionId(UUID connectionId) {
-		this.connectionId = connectionId;
-	}
-	public CreateStep getCreateStep() {
-		return createStep;
-	}
-	public void setCreateStep(CreateStep createStep) {
-		this.createStep = createStep;
-	}
-	public String getFirstname() {
-		return firstname;
-	}
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
-	}
-	public String getLastname() {
-		return lastname;
-	}
-	public void setLastname(String lastname) {
-		this.lastname = lastname;
-	}
-	public LocalDate getBirthdate() {
-		return birthdate;
-	}
-	public void setBirthdate(LocalDate birthdate) {
-		this.birthdate = birthdate;
-	}
-	public String getPlaceOfBirth() {
-		return placeOfBirth;
-	}
-	public void setPlaceOfBirth(String placeOfBirth) {
-		this.placeOfBirth = placeOfBirth;
-	}
-	public RestoreStep getRestoreStep() {
-		return restoreStep;
-	}
-	public void setRestoreStep(RestoreStep restoreStep) {
-		this.restoreStep = restoreStep;
-	}
-	public Identity getIdentity() {
-		return identity;
-	}
-	public void setIdentity(Identity identity) {
-		this.identity = identity;
-	}
-	public SessionType getType() {
-		return type;
-	}
-	public void setType(SessionType type) {
-		this.type = type;
-	}
-	public IssueStep getIssueStep() {
-		return issueStep;
-	}
-	public void setIssueStep(IssueStep issueStep) {
-		this.issueStep = issueStep;
-	}
-	
-	public String getAvatarname() {
-		return avatarname;
-	}
-	public void setAvatarname(String avatarname) {
-		this.avatarname = avatarname;
-	}
-	public String getCitizenId() {
-		return citizenId;
-	}
-	public void setCitizenId(String citizenId) {
-		this.citizenId = citizenId;
-	}
-	public UUID getAvatarPic() {
-		return avatarPic;
-	}
-	public void setAvatarPic(UUID avatarPic) {
-		this.avatarPic = avatarPic;
-	}
-	public String getAvatarMimeType() {
-		return avatarMimeType;
-	}
-	public void setAvatarMimeType(String avatarMimeType) {
-		this.avatarMimeType = avatarMimeType;
-	}
-	public String getAvatarPicCiphKey() {
-		return avatarPicCiphKey;
-	}
-	public void setAvatarPicCiphKey(String avatarPicCiphKey) {
-		this.avatarPicCiphKey = avatarPicCiphKey;
-	}
-	public String getAvatarPicCiphIv() {
-		return avatarPicCiphIv;
-	}
-	public void setAvatarPicCiphIv(String avatarPicCiphIv) {
-		this.avatarPicCiphIv = avatarPicCiphIv;
-	}
-	public String getAvatarPicCiphAlg() {
-		return avatarPicCiphAlg;
-	}
-	public void setAvatarPicCiphAlg(String avatarPicCiphAlg) {
-		this.avatarPicCiphAlg = avatarPicCiphAlg;
-	}
-	public String getAvatarURI() {
-		return avatarURI;
-	}
-	public void setAvatarURI(String avatarURI) {
-		this.avatarURI = avatarURI;
-	}
-	
-	
-	
+
+	public void updateSessionWithMrzData(MrzDataSubmitMessage mrz, Session session) {
+        session.setFirstname(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.FIRST_NAME));
+        session.setLastname(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.LAST_NAME));
+        session.setPlaceOfBirth(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.NATIONALITY));
+		session.setDocumentType(mrz.getMrzData().getParsed().getFormat());
+		session.setDocumentNumber(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.DOCUMENT_NUMBER));
+        session.setMrz(mrz.getMrzData().getRaw());
+    }
 
 	
 }
