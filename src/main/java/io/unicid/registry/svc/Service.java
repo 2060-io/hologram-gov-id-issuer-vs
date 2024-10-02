@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,6 +40,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
@@ -62,6 +64,7 @@ import io.twentysixty.sa.client.model.message.MenuDisplayMessage;
 import io.twentysixty.sa.client.model.message.MenuItem;
 import io.twentysixty.sa.client.model.message.MenuSelectMessage;
 import io.twentysixty.sa.client.model.message.Parameters;
+import io.twentysixty.sa.client.model.message.ProfileMessage;
 import io.twentysixty.sa.client.model.message.TextMessage;
 import io.twentysixty.sa.client.model.message.calls.CallOfferRequestMessage;
 import io.twentysixty.sa.client.util.Aes256cbc;
@@ -71,6 +74,7 @@ import io.twentysixty.sa.res.c.MessageResource;
 import io.unicid.registry.enums.CreateStep;
 import io.unicid.registry.enums.IdentityClaim;
 import io.unicid.registry.enums.IssueStep;
+import io.unicid.registry.enums.ConfigProperties;
 import io.unicid.registry.enums.MediaType;
 import io.unicid.registry.enums.PeerType;
 import io.unicid.registry.enums.Protection;
@@ -186,12 +190,6 @@ public class Service {
 
 	@ConfigProperty(name = "io.unicid.identity.def.claim.avatarpic.maxdimension")
 	Integer avatarMaxDim;
-
-	@ConfigProperty(name = "io.unicid.language")
-	Optional<String> language;
-
-	
-	
 	
 	
 	@ConfigProperty(name = "io.unicid.vision.redirdomain")
@@ -212,11 +210,6 @@ public class Service {
 	@ConfigProperty(name = "io.unicid.messages.welcome3")
 	Optional<String> WELCOME3;
 
-	@ConfigProperty(name = "io.unicid.messages.rootmenu.title")
-	String ROOT_MENU_TITLE;
-	
-	
-	
 	
 	//private static HashMap<UUID, SessionData> sessions = new HashMap<UUID, SessionData>();
 	private static CredentialType type = null;
@@ -266,43 +259,57 @@ public class Service {
 	private static String COMPLETE_IDENTITY_CONFIRM_NO_VALUE = "CI_No";
 	
 		
-	ResourceBundle bundle = null; 
+	ResourceBundle currentBundle = null; 
+	Map<UUID, ResourceBundle> bundles = new HashMap<>();
 	
-	private String getMessage(String messageName) {
+	private String getMessage(String messageName, UUID connection) {
 		String retval = messageName;
-		if (bundle == null) {
-			if (language.isPresent()) {
+		Connection session = this.getConnection(connection);
+
+		if (!bundles.containsKey(connection)) {
+			if (session.getLanguage()!=null && !session.getLanguage().isEmpty()) {
 				try {
-					bundle = ResourceBundle.getBundle("META-INF/resources/Messages", new Locale(language.get())); 
+					currentBundle = ResourceBundle.getBundle("META-INF/resources/Messages", new Locale(session.getLanguage())); 
 				} catch (Exception e) {
-					bundle = ResourceBundle.getBundle("META-INF/resources/Messages", new Locale("en")); 
+					currentBundle = ResourceBundle.getBundle("META-INF/resources/Messages", new Locale("en")); 
 				}
 			} else {
-				bundle = ResourceBundle.getBundle("META-INF/resources/Messages", new Locale("en")); 
-			}
-			
+				currentBundle = ResourceBundle.getBundle("META-INF/resources/Messages", new Locale("en")); 
+			}			
+
+			bundles.put(connection, currentBundle);
+		} else {
+			currentBundle = bundles.get(connection);
 		}
+
 		try {
-			retval = bundle.getString(messageName);
+			retval = currentBundle.getString(messageName);
 		} catch (Exception e) {
 			
 		}
 		
-		
+		try {
+			if(ConfigProperties.valueOf(messageName)!=null) return this.getConfigValue(retval);
+		} catch (Exception e) {}
+
 		return retval;
 	}
+
+	public String getConfigValue(String key) {
+        return ConfigProvider.getConfig().getValue(key, String.class);
+    }
 	
 	public BaseMessage getRootMenu(UUID connectionId, Session session, Identity identity) {
 		
 		
 		ContextualMenuUpdate menu = new ContextualMenuUpdate();
-		menu.setTitle(ROOT_MENU_TITLE);
+		menu.setTitle(getMessage("ROOT_MENU_TITLE", connectionId));
 		List<ContextualMenuItem> options = new ArrayList<ContextualMenuItem>();
 
 		if ((session == null) || (session.getType() == null)) {
 			// main menu
 			
-			menu.setDescription(getMessage("ROOT_MENU_NO_SELECTED_ID_DESCRIPTION"));
+			menu.setDescription(getMessage("ROOT_MENU_NO_SELECTED_ID_DESCRIPTION", connectionId));
 			List<Identity> myIdentities = this.getMyIdentities(connectionId);
 			int i = 0;
 			
@@ -319,8 +326,8 @@ public class Service {
 			
 			if (i<5) {
 				// max 5 identities
-				options.add(ContextualMenuItem.build(CMD_CREATE, getMessage("CMD_CREATE_LABEL"), null));
-				options.add(ContextualMenuItem.build(CMD_RESTORE, getMessage("CMD_RESTORE_LABEL"), null));
+				options.add(ContextualMenuItem.build(CMD_CREATE, getMessage("CMD_CREATE_LABEL", connectionId), null));
+				options.add(ContextualMenuItem.build(CMD_RESTORE, getMessage("CMD_RESTORE_LABEL", connectionId), null));
 			}
 			
 		} else switch (session.getType()) {
@@ -330,14 +337,14 @@ public class Service {
 				/* create menu */
 				
 				// abort and return to main menu
-				options.add(ContextualMenuItem.build(CMD_CREATE_ABORT, getMessage("CMD_CREATE_ABORT_LABEL"), null));
+				options.add(ContextualMenuItem.build(CMD_CREATE_ABORT, getMessage("CMD_CREATE_ABORT_LABEL", connectionId), null));
 				break;
 		} 
 		
 		case RESTORE: {
 				// restore menu
 				// abort and return to main menu
-				options.add(ContextualMenuItem.build(CMD_RESTORE_ABORT, getMessage("CMD_RESTORE_ABORT_LABEL"), null));
+				options.add(ContextualMenuItem.build(CMD_RESTORE_ABORT, getMessage("CMD_RESTORE_ABORT_LABEL", connectionId), null));
 				break;
 		} 
 		case EDIT: {
@@ -348,29 +355,29 @@ public class Service {
 				menu.setDescription(idStr.toString());
 				
 				if (identity.getDeletedTs() != null) {
-					options.add(ContextualMenuItem.build(CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_UNDELETE, getMessage("CMD_UNDELETE_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL"), null));
+					options.add(ContextualMenuItem.build(CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_UNDELETE, getMessage("CMD_UNDELETE_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
 				} else if (identity.getRevokedTs() != null) {
-					options.add(ContextualMenuItem.build(CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_ISSUE, getMessage("CMD_ISSUE_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_DELETE, getMessage("CMD_DELETE_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL"), null));
+					options.add(ContextualMenuItem.build(CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
 				} else if (identity.getIssuedTs() != null) {
-					options.add(ContextualMenuItem.build(CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_REVOKE, getMessage("CMD_REVOKE_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL"), null));
+					options.add(ContextualMenuItem.build(CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_REVOKE, getMessage("CMD_REVOKE_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
 				} else if (identity.getProtectedTs() == null) {
-					options.add(ContextualMenuItem.build(CMD_CONTINUE_SETUP, getMessage("CMD_CONTINUE_SETUP_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_DELETE, getMessage("CMD_DELETE_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL"), null));
+					options.add(ContextualMenuItem.build(CMD_CONTINUE_SETUP, getMessage("CMD_CONTINUE_SETUP_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
 				} else if (identity.getIssuedTs() == null) {
-					options.add(ContextualMenuItem.build(CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_ISSUE, getMessage("CMD_ISSUE_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_DELETE, getMessage("CMD_DELETE_LABEL"), null));
-					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL"), null));
+					options.add(ContextualMenuItem.build(CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
+					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
 				} else {
-					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL"), null));
+					options.add(ContextualMenuItem.build(CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
 				}
 				break;
 			}
@@ -382,7 +389,7 @@ public class Service {
 			
 			String idStr = getIdentityLabel(identity);
 			menu.setDescription(idStr.toString());
-			options.add(ContextualMenuItem.build(CMD_ISSUE_ABORT, getMessage("CMD_ISSUE_ABORT_LABEL"), null));
+			options.add(ContextualMenuItem.build(CMD_ISSUE_ABORT, getMessage("CMD_ISSUE_ABORT_LABEL", connectionId), null));
 			
 		}
 		default: {
@@ -492,6 +499,9 @@ public class Service {
 		} else if ((message instanceof MediaMessage)) {
 			mm = (MediaMessage) message;
 			content = "media";
+		} else if ((message instanceof ProfileMessage)) {
+			ProfileMessage profile = (ProfileMessage) message;
+			this.updatePreferLanguage(profile);
 		}
 		
 		if (content != null) {
@@ -549,14 +559,14 @@ public class Service {
 							session.setType(SessionType.EDIT);
 							session.setIdentity(identity);
 							session = em.merge(session);
-							messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_SELECTED").replace("IDENTITY", this.getIdentityLabel(identity))));
+							messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_SELECTED", message.getConnectionId()).replace("IDENTITY", this.getIdentityLabel(identity))));
 							found = true;
 						}
 					}
 				}
 			}
 			if (!found) {
-				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_NOT_FOUND")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_NOT_FOUND", message.getConnectionId())));
 				em.remove(session);
 				session = null;
 			}
@@ -604,7 +614,7 @@ public class Service {
 				em.remove(session);
 				session = null;
 			}
-			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_CREATE_ABORTED")));
+			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_CREATE_ABORTED", message.getConnectionId())));
 
 			logger.info("userInput: CMD_CREATE_ABORT : session after: " + session);
 		} else if (content.equals(CMD_RESTORE_ABORT)) {
@@ -613,7 +623,7 @@ public class Service {
 				em.remove(session);
 				session = null;
 			}
-			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_RESTORE_ABORTED")));
+			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_RESTORE_ABORTED", message.getConnectionId())));
 
 		} else if (content.equals(CMD_VIEW_ID)) {
 			logger.info("userInput: CMD_VIEW_ID : session before: " + session);
@@ -622,7 +632,7 @@ public class Service {
 				String idstr = this.getIdentityDataString(identity);
 				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), idstr));
 			} else {
-				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
 			}
 			
 		} else if (content.equals(CMD_UNDELETE)) {
@@ -631,13 +641,13 @@ public class Service {
 				if (identity.getDeletedTs().plusSeconds(86400).compareTo(Instant.now())>0) {
 					identity.setDeletedTs(null);
 					identity = em.merge(identity);
-					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_UNDELETED").replace("IDENTITY", this.getIdentityLabel(identity))));
+					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_UNDELETED", message.getConnectionId()).replace("IDENTITY", this.getIdentityLabel(identity))));
 
 				} else {
-					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_IDENTITY_UNDELETE").replace("IDENTITY", this.getIdentityLabel(identity))));
+					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_IDENTITY_UNDELETE", message.getConnectionId()).replace("IDENTITY", this.getIdentityLabel(identity))));
 				}
 			} else {
-				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
 			}
 			
 			
@@ -647,7 +657,7 @@ public class Service {
 				em.remove(session);
 				session = null;
 			}
-			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_EDIT_ABORTED")));
+			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_EDIT_ABORTED", message.getConnectionId())));
 
 		} else if (content.equals(CMD_ISSUE)) {
 			logger.info("userInput: CMD_ISSUE : session before: " + session);
@@ -659,7 +669,7 @@ public class Service {
 				this.issueEntryPoint(message.getConnectionId(), message.getThreadId(), session, null);
 				
 			} else {
-				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
 			}
 			
 		} else if (content.equals(CMD_ISSUE_ABORT)) {
@@ -669,7 +679,7 @@ public class Service {
 				session = em.merge(session);
 				
 			}
-			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_ISSUANCE_ABORTED")));
+			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_ISSUANCE_ABORTED", message.getConnectionId())));
 
 		} else if (content.equals(CMD_DELETE)) {
 			logger.info("userInput: CMD_DELETE : session before: " + session);
@@ -682,11 +692,11 @@ public class Service {
 					
 					identity.setDeletedTs(Instant.now());
 					em.merge(identity);
-					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_DELETED").replace("IDENTITY", this.getIdentityLabel(identity))));
+					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_DELETED", message.getConnectionId()).replace("IDENTITY", this.getIdentityLabel(identity))));
 				}
 				
 			} else {
-				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
 			}
 			
 			
@@ -697,10 +707,10 @@ public class Service {
 				if (identity.getIssuedTs() != null) {
 					identity.setRevokedTs(Instant.now());
 					identity = em.merge(identity);
-					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_REVOKED").replace("IDENTITY", this.getIdentityLabel(identity))));
+					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("IDENTITY_REVOKED", message.getConnectionId()).replace("IDENTITY", this.getIdentityLabel(identity))));
 				}
 			} else {
-				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST")));
+				messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
 			}
 			
 		} else if ((session != null) && (session.getType()!= null) && (session.getType().equals(SessionType.CREATE))) {
@@ -716,7 +726,7 @@ public class Service {
 			
 			this.issueEntryPoint(message.getConnectionId(), message.getThreadId(), session, content);
 		} else {
-			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("HELP")));
+			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("HELP", message.getConnectionId())));
 		}
 		
 		logger.info("userInput: sending menu content: " + content + " session: " + session + " identity: " + identity  );
@@ -724,8 +734,25 @@ public class Service {
 		messageResource.sendMessage(this.getRootMenu(message.getConnectionId(), session, identity));
 	}
 	
+	private void updatePreferLanguage(ProfileMessage profile) {
+		Connection session = this.getConnection(profile.getConnectionId());
+		session.setLanguage(profile.getPreferredLanguage());
+		em.merge(session);
+
+		// Send welcome message after
+		messageResource.sendMessage(TextMessage.build(profile.getConnectionId(),profile.getThreadId() , getMessage("WELCOME", profile.getConnectionId())));
+		if (WELCOME2.isPresent()) {
+			messageResource.sendMessage(TextMessage.build(profile.getConnectionId(), profile.getThreadId(), getMessage("WELCOME2", profile.getConnectionId())));
+		}
+		if (WELCOME3.isPresent()) {
+			messageResource.sendMessage(TextMessage.build(profile.getConnectionId(), profile.getThreadId(), getMessage("WELCOME3", profile.getConnectionId())));
+		}
+		messageResource.sendMessage(this.getRootMenu(profile.getConnectionId(), null, null));
+	}
+
 	// ?token=TOKEN&d=D_DOMAIN&q=Q_DOMAIN
-	private String buildVisionUrl(String url) {
+	private String buildVisionUrl(String url, UUID connection) {
+		Connection session = this.getConnection(connection);
 		
 		if(redirDomain.isPresent()) {
 			url = url + "&rd=" +  redirDomain.get();
@@ -736,8 +763,8 @@ public class Service {
 		if(dRedirDomain.isPresent()) {
 			url = url + "&d=" +  dRedirDomain.get();
 		}
-		if (language.isPresent()) {
-			url = url + "&lang=" +  language.get();
+		if (session.getLanguage()!=null && !session.getLanguage().isEmpty()) {
+			url = url + "&lang=" +  session.getLanguage();
 		}
 		
 		return url;
@@ -746,39 +773,39 @@ public class Service {
 	
 	private BaseMessage generateFaceVerificationMediaMessage(UUID connectionId, UUID threadId, Token token) {
 		String url = faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString());
-		url = this.buildVisionUrl(url);
+		url = this.buildVisionUrl(url, connectionId);
 		
 		MediaItem mi = new MediaItem();
 		mi.setMimeType("text/html");
 		mi.setUri(url);
-		mi.setTitle(getMessage("FACE_VERIFICATION_HEADER"));
-		mi.setDescription(getMessage("FACE_VERIFICATION_DESC"));
+		mi.setTitle(getMessage("FACE_VERIFICATION_HEADER", connectionId));
+		mi.setDescription(getMessage("FACE_VERIFICATION_DESC", connectionId));
 		mi.setOpeningMode("normal");
 		List<MediaItem> mis = new ArrayList<MediaItem>();
 		mis.add(mi);
 		MediaMessage mm = new MediaMessage();
 		mm.setConnectionId(connectionId);
 		mm.setThreadId(threadId);
-		mm.setDescription(getMessage("FACE_VERIFICATION_DESC"));
+		mm.setDescription(getMessage("FACE_VERIFICATION_DESC", connectionId));
 		mm.setItems(mis);
 		return mm;
 	}
 	
 	private BaseMessage generateFaceCaptureMediaMessage(UUID connectionId, UUID threadId, Token token) {
 		String url = faceCaptureUrl.replaceFirst("TOKEN", token.getId().toString());
-		url = this.buildVisionUrl(url);
+		url = this.buildVisionUrl(url, connectionId);
 		MediaItem mi = new MediaItem();
 		mi.setMimeType("text/html");
 		mi.setUri(url);
-		mi.setTitle(getMessage("FACE_CAPTURE_HEADER"));
-		mi.setDescription(getMessage("FACE_CAPTURE_DESC"));
+		mi.setTitle(getMessage("FACE_CAPTURE_HEADER", connectionId));
+		mi.setDescription(getMessage("FACE_CAPTURE_DESC", connectionId));
 		mi.setOpeningMode("normal");
 		List<MediaItem> mis = new ArrayList<MediaItem>();
 		mis.add(mi);
 		MediaMessage mm = new MediaMessage();
 		mm.setConnectionId(connectionId);
 		mm.setThreadId(threadId);
-		mm.setDescription(getMessage("FACE_CAPTURE_DESC"));
+		mm.setDescription(getMessage("FACE_CAPTURE_DESC", connectionId));
 		mm.setItems(mis);
 		return mm;
 	}
@@ -804,7 +831,7 @@ public class Service {
 					session = em.merge(session);
 				} catch (Exception e) {
 					logger.error("", e);
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR", connectionId)));
 				}
 				
 			}
@@ -857,7 +884,7 @@ public class Service {
 						
 					} catch (Exception e) {
 						logger.error("", e);
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR", connectionId)));
 						this.restoreSendMessage(connectionId, threadId, session);
 					}
 					
@@ -925,8 +952,8 @@ public class Service {
 							identity.setConnectionId(connectionId);
 							identity.setAuthenticatedTs(Instant.now());
 							identity = em.merge(identity);
-							messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL")));
-							messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_RESTORED").replaceFirst("IDENTITY", this.getIdentityLabel(identity))));
+							messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL", connectionId)));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_RESTORED", connectionId).replaceFirst("IDENTITY", this.getIdentityLabel(identity))));
 							session = this.issueCredentialAndSetEditMenu(session, identity);
 							
 							restored = true;
@@ -942,8 +969,8 @@ public class Service {
 					}
 					
 					if (!restored) {
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_NOT_FOUND")));
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PASSWORD")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_NOT_FOUND", connectionId)));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PASSWORD", connectionId)));
 					}
 					
 					
@@ -1011,7 +1038,7 @@ public class Service {
 				}
 			}
 			if (res == null) {
-				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_NOT_FOUND")));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_NOT_FOUND", connectionId)));
 				this.purgeSession(session);
 				session.setType(SessionType.RESTORE);
 				session.setRestoreStep(getNextRestoreStep(null));
@@ -1091,43 +1118,43 @@ public class Service {
 		
 		if (session.getRestoreStep() == null) {
 			
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRSTNAME")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRSTNAME", connectionId)));
 		} 
 		
 		else switch (session.getRestoreStep()) {
 		
 		case CITIZEN_ID:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_CITIZEN_ID")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_CITIZEN_ID", connectionId)));
 			break;
 		} 
 		
 		case FIRSTNAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRSTNAME")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRSTNAME", connectionId)));
 			break;
 		} 
 		case LASTNAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_LASTNAME")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_LASTNAME", connectionId)));
 			break;
 		}
 		case AVATARNAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_AVATARNAME")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_AVATARNAME", connectionId)));
 			break;
 		}
 		case BIRTHDATE: {
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_BIRTHDATE")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_BIRTHDATE", connectionId)));
 			break;
 		}
 		case PLACE_OF_BIRTH: {
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PLACE_OF_BIRTH")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PLACE_OF_BIRTH", connectionId)));
 			break;
 		}
 		
 		case PASSWORD: {
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PASSWORD")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_PASSWORD", connectionId)));
 			break;
 		}
 		
@@ -1374,12 +1401,12 @@ public class Service {
 					
 				} catch (Exception e) {
 					logger.error("", e);
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR", connectionId)));
 				}
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 						if (session.getAvatarPic() == null) {
 							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
@@ -1403,7 +1430,7 @@ public class Service {
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 						if (session.getAvatarPic() == null) {
 							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
@@ -1426,7 +1453,7 @@ public class Service {
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 						if (session.getAvatarPic() == null) {
 							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
@@ -1450,7 +1477,7 @@ public class Service {
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 						if (session.getAvatarPic() == null) {
 							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
@@ -1477,7 +1504,7 @@ public class Service {
 					if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 						
 						if (this.identityAlreadyExists(session)) {
-							messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+							messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 							if (session.getAvatarPic() == null) {
 								messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 							} else {
@@ -1508,13 +1535,13 @@ public class Service {
 					session = em.merge(session);
 				} catch (Exception e) {
 					logger.error("", e);
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR", connectionId)));
 				}
 				
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 						if (session.getAvatarPic() == null) {
 							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
@@ -1540,7 +1567,7 @@ public class Service {
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 						if (session.getAvatarPic() == null) {
 							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
@@ -1622,7 +1649,7 @@ public class Service {
 						session.setCreateStep(CreateStep.PASSWORD);
 						session = em.merge(session);
 						
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST", connectionId)));
 						
 						break;
 					}
@@ -1632,7 +1659,7 @@ public class Service {
 						session = em.merge(session);
 						
 						Token token = this.getToken(connectionId, TokenType.FACE_CAPTURE, session.getIdentity());
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FACE_CAPTURE_REQUIRED")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FACE_CAPTURE_REQUIRED", connectionId)));
 						messageResource.sendMessage(generateFaceCaptureMediaMessage(connectionId, threadId, token));
 						/*
 						messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_CAPTURE_REQUEST.replaceFirst("URL", faceCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
@@ -1649,7 +1676,7 @@ public class Service {
 						session = em.merge(session);
 						
 						Token token = this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FINGERPRINT_CAPTURE_REQUIRED")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FINGERPRINT_CAPTURE_REQUIRED", connectionId)));
 					/*	messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FINGERPRINT_CAPTURE_REQUEST").replaceFirst("URL", fingerprintsCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
 								.replaceFirst("REDIRDOMAIN", redirDomain)
 								.replaceFirst("Q_DOMAIN", qRedirDomain)
@@ -1662,7 +1689,7 @@ public class Service {
 						session = em.merge(session);
 						
 						this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WEBRTC_REQUIRED")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WEBRTC_REQUIRED", connectionId)));
 						this.sendWebRTCCapture(session, threadId);
 						break;
 					}
@@ -1721,13 +1748,13 @@ public class Service {
 						session.setCitizenId(citizenId.toString());
 					} catch (Exception e) {
 						logger.error("", e);
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("ID_ERROR", connectionId)));
 					}
 					
 				}
 				
 				if (this.identityAlreadyExists(session)) {
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 					if (session.getAvatarPic() == null) {
 						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 					} else {
@@ -1753,7 +1780,7 @@ public class Service {
 				session.setFirstname(content);
 				
 				if (this.identityAlreadyExists(session)) {
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 					if (session.getAvatarPic() == null) {
 						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 					} else {
@@ -1780,7 +1807,7 @@ public class Service {
 				
 				
 				if (this.identityAlreadyExists(session)) {
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 					if (session.getAvatarPic() == null) {
 						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 					} else {
@@ -1807,7 +1834,7 @@ public class Service {
 				
 				
 				if (this.identityAlreadyExists(session)) {
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 					if (session.getAvatarPic() == null) {
 						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 					} else {
@@ -1839,7 +1866,7 @@ public class Service {
 					
 						
 					if (this.identityAlreadyExists(session)) {
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 						if (session.getAvatarPic() == null) {
 							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
@@ -1876,7 +1903,7 @@ public class Service {
 					
 					
 					if (this.identityAlreadyExists(session)) {
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 						if (session.getAvatarPic() == null) {
 							messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 						} else {
@@ -1895,7 +1922,7 @@ public class Service {
 					
 				} catch (Exception e) {
 					logger.error("", e);
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR", connectionId)));
 				}
 				
 			}
@@ -1911,7 +1938,7 @@ public class Service {
 				session.setPlaceOfBirth(content);
 				
 				if (this.identityAlreadyExists(session)) {
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
 					if (session.getAvatarPic() == null) {
 						messageResource.sendMessage(TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 					} else {
@@ -1946,7 +1973,7 @@ public class Service {
 				
 				
 				
-				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_CONFIRM")));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_CONFIRM", connectionId)));
 
 				this.purgeSession(session);
 				session.setType(SessionType.ISSUE);
@@ -1955,7 +1982,7 @@ public class Service {
 				this.issueEntryPoint(connectionId, threadId, session, content);
 				
 			} else {
-				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST")));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST", connectionId)));
 			}
 			break;
 		} case FACE_CAPTURE: {
@@ -2109,7 +2136,7 @@ public class Service {
 		List<MenuItem> menuItems = new ArrayList<MenuItem>();
 		
 		MenuDisplayMessage confirm = new MenuDisplayMessage();
-		confirm.setPrompt(getMessage("CHANGE_CLAIM_TITLE"));
+		confirm.setPrompt(getMessage("CHANGE_CLAIM_TITLE", connectionId));
 		
 		if (enableCitizenIdClaim) {
 			MenuItem citizenId = new MenuItem();
@@ -2170,7 +2197,7 @@ public class Service {
 		List<MenuItem> menuItems = new ArrayList<MenuItem>();
 		
 		MenuDisplayMessage confirm = new MenuDisplayMessage();
-		confirm.setPrompt(getMessage("CONFLICTIVE_CLAIM_TITLE"));
+		confirm.setPrompt(getMessage("CONFLICTIVE_CLAIM_TITLE", connectionId));
 		
 		if (restoreCitizenidClaim) {
 			MenuItem citizenId = new MenuItem();
@@ -2223,15 +2250,15 @@ public class Service {
 	private BaseMessage getConfirmData(UUID connectionId, UUID threadId) {
 
 		MenuDisplayMessage confirm = new MenuDisplayMessage();
-		confirm.setPrompt(getMessage("COMPLETE_IDENTITY_CONFIRM_TITLE"));
+		confirm.setPrompt(getMessage("COMPLETE_IDENTITY_CONFIRM_TITLE", connectionId));
 
 		MenuItem yes = new MenuItem();
 		yes.setId(COMPLETE_IDENTITY_CONFIRM_YES_VALUE);
-		yes.setText(getMessage("COMPLETE_IDENTITY_CONFIRM_YES"));
+		yes.setText(getMessage("COMPLETE_IDENTITY_CONFIRM_YES", connectionId));
 		
 		MenuItem no = new MenuItem();
 		no.setId(COMPLETE_IDENTITY_CONFIRM_NO_VALUE);
-		no.setText(getMessage("COMPLETE_IDENTITY_CONFIRM_NO"));
+		no.setText(getMessage("COMPLETE_IDENTITY_CONFIRM_NO", connectionId));
 		
 		List<MenuItem> menuItems = new ArrayList<MenuItem>();
 		menuItems.add(yes);
@@ -2249,12 +2276,12 @@ public class Service {
 	private void createSendMessage(UUID connectionId, UUID threadId, Session session) throws Exception {
 		CreateStep step = session.getCreateStep();
 		if (session.getCreateStep() == null) {
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, WELCOME));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WELCOME", connectionId)));
 			if (WELCOME2.isPresent()) {
-				messageResource.sendMessage(TextMessage.build(connectionId, threadId, WELCOME2.get()));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WELCOME2", connectionId)));
 			}
 			if (WELCOME3.isPresent()) {
-				messageResource.sendMessage(TextMessage.build(connectionId, threadId, WELCOME3.get()));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WELCOME3", connectionId)));
 			}
 			// should not occur never
 			if (step == null) {
@@ -2268,43 +2295,43 @@ public class Service {
 		case CITIZEN_ID:
 		case CHANGE_CITIZEN_ID: 
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("CITIZEN_ID_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("CITIZEN_ID_REQUEST", connectionId)));
 			break;
 		} 
 		
 		case FIRSTNAME:
 		case CHANGE_FIRSTNAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FIRSTNAME_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FIRSTNAME_REQUEST", connectionId)));
 			break;
 		} 
 		case LASTNAME:
 		case CHANGE_LASTNAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("LASTNAME_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("LASTNAME_REQUEST", connectionId)));
 			break;
 		}
 		case AVATARNAME:
 		case CHANGE_AVATARNAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATARNAME_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATARNAME_REQUEST", connectionId)));
 			break;
 		}
 		case AVATARPIC:
 		case CHANGE_AVATARPIC:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATARPIC_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATARPIC_REQUEST", connectionId)));
 			break;
 		}
 		case BIRTHDATE: 
 		case CHANGE_BIRTHDATE: {
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_REQUEST", connectionId)));
 			break;
 		}
 		case PLACE_OF_BIRTH:
 		case CHANGE_PLACE_OF_BIRTH:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PLACE_OF_BIRTH_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PLACE_OF_BIRTH_REQUEST", connectionId)));
 			break;
 		}
 		
@@ -2317,12 +2344,12 @@ public class Service {
 				messageResource.sendMessage(mms);
 				
 			}
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("CONFIRM_DATA_IMMUTABLE")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("CONFIRM_DATA_IMMUTABLE", connectionId)));
 			messageResource.sendMessage(this.getConfirmData(connectionId, threadId));	
 			break;
 		}
 		case PASSWORD: {
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_REQUEST", connectionId)));
 			break;
 		}
 		
@@ -2377,7 +2404,7 @@ public class Service {
 				
 				) {
 			
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_LOCKED")));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_LOCKED", connectionId)));
 			
 			switch (identity.getProtection()) {
 			
@@ -2385,7 +2412,7 @@ public class Service {
 				
 				session.setIssueStep(IssueStep.PASSWORD_AUTH);
 				session = em.merge(session);
-				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST")));
+				messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST", connectionId)));
 				
 				break;
 			}
@@ -2434,19 +2461,19 @@ public class Service {
 						
 						identity.setAuthenticatedTs(Instant.now());
 						identity = em.merge(identity);
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AUTHENTICATION_SUCCESSFULL")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AUTHENTICATION_SUCCESSFULL", connectionId)));
 						
 						session = this.issueCredentialAndSetEditMenu(session, identity);
 						session = em.merge(session);
 						
 					} else {
 						
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("INVALID_PASSWORD")));						
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST")));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("INVALID_PASSWORD", connectionId)));						
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST", connectionId)));
 
 					}
 				} else {
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST")));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("PASSWORD_VERIFICATION_REQUEST", connectionId)));
 				}
 				break;
 			}
@@ -2482,7 +2509,7 @@ public class Service {
 	
 	private String getIdentityDataString(Identity identity) {
 		StringBuffer data = new StringBuffer(1024);
-		data.append(getMessage("IDENTITY_DATA_STR_HEADER")).append("\n");
+		data.append(getMessage("IDENTITY_DATA_STR_HEADER", identity.getConnectionId())).append("\n");
 		
 		
 		
@@ -2565,7 +2592,7 @@ public class Service {
 	
 	private String getSessionDataString(Session session) {
 		StringBuffer data = new StringBuffer(1024);
-		data.append(getMessage("IDENTITY_DATA_STR_HEADER")).append("\n");
+		data.append(getMessage("IDENTITY_DATA_STR_HEADER", session.getConnectionId())).append("\n");
 		
 		if (enableCitizenIdClaim) {
 			data.append(IdentityClaim.CITIZEN_ID.getClaimLabel()).append(": ");
@@ -2842,16 +2869,7 @@ public class Service {
 	
 	@Transactional
 	public void newConnection(ConnectionStateUpdated csu) throws Exception {
-		UUID threadId = UUID.randomUUID();
 		this.getConnection(csu.getConnectionId());
-		messageResource.sendMessage(TextMessage.build(csu.getConnectionId(),threadId , WELCOME));
-		if (WELCOME2.isPresent()) {
-			messageResource.sendMessage(TextMessage.build(csu.getConnectionId(), threadId, WELCOME2.get()));
-		}
-		if (WELCOME3.isPresent()) {
-			messageResource.sendMessage(TextMessage.build(csu.getConnectionId(), threadId, WELCOME3.get()));
-		}
-		messageResource.sendMessage(this.getRootMenu(csu.getConnectionId(), null, null));
 		
 		//entryPointCreate(connectionId, null, null);
 	}
@@ -2863,8 +2881,6 @@ public class Service {
 			session.setDeletedTs(Instant.now());
 			loggerInfoSerializeObject("deleteConnection: ", session);
 		}
-		
-			
 	}
 
 	private Connection getConnection(UUID connectionId) {
@@ -2941,7 +2957,7 @@ public class Service {
 					
 					identity = em.merge(identity);
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_CAPTURE_SUCCESSFULL")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_CAPTURE_SUCCESSFULL", session.getConnectionId())));
 					
 					this.purgeSession(session);
 					session.setType(SessionType.ISSUE);
@@ -2972,7 +2988,7 @@ public class Service {
 					
 					identity = em.merge(identity);
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_CAPTURE_SUCCESSFULL")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_CAPTURE_SUCCESSFULL", session.getConnectionId())));
 					
 					this.purgeSession(session);
 					session.setType(SessionType.ISSUE);
@@ -3002,7 +3018,7 @@ public class Service {
 					
 					identity = em.merge(identity);
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("WEBRTC_CAPTURE_SUCCESSFULL")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("WEBRTC_CAPTURE_SUCCESSFULL", session.getConnectionId())));
 					
 					this.purgeSession(session);
 					session.setType(SessionType.ISSUE);
@@ -3033,7 +3049,7 @@ public class Service {
 					
 					identity = em.merge(identity);
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL", session.getConnectionId())));
 					
 					session = this.issueCredentialAndSetEditMenu(session, identity);
 					
@@ -3062,7 +3078,7 @@ public class Service {
 					identity.setConnectionId(session.getConnectionId());
 					identity = em.merge(identity);
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL", session.getConnectionId())));
 					
 					session = this.issueCredentialAndSetEditMenu(session, identity);
 					
@@ -3091,7 +3107,7 @@ public class Service {
 					
 					identity = em.merge(identity);
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL", session.getConnectionId())));
 					
 					session = this.issueCredentialAndSetEditMenu(session, identity);
 					
@@ -3135,7 +3151,7 @@ public class Service {
 					
 					
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_CAPTURE_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_CAPTURE_ERROR", session.getConnectionId())));
 					
 					this.createEntryPoint(session.getConnectionId(), null, session, null, null);
 				
@@ -3160,7 +3176,7 @@ public class Service {
 					
 
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_CAPTURE_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_CAPTURE_ERROR", session.getConnectionId())));
 					
 					this.createEntryPoint(session.getConnectionId(), null, session, null, null);
 				
@@ -3184,7 +3200,7 @@ public class Service {
 					
 
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("WEBRTC_CAPTURE_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("WEBRTC_CAPTURE_ERROR", session.getConnectionId())));
 					
 					this.createEntryPoint(session.getConnectionId(), null, session, null, null);
 				
@@ -3206,7 +3222,7 @@ public class Service {
 						) {
 					
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_AUTHENTICATION_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FACE_AUTHENTICATION_ERROR", session.getConnectionId())));
 					
 					if (session.getType().equals(SessionType.ISSUE)) {
 						this.issueEntryPoint(session.getConnectionId(), null, session, null);
@@ -3232,7 +3248,7 @@ public class Service {
 						&& (identity.getProtectedTs() != null)
 						) {
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_AUTHENTICATION_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("FINGERPRINT_AUTHENTICATION_ERROR", session.getConnectionId())));
 					
 					if (session.getType().equals(SessionType.ISSUE)) {
 						this.issueEntryPoint(session.getConnectionId(), null, session, null);
@@ -3259,7 +3275,7 @@ public class Service {
 						&& (identity.getProtectedTs() != null)
 						) {
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("WEBRTC_AUTHENTICATION_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("WEBRTC_AUTHENTICATION_ERROR", session.getConnectionId())));
 					
 					if (session.getType().equals(SessionType.ISSUE)) {
 						this.issueEntryPoint(session.getConnectionId(), null, session, null);
@@ -3297,7 +3313,7 @@ public class Service {
 		
 		if (items.size() == 0) {
 			logger.info("incomingAvatarPicture: no items");
-			messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_NO_ATTACHMENT_ERROR")));
+			messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_NO_ATTACHMENT_ERROR", session.getConnectionId())));
 			session.setAvatarPic(null);
 			session.setAvatarPicCiphAlg(null);
 			session.setAvatarPicCiphIv(null);
@@ -3419,7 +3435,7 @@ public class Service {
 							} catch (Exception e) {
 								logger.error("incomingAvatarPicture", e);
 								logger.info("incomingAvatarPicture: could not save avatar");
-								messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_SAVE_ERROR")));
+								messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_SAVE_ERROR", session.getConnectionId())));
 								session.setAvatarPic(null);
 								session.setAvatarPicCiphAlg(null);
 								session.setAvatarPicCiphIv(null);
@@ -3431,7 +3447,7 @@ public class Service {
 						} else {
 							
 							logger.info("incomingAvatarPicture: no uri");
-							messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_URI_ERROR")));
+							messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_URI_ERROR", session.getConnectionId())));
 							session.setAvatarPic(null);
 							session.setAvatarPicCiphAlg(null);
 							session.setAvatarPicCiphIv(null);
@@ -3445,7 +3461,7 @@ public class Service {
 						
 					} else {
 						logger.info("incomingAvatarPicture: invalid type: " + mediaType);
-						messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_TYPE_ERROR")));
+						messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_TYPE_ERROR", session.getConnectionId())));
 						session.setAvatarPic(null);
 						session.setAvatarPicCiphAlg(null);
 						session.setAvatarPicCiphIv(null);
@@ -3456,7 +3472,7 @@ public class Service {
 					} 
 				} else {
 					logger.info("incomingAvatarPicture: invalid type: " + mediaType);
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_TYPE_ERROR")));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_TYPE_ERROR", session.getConnectionId())));
 					session.setAvatarPic(null);
 					session.setAvatarPicCiphAlg(null);
 					session.setAvatarPicCiphIv(null);
@@ -3469,7 +3485,7 @@ public class Service {
 			} else {
 				// too big too big ;-)
 				logger.info("incomingAvatarPicture: no items");
-				messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_SIZE_ERROR")));
+				messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MEDIA_SIZE_ERROR", session.getConnectionId())));
 				session.setAvatarPic(null);
 				session.setAvatarPicCiphAlg(null);
 				session.setAvatarPicCiphIv(null);

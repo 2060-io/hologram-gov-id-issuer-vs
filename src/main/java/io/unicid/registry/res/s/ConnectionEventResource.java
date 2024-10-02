@@ -13,7 +13,6 @@ import org.jboss.logging.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.twentysixty.sa.client.model.event.ConnectionStateUpdated;
-import io.twentysixty.sa.client.model.event.DidExchangeState;
 import io.twentysixty.sa.client.res.s.ConnectionEventInterface;
 import io.twentysixty.sa.client.util.JsonUtil;
 import io.unicid.registry.svc.Service;
@@ -41,15 +40,26 @@ public class ConnectionEventResource implements ConnectionEventInterface {
 				logger.error("", e);
 			}
 		}
-		if (event.getState().equals(DidExchangeState.COMPLETED)) {
-			try {
-				service.newConnection(event);
-			} catch (Exception e) {
-				
-				logger.error("", e);
-				return  Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		switch (event.getState()) {
+			case COMPLETED: {
+				try {
+					service.newConnection(event);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				break;
 			}
-		}
+			case TERMINATED: {
+				try {
+					service.deleteConnection(event);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				break;
+			}
+			default:
+				break;
+			}
 		
 		return  Response.status(Status.OK).build();
 		

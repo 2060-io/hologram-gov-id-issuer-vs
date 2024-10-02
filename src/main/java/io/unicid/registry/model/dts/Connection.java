@@ -42,6 +42,9 @@ public class Connection implements Serializable {
 
 	private UUID avatarPic;
 
+	@Column(columnDefinition="text")
+	private String language;
+
 	@Column(columnDefinition="timestamptz")
 	private Instant createdTs;
 
