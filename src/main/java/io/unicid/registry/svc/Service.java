@@ -753,9 +753,9 @@ public class Service {
 			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), message.getThreadId(), getMessage("HELP", message.getConnectionId())));
 		}
 		
-		logger.info("userInput: sending menu content: " + content + " session: " + session + " identity: " + identity  );
+		logger.info("userInput: sending menu content: " + content + " session: " + session + " identity: " + session.getIdentity()  );
 		
-		messageResource.sendMessage(this.getRootMenu(message.getConnectionId(), session, identity));
+		messageResource.sendMessage(this.getRootMenu(message.getConnectionId(), session, session.getIdentity()));
 	}
 	
 	private void updatePreferLanguage(ProfileMessage profile) {
