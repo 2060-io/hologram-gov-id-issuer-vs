@@ -16,7 +16,7 @@ public interface MessageResource extends MessageInterface {
 
     default String delay() {
         try {
-            TimeUnit.MILLISECONDS.sleep(200);
+            TimeUnit.MILLISECONDS.sleep(500);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

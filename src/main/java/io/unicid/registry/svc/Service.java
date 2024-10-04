@@ -527,6 +527,19 @@ public class Service {
 			MrzDataSubmitMessage mrz = (MrzDataSubmitMessage) message;
 			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), null, getMessage("MRZ_SUCCESSFULL", message.getConnectionId())));
 			content = JsonUtil.serialize(mrz, false);
+		} else if ((message instanceof CredentialReceptionMessage)) {
+			CredentialReceptionMessage crp = (CredentialReceptionMessage) message;
+			switch (crp.getState()) {
+				case DONE:
+					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), null, getMessage("CREDENTIAL_ACCEPTED", message.getConnectionId())));
+					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), null, getMessage("NEW_CREDENTIAL", message.getConnectionId())));					
+					break;
+				case DECLINED:
+					messageResource.sendMessage(TextMessage.build(message.getConnectionId(), null, getMessage("CREDENTIAL_REJECTED", message.getConnectionId())));	
+					break;
+				default:
+					break;
+			}
 		}
 		
 		if (content != null) {
@@ -3282,7 +3295,7 @@ public class Service {
 					
 					identity = em.merge(identity);
 					
-					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("AUTHENTICATION_SUCCESSFULL", session.getConnectionId())));
+					messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("CREDENTIAL_SUCCESSFULL", session.getConnectionId())));
 					
 					session = this.issueCredentialAndSetEditMenu(session, identity);
 					
