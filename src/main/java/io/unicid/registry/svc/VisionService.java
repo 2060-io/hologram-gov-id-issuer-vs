@@ -220,7 +220,7 @@ public class VisionService {
 		PeerRegistry cr = updatePeerRegistry(notificationRequest);
 		
 		if (cr.getType().equals(PeerType.PEER_USER)){
-			Token t = registerService.getTokenByConnection(cr.getIdentity().getConnectionId(), TokenType.WEBRTC_CAPTURE);
+			Token t = registerService.getTokenByConnection(cr.getIdentity().getConnectionId(), TokenType.WEBRTC_VERIFICATION);
 
 			// Create registry vision
 			PeerRegistry crv = new PeerRegistry();

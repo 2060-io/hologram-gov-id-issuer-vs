@@ -525,6 +525,7 @@ public class Service {
 			this.updatePreferLanguage(profile);
 		} else if ((message instanceof MrzDataSubmitMessage)) {
 			MrzDataSubmitMessage mrz = (MrzDataSubmitMessage) message;
+			messageResource.sendMessage(TextMessage.build(message.getConnectionId(), null, getMessage("MRZ_SUCCESSFULL", message.getConnectionId())));
 			content = JsonUtil.serialize(mrz, false);
 		}
 		
@@ -964,8 +965,8 @@ public class Service {
 				break;
 			}
 			case WEBRTC_VERIFICATION: {
-				Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
-				this.notifySuccess(token);
+				this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+				this.sendWebRTCCapture(session, threadId);
 				
 				
 				break;
@@ -1137,8 +1138,8 @@ public class Service {
 					session.setRestoreStep(RestoreStep.WEBRTC_VERIFICATION);
 					session = em.merge(session);
 					
-					Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res);
-					this.notifySuccess(token);
+					this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res);
+					this.sendWebRTCCapture(session, threadId);
 					
 					
 					break;
@@ -1191,8 +1192,8 @@ public class Service {
 			break;
 		}
 		case MRZ: {
-			messageResource.sendMessage(MrzDataRequestMessage.build(connectionId, threadId));
 			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_MRZ", connectionId)));
+			messageResource.sendMessage(MrzDataRequestMessage.build(connectionId, threadId));
 			break;
 		}
 		
@@ -1769,9 +1770,9 @@ public class Service {
 						session.setCreateStep(CreateStep.WEBRTC_CAPTURE);
 						session = em.merge(session);
 						
-						this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
+						Token token = this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
 						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WEBRTC_REQUIRED", connectionId)));
-						this.sendWebRTCCapture(session, threadId);
+						this.notifySuccess(token);
 						break;
 					}
 					}
@@ -2105,8 +2106,8 @@ public class Service {
 			
 			break;
 		} case WEBRTC_CAPTURE: {
-			Token token = this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
-			this.sendWebRTCCapture(session, threadId);
+			Token token = this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
+			this.notifySuccess(token);
 			
 			break;
 		}
@@ -2234,6 +2235,7 @@ public class Service {
 			em.persist(cr);
 		}
 		
+		messageResource.sendMessage(TextMessage.build(session.getConnectionId(), null, getMessage("MRZ_FACE_VERIFICATION", session.getConnectionId())));
 		messageResource.sendMessage(this.generateOfferMessage(session.getConnectionId(), threadId, wsUrlMap));		
 	}
 
@@ -2456,8 +2458,8 @@ public class Service {
 		case MRZ:
 		case CHANGE_MRZ:
 		{
-			messageResource.sendMessage(MrzDataRequestMessage.build(connectionId, threadId));
 			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("MRZ_REQUEST", connectionId)));
+			messageResource.sendMessage(MrzDataRequestMessage.build(connectionId, threadId));
 			break;
 		}
 		
@@ -2570,8 +2572,8 @@ public class Service {
 				session.setIssueStep(IssueStep.WEBRTC_AUTH);
 				session = em.merge(session);
 				
-				Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
-				this.notifySuccess(token);
+				this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+				this.sendWebRTCCapture(session, threadId);
 				
 
 				break;
@@ -2621,8 +2623,8 @@ public class Service {
 			}
 
 			case WEBRTC_AUTH: {
-				Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
-				this.notifySuccess(token);
+				this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+				this.sendWebRTCCapture(session, threadId);
 				
 				break;
 			}
