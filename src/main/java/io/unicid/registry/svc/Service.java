@@ -59,6 +59,7 @@ import io.twentysixty.sa.client.model.message.ContextualMenuItem;
 import io.twentysixty.sa.client.model.message.ContextualMenuSelect;
 import io.twentysixty.sa.client.model.message.ContextualMenuUpdate;
 import io.twentysixty.sa.client.model.message.CredentialIssuanceMessage;
+import io.twentysixty.sa.client.model.message.CredentialReceptionMessage;
 import io.twentysixty.sa.client.model.message.MediaItem;
 import io.twentysixty.sa.client.model.message.MediaMessage;
 import io.twentysixty.sa.client.model.message.MenuDisplayMessage;
