@@ -14,12 +14,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.UUID;
 
 import jakarta.annotation.PostConstruct;
@@ -78,7 +75,6 @@ import io.twentysixty.sa.res.c.MessageResource;
 import io.unicid.registry.enums.CreateStep;
 import io.unicid.registry.enums.IdentityClaim;
 import io.unicid.registry.enums.IssueStep;
-import io.unicid.registry.enums.ConfigProperties;
 import io.unicid.registry.enums.MediaType;
 import io.unicid.registry.enums.PeerType;
 import io.unicid.registry.enums.Protection;
@@ -98,6 +94,7 @@ import io.unicid.registry.model.res.webRtc.WebRtcCallData;
 import io.unicid.registry.res.c.MediaResource;
 import io.unicid.registry.res.c.Resource;
 import io.unicid.registry.res.c.WebRtcResource;
+import io.unicid.registry.utils.I18n;
 
 
 
@@ -107,6 +104,8 @@ public class Service {
 	private static Logger logger = Logger.getLogger(Service.class);
 
 	@Inject EntityManager em;
+
+	@Inject I18n i18n;
 	
 	@RestClient
 	@Inject MediaResource mediaResource;
@@ -280,41 +279,15 @@ public class Service {
 			restoreBirthplaceClaim = false;
         }
     }
-		
-	ResourceBundle currentBundle = null; 
-	Map<UUID, ResourceBundle> bundles = new HashMap<>();
 	
 	private String getMessage(String messageName, UUID connection) {
-		String retval = messageName;
 		Connection session = this.getConnection(connection);
-
-		if (!bundles.containsKey(connection)) {
-			if (session.getLanguage()!=null && !session.getLanguage().isEmpty()) {
-				try {
-					currentBundle = ResourceBundle.getBundle("META-INF/resources/Messages", new Locale(session.getLanguage())); 
-				} catch (Exception e) {
-					currentBundle = ResourceBundle.getBundle("META-INF/resources/Messages", new Locale("en")); 
-				}
-			} else {
-				currentBundle = ResourceBundle.getBundle("META-INF/resources/Messages", new Locale("en")); 
-			}			
-
-			bundles.put(connection, currentBundle);
-		} else {
-			currentBundle = bundles.get(connection);
-		}
-
 		try {
-			retval = currentBundle.getString(messageName);
+			return i18n.getMessage(messageName, connection, session.getLanguage());
 		} catch (Exception e) {
-			
+			logger.error("getMessage: error: " + messageName);
+			return messageName;
 		}
-		
-		try {
-			if(ConfigProperties.valueOf(messageName)!=null) return this.getConfigValue(retval);
-		} catch (Exception e) {}
-
-		return retval;
 	}
 
 	public String getConfigValue(String key) {
