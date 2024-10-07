@@ -5,11 +5,11 @@ public enum IdentityClaim {
 
 	ID("id", "id"),
 	CITIZEN_ID("citizenId", "Citizen ID"),
-	FIRSTNAME("firstname", "Firstname"),
-	LASTNAME("lastname", "Lastname"),
-	AVATARNAME("avatarname", "Avatarname"),
-	AVATARPIC("avatarpic", "Avatarpic"),
-	BIRTHDATE("birthdate", "Birthdate"),
+	FIRST_NAME("firstName", "First name"),
+	LAST_NAME("lastName", "Last name"),
+	AVATAR_NAME("avatarName", "Avatar name"),
+	AVATAR_PIC("avatarPic", "Avatar pic"),
+	BIRTH_DATE("birthDate", "Birth date"),
 	PLACE_OF_BIRTH("placeOfBirth", "Place of Birth"),
 	MRZ("mrz", "mrz"),
 	GENRE("genre", "Genre"),
@@ -31,11 +31,11 @@ public enum IdentityClaim {
 
 		switch(claimName){
 		case "id": return ID;
-		case "firstname": return FIRSTNAME;
-		case "lastname": return LASTNAME;
-		case "avatarname": return AVATARNAME;
-		case "avatarpic": return AVATARPIC;
-		case "birthdate": return BIRTHDATE;
+		case "firstName": return FIRST_NAME;
+		case "lastName": return LAST_NAME;
+		case "avatarName": return AVATAR_NAME;
+		case "avatarPic": return AVATAR_PIC;
+		case "birthDate": return BIRTH_DATE;
 		case "placeOfBirth": return PLACE_OF_BIRTH;
 		case "mrz": return MRZ;
 		case "sex": return GENRE;

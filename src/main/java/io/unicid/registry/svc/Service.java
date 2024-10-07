@@ -157,16 +157,16 @@ public class Service {
 	
 	@ConfigProperty(name = "io.unicid.identity.def.claim.citizenid")
 	Boolean enableCitizenIdClaim;
-	@ConfigProperty(name = "io.unicid.identity.def.claim.firstname")
-	Boolean enableFirstnameClaim;
-	@ConfigProperty(name = "io.unicid.identity.def.claim.lastname")
-	Boolean enableLastnameClaim;
-	@ConfigProperty(name = "io.unicid.identity.def.claim.avatarname")
-	Boolean enableAvatarnameClaim;
-	@ConfigProperty(name = "io.unicid.identity.def.claim.avatarpic")
-	Boolean enableAvatarpicClaim;
-	@ConfigProperty(name = "io.unicid.identity.def.claim.birthdate")
-	Boolean enableBirthdateClaim;
+	@ConfigProperty(name = "io.unicid.identity.def.claim.firstName")
+	Boolean enableFirstNameClaim;
+	@ConfigProperty(name = "io.unicid.identity.def.claim.lastName")
+	Boolean enableLastNameClaim;
+	@ConfigProperty(name = "io.unicid.identity.def.claim.avatarName")
+	Boolean enableAvatarNameClaim;
+	@ConfigProperty(name = "io.unicid.identity.def.claim.avatarPic")
+	Boolean enableAvatarPicClaim;
+	@ConfigProperty(name = "io.unicid.identity.def.claim.birthDate")
+	Boolean enableBirthDateClaim;
 	@ConfigProperty(name = "io.unicid.identity.def.claim.birthplace")
 	Boolean enableBirthplaceClaim;
 	@ConfigProperty(name = "io.unicid.identity.def.claim.mrz")
@@ -176,20 +176,20 @@ public class Service {
 	
 	@ConfigProperty(name = "io.unicid.identity.restore.claim.citizenid")
 	Boolean restoreCitizenidClaim;
-	@ConfigProperty(name = "io.unicid.identity.restore.claim.firstname")
-	Boolean restoreFirstnameClaim;
-	@ConfigProperty(name = "io.unicid.identity.restore.claim.lastname")
-	Boolean restoreLastnameClaim;
-	@ConfigProperty(name = "io.unicid.identity.restore.claim.avatarname")
-	Boolean restoreAvatarnameClaim;
-	@ConfigProperty(name = "io.unicid.identity.restore.claim.birthdate")
-	Boolean restoreBirthdateClaim;
+	@ConfigProperty(name = "io.unicid.identity.restore.claim.firstName")
+	Boolean restoreFirstNameClaim;
+	@ConfigProperty(name = "io.unicid.identity.restore.claim.lastName")
+	Boolean restoreLastNameClaim;
+	@ConfigProperty(name = "io.unicid.identity.restore.claim.avatarName")
+	Boolean restoreAvatarNameClaim;
+	@ConfigProperty(name = "io.unicid.identity.restore.claim.birthDate")
+	Boolean restoreBirthDateClaim;
 	@ConfigProperty(name = "io.unicid.identity.restore.claim.birthplace")
 	Boolean restoreBirthplaceClaim;
 	@ConfigProperty(name = "io.unicid.identity.restore.claim.mrz")
 	Boolean restoreMrzClaim;
 
-	@ConfigProperty(name = "io.unicid.identity.def.claim.avatarpic.maxdimension")
+	@ConfigProperty(name = "io.unicid.identity.def.claim.avatarPic.maxdimension")
 	Integer avatarMaxDim;
 	
 	
@@ -263,20 +263,20 @@ public class Service {
     void init() {
         if (Boolean.TRUE.equals(enableMrzClaim)) {
 			enableCitizenIdClaim = false;
-			enableFirstnameClaim = false;
-			enableLastnameClaim = false;
-			enableAvatarnameClaim = false;
-			enableAvatarpicClaim = false;
-			enableBirthdateClaim = false;
+			enableFirstNameClaim = false;
+			enableLastNameClaim = false;
+			enableAvatarNameClaim = false;
+			enableAvatarPicClaim = false;
+			enableBirthDateClaim = false;
 			enableBirthplaceClaim = false;
 			enablePhotoClaim = false;
         }
         if (Boolean.TRUE.equals(restoreMrzClaim)) {
 			restoreCitizenidClaim = false;
-			restoreFirstnameClaim = false;
-			restoreLastnameClaim = false;
-			restoreAvatarnameClaim = false;
-			restoreBirthdateClaim = false;
+			restoreFirstNameClaim = false;
+			restoreLastNameClaim = false;
+			restoreAvatarNameClaim = false;
+			restoreBirthDateClaim = false;
 			restoreBirthplaceClaim = false;
         }
     }
@@ -460,16 +460,16 @@ public class Service {
 		}
 		
 		boolean name = false;
-		if (identity.getFirstname() != null) {
-			idLabel.append(" ").append(identity.getFirstname());
+		if (identity.getFirstName() != null) {
+			idLabel.append(" ").append(identity.getFirstName());
 			name = true;
 		}
-		if (identity.getLastname() != null) {
-			idLabel.append(" ").append(identity.getLastname());
+		if (identity.getLastName() != null) {
+			idLabel.append(" ").append(identity.getLastName());
 			name = true;
 		}
-		if (identity.getAvatarname() != null) {
-			idLabel.append(" ").append(identity.getAvatarname());
+		if (identity.getAvatarName() != null) {
+			idLabel.append(" ").append(identity.getAvatarName());
 			name = true;
 		}
 		if (!name) {
@@ -878,36 +878,36 @@ public class Service {
 			break;
 		}
 		
-			case FIRSTNAME: {
+			case FIRST_NAME: {
 				if (content != null) {
 					session.setRestoreStep(getNextRestoreStep(session.getRestoreStep()));
-					session.setFirstname(content);
+					session.setFirstName(content);
 					session = em.merge(session);
 				}
 				this.restoreSendMessage(connectionId, threadId, session);
 				break;
 			} 
-			case LASTNAME: {
+			case LAST_NAME: {
 				if (content != null) {
 					session.setRestoreStep(getNextRestoreStep(session.getRestoreStep()));
-					session.setLastname(content);
-					session = em.merge(session);
-				}
-				this.restoreSendMessage(connectionId, threadId, session);
-				break;
-			} 
-			
-			case AVATARNAME: {
-				if (content != null) {
-					session.setRestoreStep(getNextRestoreStep(session.getRestoreStep()));
-					session.setAvatarname(content);
+					session.setLastName(content);
 					session = em.merge(session);
 				}
 				this.restoreSendMessage(connectionId, threadId, session);
 				break;
 			} 
 			
-			case BIRTHDATE: {
+			case AVATAR_NAME: {
+				if (content != null) {
+					session.setRestoreStep(getNextRestoreStep(session.getRestoreStep()));
+					session.setAvatarName(content);
+					session = em.merge(session);
+				}
+				this.restoreSendMessage(connectionId, threadId, session);
+				break;
+			} 
+			
+			case BIRTH_DATE: {
 				if (content != null) {
 					
 					LocalDate birthDate = null;
@@ -915,7 +915,7 @@ public class Service {
 					try {
 						// parse date
 						birthDate = LocalDate.from(df.parse(content));
-						session.setBirthdate(birthDate);
+						session.setBirthDate(birthDate);
 						session.setRestoreStep(getNextRestoreStep(session.getRestoreStep()));
 						session = em.merge(session);
 						
@@ -923,7 +923,7 @@ public class Service {
 						
 					} catch (Exception e) {
 						logger.error("", e);
-						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR", connectionId)));
+						messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTH_DATE_ERROR", connectionId)));
 						this.restoreSendMessage(connectionId, threadId, session);
 					}
 					
@@ -989,7 +989,7 @@ public class Service {
 				if (content != null) {
 					logger.info("restoreEntryPoint: password: " + content);
 					String password = DigestUtils.sha256Hex(content);
-					// 	@NamedQuery(name="Identity.findForRestore", query="SELECT i FROM Identity i where i.connectionId<>:connectionId and (i.deletedTs IS NULL or i.deletedTs>:deletedTs) and i.firstname=:firstname and i.lastname=:lastname and i.birthdate=:birthdate  ORDER by i.id ASC"),
+					// 	@NamedQuery(name="Identity.findForRestore", query="SELECT i FROM Identity i where i.connectionId<>:connectionId and (i.deletedTs IS NULL or i.deletedTs>:deletedTs) and i.firstName=:firstName and i.lastName=:lastName and i.birthDate=:birthDate  ORDER by i.id ASC"),
 					
 					Identity identity = session.getIdentity();
 					
@@ -1010,9 +1010,9 @@ public class Service {
 					}
 					
 					if (debug) {
-						logger.info("entryPointRestore: finding Identity with firstname: " + session.getFirstname()
-								+ " lastname: " + session.getLastname()
-								+ " birthdate: " + session.getBirthdate()
+						logger.info("entryPointRestore: finding Identity with firstName: " + session.getFirstName()
+								+ " lastName: " + session.getLastName()
+								+ " birthDate: " + session.getBirthDate()
 								+ " password: " + password
 								);
 					}
@@ -1050,21 +1050,21 @@ public class Service {
 				allPredicates.add(predicate);
 			}
 			
-			if (restoreFirstnameClaim) {
-				Predicate predicate = builder.equal(root.get("firstname"), session.getFirstname());
+			if (restoreFirstNameClaim) {
+				Predicate predicate = builder.equal(root.get("firstName"), session.getFirstName());
 				allPredicates.add(predicate);
 			}
-			if (restoreLastnameClaim) {
-				Predicate predicate = builder.equal(root.get("lastname"), session.getLastname());
+			if (restoreLastNameClaim) {
+				Predicate predicate = builder.equal(root.get("lastName"), session.getLastName());
 				allPredicates.add(predicate);
 			}
-			if (restoreAvatarnameClaim) {
-				Predicate predicate = builder.equal(root.get("avatarname"), session.getAvatarname());
+			if (restoreAvatarNameClaim) {
+				Predicate predicate = builder.equal(root.get("avatarName"), session.getAvatarName());
 				allPredicates.add(predicate);
 			}
 			
-			if (restoreBirthdateClaim) {
-				Predicate predicate = builder.equal(root.get("birthdate"), session.getBirthdate());
+			if (restoreBirthDateClaim) {
+				Predicate predicate = builder.equal(root.get("birthDate"), session.getBirthDate());
 				allPredicates.add(predicate);
 			}
 			if (restoreBirthplaceClaim) {
@@ -1171,7 +1171,7 @@ public class Service {
 		
 		if (session.getRestoreStep() == null) {
 			
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRSTNAME", connectionId)));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRST_NAME", connectionId)));
 		} 
 		
 		else switch (session.getRestoreStep()) {
@@ -1182,23 +1182,23 @@ public class Service {
 			break;
 		} 
 		
-		case FIRSTNAME:
+		case FIRST_NAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRSTNAME", connectionId)));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_FIRST_NAME", connectionId)));
 			break;
 		} 
-		case LASTNAME:
+		case LAST_NAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_LASTNAME", connectionId)));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_LAST_NAME", connectionId)));
 			break;
 		}
-		case AVATARNAME:
+		case AVATAR_NAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_AVATARNAME", connectionId)));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_AVATAR_NAME", connectionId)));
 			break;
 		}
-		case BIRTHDATE: {
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_BIRTHDATE", connectionId)));
+		case BIRTH_DATE: {
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("RESTORE_BIRTH_DATE", connectionId)));
 			break;
 		}
 		case PLACE_OF_BIRTH: {
@@ -1247,27 +1247,27 @@ public class Service {
 			if (debug) logger.info("identityAlreadyExists: citizenId: " + session.getCitizenId());
 		}
 		
-		if (restoreFirstnameClaim) {
-			Predicate predicate = builder.equal(root.get("firstname"), session.getFirstname());
+		if (restoreFirstNameClaim) {
+			Predicate predicate = builder.equal(root.get("firstName"), session.getFirstName());
 			allPredicates.add(predicate);
 			
-			if (debug) logger.info("identityAlreadyExists: firstname: " + session.getFirstname());
+			if (debug) logger.info("identityAlreadyExists: firstName: " + session.getFirstName());
 		}
-		if (restoreLastnameClaim) {
-			Predicate predicate = builder.equal(root.get("lastname"), session.getLastname());
+		if (restoreLastNameClaim) {
+			Predicate predicate = builder.equal(root.get("lastName"), session.getLastName());
 			allPredicates.add(predicate);
-			if (debug) logger.info("identityAlreadyExists: lastname: " + session.getLastname());
+			if (debug) logger.info("identityAlreadyExists: lastName: " + session.getLastName());
 		}
-		if (restoreAvatarnameClaim) {
-			Predicate predicate = builder.equal(root.get("avatarname"), session.getAvatarname());
+		if (restoreAvatarNameClaim) {
+			Predicate predicate = builder.equal(root.get("avatarName"), session.getAvatarName());
 			allPredicates.add(predicate);
-			if (debug) logger.info("identityAlreadyExists: avatarname: " + session.getAvatarname());
+			if (debug) logger.info("identityAlreadyExists: avatarName: " + session.getAvatarName());
 		}
 		
-		if (restoreBirthdateClaim) {
-			Predicate predicate = builder.equal(root.get("birthdate"), session.getBirthdate());
+		if (restoreBirthDateClaim) {
+			Predicate predicate = builder.equal(root.get("birthDate"), session.getBirthDate());
 			allPredicates.add(predicate);
-			if (debug) logger.info("identityAlreadyExists: birthdate: " + session.getBirthdate());
+			if (debug) logger.info("identityAlreadyExists: birthDate: " + session.getBirthDate());
 		}
 		
 		if (restoreMrzClaim) {
@@ -1301,81 +1301,57 @@ public class Service {
 	}
 	
 	
-	/*
-	 * @ConfigProperty(name = "io.unicid.identity.claims.idnumber")
-	Boolean enableIdNumberClaim;
-	
-	@ConfigProperty(name = "io.unicid.identity.claims.firstname")
-	Boolean enableFirstnameClaim;
-	
-	@ConfigProperty(name = "io.unicid.identity.claims.lastname")
-	Boolean enableLastnameClaim;
-	
-	@ConfigProperty(name = "io.unicid.identity.claims.avatarname")
-	Boolean enableAvatarnameClaim;
-	
-	@ConfigProperty(name = "io.unicid.identity.claims.avatarpic")
-	Boolean enableAvatarPicClaim;
-	
-	@ConfigProperty(name = "io.unicid.identity.claims.birthdate")
-	Boolean enableBirthdateClaim;
-	
-	@ConfigProperty(name = "io.unicid.identity.claims.birthplace")
-	Boolean enableBirthplaceClaim;
-	
-	 */
-	
 	private CreateStep getNextCreateStep(CreateStep current) throws Exception {
 		
 		if (current == null) {
 			if(enableMrzClaim) return CreateStep.MRZ;
 			if(enableCitizenIdClaim) return CreateStep.CITIZEN_ID;
-			if(enableFirstnameClaim) return CreateStep.FIRSTNAME;
-			if(enableLastnameClaim) return CreateStep.LASTNAME;
-			if(enableAvatarnameClaim) return CreateStep.AVATARNAME;
-			if(enableAvatarpicClaim) return CreateStep.AVATARPIC;
-			if(enableBirthdateClaim) return CreateStep.BIRTHDATE;
+			if(enableFirstNameClaim) return CreateStep.FIRST_NAME;
+			if(enableLastNameClaim) return CreateStep.LAST_NAME;
+			if(enableAvatarNameClaim) return CreateStep.AVATAR_NAME;
+			if(enableAvatarPicClaim) return CreateStep.AVATAR_PIC;
+			if(enableBirthDateClaim) return CreateStep.BIRTH_DATE;
 			if(enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
 			
 			throw new Exception("no claim has been enabled");
 		} else {
 			switch (current) {
 			case CITIZEN_ID: {
-				if(enableFirstnameClaim) return CreateStep.FIRSTNAME;
-				if(enableLastnameClaim) return CreateStep.LASTNAME;
-				if(enableAvatarnameClaim) return CreateStep.AVATARNAME;
-				if(enableAvatarpicClaim) return CreateStep.AVATARPIC;
-				if(enableBirthdateClaim) return CreateStep.BIRTHDATE;
+				if(enableFirstNameClaim) return CreateStep.FIRST_NAME;
+				if(enableLastNameClaim) return CreateStep.LAST_NAME;
+				if(enableAvatarNameClaim) return CreateStep.AVATAR_NAME;
+				if(enableAvatarPicClaim) return CreateStep.AVATAR_PIC;
+				if(enableBirthDateClaim) return CreateStep.BIRTH_DATE;
 				if(enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
 				return CreateStep.PENDING_CONFIRM;
 			}
-			case FIRSTNAME: {
-				if(enableLastnameClaim) return CreateStep.LASTNAME;
-				if(enableAvatarnameClaim) return CreateStep.AVATARNAME;
-				if(enableAvatarpicClaim) return CreateStep.AVATARPIC;
-				if(enableBirthdateClaim) return CreateStep.BIRTHDATE;
+			case FIRST_NAME: {
+				if(enableLastNameClaim) return CreateStep.LAST_NAME;
+				if(enableAvatarNameClaim) return CreateStep.AVATAR_NAME;
+				if(enableAvatarPicClaim) return CreateStep.AVATAR_PIC;
+				if(enableBirthDateClaim) return CreateStep.BIRTH_DATE;
 				if(enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
 				return CreateStep.PENDING_CONFIRM;
 			}
-			case LASTNAME: {
-				if(enableAvatarnameClaim) return CreateStep.AVATARNAME;
-				if(enableAvatarpicClaim) return CreateStep.AVATARPIC;
-				if(enableBirthdateClaim) return CreateStep.BIRTHDATE;
+			case LAST_NAME: {
+				if(enableAvatarNameClaim) return CreateStep.AVATAR_NAME;
+				if(enableAvatarPicClaim) return CreateStep.AVATAR_PIC;
+				if(enableBirthDateClaim) return CreateStep.BIRTH_DATE;
 				if(enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
 				return CreateStep.PENDING_CONFIRM;
 			}
-			case AVATARNAME: {
-				if(enableAvatarpicClaim) return CreateStep.AVATARPIC;
-				if(enableBirthdateClaim) return CreateStep.BIRTHDATE;
+			case AVATAR_NAME: {
+				if(enableAvatarPicClaim) return CreateStep.AVATAR_PIC;
+				if(enableBirthDateClaim) return CreateStep.BIRTH_DATE;
 				if(enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
 				return CreateStep.PENDING_CONFIRM;
 			}
-			case AVATARPIC: {
-				if(enableBirthdateClaim) return CreateStep.BIRTHDATE;
+			case AVATAR_PIC: {
+				if(enableBirthDateClaim) return CreateStep.BIRTH_DATE;
 				if(enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
 				return CreateStep.PENDING_CONFIRM;
 			}
-			case BIRTHDATE: {
+			case BIRTH_DATE: {
 				if(enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
 				return CreateStep.PENDING_CONFIRM;
 			}
@@ -1396,10 +1372,10 @@ public class Service {
 		if (current == null) {
 			if(restoreMrzClaim) return RestoreStep.MRZ;
 			if(restoreCitizenidClaim) return RestoreStep.CITIZEN_ID;
-			if(restoreFirstnameClaim) return RestoreStep.FIRSTNAME;
-			if(restoreLastnameClaim) return RestoreStep.LASTNAME;
-			if(restoreAvatarnameClaim) return RestoreStep.AVATARNAME;
-			if(restoreBirthdateClaim) return RestoreStep.BIRTHDATE;
+			if(restoreFirstNameClaim) return RestoreStep.FIRST_NAME;
+			if(restoreLastNameClaim) return RestoreStep.LAST_NAME;
+			if(restoreAvatarNameClaim) return RestoreStep.AVATAR_NAME;
+			if(restoreBirthDateClaim) return RestoreStep.BIRTH_DATE;
 			if(restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
 			
 			throw new Exception("no claim has been enabled");
@@ -1407,33 +1383,33 @@ public class Service {
 			switch (current) {
 			case CITIZEN_ID: {
 				
-				if(restoreFirstnameClaim) return RestoreStep.FIRSTNAME;
-				if(restoreLastnameClaim) return RestoreStep.LASTNAME;
-				if(restoreAvatarnameClaim) return RestoreStep.AVATARNAME;
-				if(restoreBirthdateClaim) return RestoreStep.BIRTHDATE;
+				if(restoreFirstNameClaim) return RestoreStep.FIRST_NAME;
+				if(restoreLastNameClaim) return RestoreStep.LAST_NAME;
+				if(restoreAvatarNameClaim) return RestoreStep.AVATAR_NAME;
+				if(restoreBirthDateClaim) return RestoreStep.BIRTH_DATE;
 				if(restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
 				return RestoreStep.DONE;
 			}
-			case FIRSTNAME: {
-				if(restoreLastnameClaim) return RestoreStep.LASTNAME;
-				if(restoreAvatarnameClaim) return RestoreStep.AVATARNAME;
-				if(restoreBirthdateClaim) return RestoreStep.BIRTHDATE;
+			case FIRST_NAME: {
+				if(restoreLastNameClaim) return RestoreStep.LAST_NAME;
+				if(restoreAvatarNameClaim) return RestoreStep.AVATAR_NAME;
+				if(restoreBirthDateClaim) return RestoreStep.BIRTH_DATE;
 				if(restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
 				return RestoreStep.DONE;
 			}
-			case LASTNAME: {
-				if(restoreAvatarnameClaim) return RestoreStep.AVATARNAME;
-				if(restoreBirthdateClaim) return RestoreStep.BIRTHDATE;
+			case LAST_NAME: {
+				if(restoreAvatarNameClaim) return RestoreStep.AVATAR_NAME;
+				if(restoreBirthDateClaim) return RestoreStep.BIRTH_DATE;
 				if(restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
 				return RestoreStep.DONE;
 			}
-			case AVATARNAME: {
-				if(restoreBirthdateClaim) return RestoreStep.BIRTHDATE;
+			case AVATAR_NAME: {
+				if(restoreBirthDateClaim) return RestoreStep.BIRTH_DATE;
 				if(restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
 				return RestoreStep.DONE;
 			}
 			
-			case BIRTHDATE: {
+			case BIRTH_DATE: {
 				if(restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
 				return RestoreStep.DONE;
 			}
@@ -1491,10 +1467,10 @@ public class Service {
 			this.createSendMessage(connectionId, threadId, session);
 			break;
 		} 
-		case FIRSTNAME: {
+		case FIRST_NAME: {
 			if (content != null) {
 				session.setCreateStep(getNextCreateStep(session.getCreateStep()));
-				session.setFirstname(content);
+				session.setFirstName(content);
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
@@ -1514,10 +1490,10 @@ public class Service {
 			this.createSendMessage(connectionId, threadId, session);
 			break;
 		} 
-		case LASTNAME: {
+		case LAST_NAME: {
 			if (content != null) {
 				session.setCreateStep(getNextCreateStep(session.getCreateStep()));
-				session.setLastname(content);
+				session.setLastName(content);
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
 					if (this.identityAlreadyExists(session)) {
@@ -1537,10 +1513,10 @@ public class Service {
 			this.createSendMessage(connectionId, threadId, session);
 			break;
 		}
-		case AVATARNAME: {
+		case AVATAR_NAME: {
 			if (content != null) {
 				session.setCreateStep(getNextCreateStep(session.getCreateStep()));
-				session.setAvatarname(content);
+				session.setAvatarName(content);
 				
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
 					
@@ -1561,7 +1537,7 @@ public class Service {
 			this.createSendMessage(connectionId, threadId, session);
 			break;
 		}
-		case AVATARPIC: {
+		case AVATAR_PIC: {
 			if (mm != null) {
 				
 				this.saveAvatarPicture(mm, session);
@@ -1590,7 +1566,7 @@ public class Service {
 			this.createSendMessage(connectionId, threadId, session);
 			break;
 		}
-		case BIRTHDATE: {
+		case BIRTH_DATE: {
 			if (content != null) {
 				
 				LocalDate birthDate = null;
@@ -1598,12 +1574,12 @@ public class Service {
 				try {
 					// parse date
 					birthDate = LocalDate.from(df.parse(content));
-					session.setBirthdate(birthDate);
+					session.setBirthDate(birthDate);
 					session.setCreateStep(getNextCreateStep(session.getCreateStep()));
 					session = em.merge(session);
 				} catch (Exception e) {
 					logger.error("", e);
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR", connectionId)));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTH_DATE_ERROR", connectionId)));
 				}
 				
 				if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
@@ -1688,15 +1664,15 @@ public class Service {
 						identity = new Identity();
 						identity.setId(UUID.randomUUID());
 						identity.setCitizenId(session.getCitizenId());
-						identity.setFirstname(session.getFirstname());
-						identity.setLastname(session.getLastname());
+						identity.setFirstName(session.getFirstName());
+						identity.setLastName(session.getLastName());
 						identity.setAvatarPic(session.getAvatarPic());
 						identity.setAvatarPicCiphAlg(session.getAvatarPicCiphAlg());
 						identity.setAvatarPicCiphIv(session.getAvatarPicCiphIv());
 						identity.setAvatarPicCiphKey(session.getAvatarPicCiphKey());
 						identity.setAvatarMimeType(session.getAvatarMimeType());
-						identity.setAvatarname(session.getAvatarname());
-						identity.setBirthdate(session.getBirthdate());
+						identity.setAvatarName(session.getAvatarName());
+						identity.setBirthDate(session.getBirthDate());
 						identity.setPlaceOfBirth(session.getPlaceOfBirth());
 						identity.setMrz(session.getMrz());
 						identity.setDocumentType(session.getDocumentType());
@@ -1806,20 +1782,20 @@ public class Service {
 				if (content.equals(IdentityClaim.CITIZEN_ID.toString())) {
 					session.setCreateStep(CreateStep.CHANGE_CITIZEN_ID);
 					session = em.merge(session);
-				} else if (content.equals(IdentityClaim.FIRSTNAME.toString())) {
-					session.setCreateStep(CreateStep.CHANGE_FIRSTNAME);
+				} else if (content.equals(IdentityClaim.FIRST_NAME.toString())) {
+					session.setCreateStep(CreateStep.CHANGE_FIRST_NAME);
 					session = em.merge(session);
-				} else if (content.equals(IdentityClaim.LASTNAME.toString())) {
-					session.setCreateStep(CreateStep.CHANGE_LASTNAME);
+				} else if (content.equals(IdentityClaim.LAST_NAME.toString())) {
+					session.setCreateStep(CreateStep.CHANGE_LAST_NAME);
 					session = em.merge(session);
-				} else if (content.equals(IdentityClaim.AVATARNAME.toString())) {
-					session.setCreateStep(CreateStep.CHANGE_AVATARNAME);
+				} else if (content.equals(IdentityClaim.AVATAR_NAME.toString())) {
+					session.setCreateStep(CreateStep.CHANGE_AVATAR_NAME);
 					session = em.merge(session);
-				} else if (content.equals(IdentityClaim.AVATARPIC.toString())) {
-					session.setCreateStep(CreateStep.CHANGE_AVATARPIC);
+				} else if (content.equals(IdentityClaim.AVATAR_PIC.toString())) {
+					session.setCreateStep(CreateStep.CHANGE_AVATAR_PIC);
 					session = em.merge(session);
-				} else if (content.equals(IdentityClaim.BIRTHDATE.toString())) {
-					session.setCreateStep(CreateStep.CHANGE_BIRTHDATE);
+				} else if (content.equals(IdentityClaim.BIRTH_DATE.toString())) {
+					session.setCreateStep(CreateStep.CHANGE_BIRTH_DATE);
 					session = em.merge(session);
 				} else if (content.equals(IdentityClaim.PLACE_OF_BIRTH.toString())) {
 					session.setCreateStep(CreateStep.CHANGE_PLACE_OF_BIRTH);
@@ -1873,10 +1849,10 @@ public class Service {
 			break;
 		}
 		
-		case CHANGE_FIRSTNAME: {
+		case CHANGE_FIRST_NAME: {
 			if (content != null) {
 				session.setCreateStep(CreateStep.PENDING_CONFIRM);
-				session.setFirstname(content);
+				session.setFirstName(content);
 				
 				if (this.identityAlreadyExists(session)) {
 					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
@@ -1899,10 +1875,10 @@ public class Service {
 			break;
 		}
 		
-		case CHANGE_LASTNAME: {
+		case CHANGE_LAST_NAME: {
 			if (content != null) {
 				session.setCreateStep(CreateStep.PENDING_CONFIRM);
-				session.setLastname(content);
+				session.setLastName(content);
 				
 				
 				if (this.identityAlreadyExists(session)) {
@@ -1926,10 +1902,10 @@ public class Service {
 			this.createSendMessage(connectionId, threadId, session);
 			break;
 		}
-		case CHANGE_AVATARNAME: {
+		case CHANGE_AVATAR_NAME: {
 			if (content != null) {
 				session.setCreateStep(CreateStep.PENDING_CONFIRM);
-				session.setAvatarname(content);
+				session.setAvatarName(content);
 				
 				
 				if (this.identityAlreadyExists(session)) {
@@ -1954,7 +1930,7 @@ public class Service {
 			break;
 		}
 		
-		case CHANGE_AVATARPIC: {
+		case CHANGE_AVATAR_PIC: {
 			
 			if (mm != null) {
 				
@@ -1989,7 +1965,7 @@ public class Service {
 			break;
 		}
 		
-		case CHANGE_BIRTHDATE: {
+		case CHANGE_BIRTH_DATE: {
 			
 			if (content != null) {
 				
@@ -1998,7 +1974,7 @@ public class Service {
 				try {
 					// parse date
 					birthDate = LocalDate.from(df.parse(content));
-					session.setBirthdate(birthDate);
+					session.setBirthDate(birthDate);
 					
 					
 					if (this.identityAlreadyExists(session)) {
@@ -2021,7 +1997,7 @@ public class Service {
 					
 				} catch (Exception e) {
 					logger.error("", e);
-					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_ERROR", connectionId)));
+					messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTH_DATE_ERROR", connectionId)));
 				}
 				
 			}
@@ -2267,37 +2243,37 @@ public class Service {
 			
 		}
 		
-		if (enableFirstnameClaim) {
-			MenuItem firstname = new MenuItem();
-			firstname.setId(IdentityClaim.FIRSTNAME.toString());
-			firstname.setText(IdentityClaim.FIRSTNAME.getClaimLabel());
-			menuItems.add(firstname);
+		if (enableFirstNameClaim) {
+			MenuItem firstName = new MenuItem();
+			firstName.setId(IdentityClaim.FIRST_NAME.toString());
+			firstName.setText(IdentityClaim.FIRST_NAME.getClaimLabel());
+			menuItems.add(firstName);
 		}
-		if (enableLastnameClaim) {
-			MenuItem lastname = new MenuItem();
-			lastname.setId(IdentityClaim.LASTNAME.toString());
-			lastname.setText(IdentityClaim.LASTNAME.getClaimLabel());
-			menuItems.add(lastname);
-		}
-		
-		if (enableAvatarnameClaim) {
-			MenuItem avatarname = new MenuItem();
-			avatarname.setId(IdentityClaim.AVATARNAME.toString());
-			avatarname.setText(IdentityClaim.AVATARNAME.getClaimLabel());
-			menuItems.add(avatarname);
+		if (enableLastNameClaim) {
+			MenuItem lastName = new MenuItem();
+			lastName.setId(IdentityClaim.LAST_NAME.toString());
+			lastName.setText(IdentityClaim.LAST_NAME.getClaimLabel());
+			menuItems.add(lastName);
 		}
 		
-		if (enableAvatarpicClaim) {
-			MenuItem avatarname = new MenuItem();
-			avatarname.setId(IdentityClaim.AVATARPIC.toString());
-			avatarname.setText(IdentityClaim.AVATARPIC.getClaimLabel());
-			menuItems.add(avatarname);
+		if (enableAvatarNameClaim) {
+			MenuItem avatarName = new MenuItem();
+			avatarName.setId(IdentityClaim.AVATAR_NAME.toString());
+			avatarName.setText(IdentityClaim.AVATAR_NAME.getClaimLabel());
+			menuItems.add(avatarName);
 		}
-		if (enableBirthdateClaim) {
-			MenuItem birthdate = new MenuItem();
-			birthdate.setId(IdentityClaim.BIRTHDATE.toString());
-			birthdate.setText(IdentityClaim.BIRTHDATE.getClaimLabel());
-			menuItems.add(birthdate);
+		
+		if (enableAvatarPicClaim) {
+			MenuItem avatarName = new MenuItem();
+			avatarName.setId(IdentityClaim.AVATAR_PIC.toString());
+			avatarName.setText(IdentityClaim.AVATAR_PIC.getClaimLabel());
+			menuItems.add(avatarName);
+		}
+		if (enableBirthDateClaim) {
+			MenuItem birthDate = new MenuItem();
+			birthDate.setId(IdentityClaim.BIRTH_DATE.toString());
+			birthDate.setText(IdentityClaim.BIRTH_DATE.getClaimLabel());
+			menuItems.add(birthDate);
 		}
 		
 		if (enableBirthplaceClaim) {
@@ -2335,31 +2311,31 @@ public class Service {
 			
 		}
 		
-		if (restoreFirstnameClaim) {
-			MenuItem firstname = new MenuItem();
-			firstname.setId(IdentityClaim.FIRSTNAME.toString());
-			firstname.setText(IdentityClaim.FIRSTNAME.getClaimLabel());
-			menuItems.add(firstname);
+		if (restoreFirstNameClaim) {
+			MenuItem firstName = new MenuItem();
+			firstName.setId(IdentityClaim.FIRST_NAME.toString());
+			firstName.setText(IdentityClaim.FIRST_NAME.getClaimLabel());
+			menuItems.add(firstName);
 		}
-		if (restoreLastnameClaim) {
-			MenuItem lastname = new MenuItem();
-			lastname.setId(IdentityClaim.LASTNAME.toString());
-			lastname.setText(IdentityClaim.LASTNAME.getClaimLabel());
-			menuItems.add(lastname);
-		}
-		
-		if (restoreAvatarnameClaim) {
-			MenuItem avatarname = new MenuItem();
-			avatarname.setId(IdentityClaim.AVATARNAME.toString());
-			avatarname.setText(IdentityClaim.AVATARNAME.getClaimLabel());
-			menuItems.add(avatarname);
+		if (restoreLastNameClaim) {
+			MenuItem lastName = new MenuItem();
+			lastName.setId(IdentityClaim.LAST_NAME.toString());
+			lastName.setText(IdentityClaim.LAST_NAME.getClaimLabel());
+			menuItems.add(lastName);
 		}
 		
-		if (restoreBirthdateClaim) {
-			MenuItem birthdate = new MenuItem();
-			birthdate.setId(IdentityClaim.BIRTHDATE.toString());
-			birthdate.setText(IdentityClaim.BIRTHDATE.getClaimLabel());
-			menuItems.add(birthdate);
+		if (restoreAvatarNameClaim) {
+			MenuItem avatarName = new MenuItem();
+			avatarName.setId(IdentityClaim.AVATAR_NAME.toString());
+			avatarName.setText(IdentityClaim.AVATAR_NAME.getClaimLabel());
+			menuItems.add(avatarName);
+		}
+		
+		if (restoreBirthDateClaim) {
+			MenuItem birthDate = new MenuItem();
+			birthDate.setId(IdentityClaim.BIRTH_DATE.toString());
+			birthDate.setText(IdentityClaim.BIRTH_DATE.getClaimLabel());
+			menuItems.add(birthDate);
 		}
 		
 		if (restoreBirthplaceClaim) {
@@ -2434,33 +2410,33 @@ public class Service {
 			break;
 		} 
 		
-		case FIRSTNAME:
-		case CHANGE_FIRSTNAME:
+		case FIRST_NAME:
+		case CHANGE_FIRST_NAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FIRSTNAME_REQUEST", connectionId)));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FIRST_NAME_REQUEST", connectionId)));
 			break;
 		} 
-		case LASTNAME:
-		case CHANGE_LASTNAME:
+		case LAST_NAME:
+		case CHANGE_LAST_NAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("LASTNAME_REQUEST", connectionId)));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("LAST_NAME_REQUEST", connectionId)));
 			break;
 		}
-		case AVATARNAME:
-		case CHANGE_AVATARNAME:
+		case AVATAR_NAME:
+		case CHANGE_AVATAR_NAME:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATARNAME_REQUEST", connectionId)));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATAR_NAME_REQUEST", connectionId)));
 			break;
 		}
-		case AVATARPIC:
-		case CHANGE_AVATARPIC:
+		case AVATAR_PIC:
+		case CHANGE_AVATAR_PIC:
 		{
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATARPIC_REQUEST", connectionId)));
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("AVATAR_PIC_REQUEST", connectionId)));
 			break;
 		}
-		case BIRTHDATE: 
-		case CHANGE_BIRTHDATE: {
-			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTHDATE_REQUEST", connectionId)));
+		case BIRTH_DATE: 
+		case CHANGE_BIRTH_DATE: {
+			messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("BIRTH_DATE_REQUEST", connectionId)));
 			break;
 		}
 		case PLACE_OF_BIRTH:
@@ -2515,7 +2491,7 @@ public class Service {
 	private Session issueCredentialAndSetEditMenu(Session session, Identity identity) throws Exception {
 
 		if (identity.getAuthenticatedTs().plus(Duration.ofMinutes(authenticationValidForMinutes)).plus(Duration.ofSeconds(15)).compareTo(Instant.now())>=0) {
-			logger.info("issueCredentialAndSetEditMenu: " + session.getFirstname());
+			logger.info("issueCredentialAndSetEditMenu: " + session.getFirstName());
 			identity.setIssuedTs(Instant.now());
 			identity.setRevokedTs(null);
 			identity = em.merge(identity);
@@ -2666,50 +2642,50 @@ public class Service {
 			}
 		}
 		
-		if (enableFirstnameClaim) {
-			data.append(IdentityClaim.FIRSTNAME.getClaimLabel()).append(": ");
+		if (enableFirstNameClaim) {
+			data.append(IdentityClaim.FIRST_NAME.getClaimLabel()).append(": ");
 			
-			if (identity.getFirstname() != null) {
-				data.append(identity.getFirstname()).append("\n");
+			if (identity.getFirstName() != null) {
+				data.append(identity.getFirstName()).append("\n");
 			} else {
-				data.append("<unset firstname>").append("\n");
+				data.append("<unset firstName>").append("\n");
 			}
 			
 		}
-		if (enableLastnameClaim) {
-			data.append(IdentityClaim.LASTNAME.getClaimLabel()).append(": ");
+		if (enableLastNameClaim) {
+			data.append(IdentityClaim.LAST_NAME.getClaimLabel()).append(": ");
 			
-			if (identity.getLastname() != null) {
-				data.append(identity.getLastname()).append("\n");
+			if (identity.getLastName() != null) {
+				data.append(identity.getLastName()).append("\n");
 			} else {
-				data.append("<unset lastname>").append("\n");
+				data.append("<unset lastName>").append("\n");
 			}
 		}
 		
-		if (enableAvatarnameClaim) {
-			data.append(IdentityClaim.AVATARNAME.getClaimLabel()).append(": ");
+		if (enableAvatarNameClaim) {
+			data.append(IdentityClaim.AVATAR_NAME.getClaimLabel()).append(": ");
 			
-			if (identity.getAvatarname() != null) {
-				data.append(identity.getAvatarname()).append("\n");
+			if (identity.getAvatarName() != null) {
+				data.append(identity.getAvatarName()).append("\n");
 			} else {
-				data.append("<unset avatarname>").append("\n");
+				data.append("<unset avatarName>").append("\n");
 			}
 		}
-		if (enableAvatarpicClaim) {
-			data.append(IdentityClaim.AVATARPIC.getClaimLabel()).append(": ");
+		if (enableAvatarPicClaim) {
+			data.append(IdentityClaim.AVATAR_PIC.getClaimLabel()).append(": ");
 			
 			if (identity.getAvatarPic() != null) {
 				data.append(identity.getAvatarPic()).append("\n");
 			} else {
-				data.append("<unset avatarpic>").append("\n");
+				data.append("<unset avatarPic>").append("\n");
 			}
 		}
-		if (enableBirthdateClaim) {
-			data.append(IdentityClaim.BIRTHDATE.getClaimLabel()).append(": ");
-			if (identity.getBirthdate() != null) {
-				data.append(identity.getBirthdate()).append("\n");
+		if (enableBirthDateClaim) {
+			data.append(IdentityClaim.BIRTH_DATE.getClaimLabel()).append(": ");
+			if (identity.getBirthDate() != null) {
+				data.append(identity.getBirthDate()).append("\n");
 			} else {
-				data.append("<unset birthdate>").append("\n");
+				data.append("<unset birthDate>").append("\n");
 			}
 		}
 		
@@ -2754,50 +2730,50 @@ public class Service {
 			}
 		}
 		
-		if (enableFirstnameClaim) {
-			data.append(IdentityClaim.FIRSTNAME.getClaimLabel()).append(": ");
+		if (enableFirstNameClaim) {
+			data.append(IdentityClaim.FIRST_NAME.getClaimLabel()).append(": ");
 			
-			if (session.getFirstname() != null) {
-				data.append(session.getFirstname()).append("\n");
+			if (session.getFirstName() != null) {
+				data.append(session.getFirstName()).append("\n");
 			} else {
-				data.append("<unset firstname>").append("\n");
+				data.append("<unset firstName>").append("\n");
 			}
 			
 		}
-		if (enableLastnameClaim) {
-			data.append(IdentityClaim.LASTNAME.getClaimLabel()).append(": ");
+		if (enableLastNameClaim) {
+			data.append(IdentityClaim.LAST_NAME.getClaimLabel()).append(": ");
 			
-			if (session.getLastname() != null) {
-				data.append(session.getLastname()).append("\n");
+			if (session.getLastName() != null) {
+				data.append(session.getLastName()).append("\n");
 			} else {
-				data.append("<unset lastname>").append("\n");
+				data.append("<unset lastName>").append("\n");
 			}
 		}
 		
-		if (enableAvatarnameClaim) {
-			data.append(IdentityClaim.AVATARNAME.getClaimLabel()).append(": ");
+		if (enableAvatarNameClaim) {
+			data.append(IdentityClaim.AVATAR_NAME.getClaimLabel()).append(": ");
 			
-			if (session.getAvatarname() != null) {
-				data.append(session.getAvatarname()).append("\n");
+			if (session.getAvatarName() != null) {
+				data.append(session.getAvatarName()).append("\n");
 			} else {
-				data.append("<unset avatarname>").append("\n");
+				data.append("<unset avatarName>").append("\n");
 			}
 		}
-		if (enableAvatarpicClaim) {
-			data.append(IdentityClaim.AVATARPIC.getClaimLabel()).append(": ");
+		if (enableAvatarPicClaim) {
+			data.append(IdentityClaim.AVATAR_PIC.getClaimLabel()).append(": ");
 			
 			if (session.getAvatarPic() != null) {
 				data.append(session.getAvatarPic()).append("\n");
 			} else {
-				data.append("<unset avatarpic>").append("\n");
+				data.append("<unset avatarPic>").append("\n");
 			}
 		}
-		if (enableBirthdateClaim) {
-			data.append(IdentityClaim.BIRTHDATE.getClaimLabel()).append(": ");
-			if (session.getBirthdate() != null) {
-				data.append(session.getBirthdate()).append("\n");
+		if (enableBirthDateClaim) {
+			data.append(IdentityClaim.BIRTH_DATE.getClaimLabel()).append(": ");
+			if (session.getBirthDate() != null) {
+				data.append(session.getBirthDate()).append("\n");
 			} else {
-				data.append("<unset birthdate>").append("\n");
+				data.append("<unset birthDate>").append("\n");
 			}
 		}
 		
@@ -2837,19 +2813,19 @@ public class Service {
 					List<String> attributes = new ArrayList<String>();
 					attributes.add("id");
 					if (enableCitizenIdClaim) attributes.add("citizenId");
-					if (enableFirstnameClaim) attributes.add("firstname");
-					if (enableLastnameClaim) attributes.add("lastname");
-					if (enableAvatarnameClaim) attributes.add("avatarName");
-					if (enableAvatarpicClaim) attributes.add("avatarPic");
-					if (enableBirthdateClaim) attributes.add("birthdate");
+					if (enableFirstNameClaim) attributes.add("firstName");
+					if (enableLastNameClaim) attributes.add("lastName");
+					if (enableAvatarNameClaim) attributes.add("avatarName");
+					if (enableAvatarPicClaim) attributes.add("avatarPic");
+					if (enableBirthDateClaim) attributes.add("birthDate");
 					if (enableBirthplaceClaim) attributes.add("placeOfBirth");
 					if (enablePhotoClaim) attributes.add("photo");
 					if (enableMrzClaim) {
 						attributes.add("documentType");
 						attributes.add("country");
-						attributes.add("firstname");
-						attributes.add("lastname");
-						attributes.add("birthdate");
+						attributes.add("firstName");
+						attributes.add("lastName");
+						attributes.add("birthDate");
 						attributes.add("documentNumber");
 						attributes.add("photo");
 					}
@@ -2895,25 +2871,25 @@ public class Service {
 			citizenId.setValue(id.getCitizenId().toString());
 			claims.add(citizenId);
 		}
-		if (enableFirstnameClaim) {
-			Claim firstname = new Claim();
-			firstname.setName("firstname");
-			firstname.setValue(id.getFirstname());
-			claims.add(firstname);
+		if (enableFirstNameClaim) {
+			Claim firstName = new Claim();
+			firstName.setName("firstName");
+			firstName.setValue(id.getFirstName());
+			claims.add(firstName);
 		}
-		if (enableLastnameClaim) {
-			Claim lastname = new Claim();
-			lastname.setName("lastname");
-			lastname.setValue(id.getLastname());
-			claims.add(lastname);
+		if (enableLastNameClaim) {
+			Claim lastName = new Claim();
+			lastName.setName("lastName");
+			lastName.setValue(id.getLastName());
+			claims.add(lastName);
 		}
-		if (enableAvatarnameClaim) {
-			Claim avatarname = new Claim();
-			avatarname.setName("avatarName");
-			avatarname.setValue(id.getAvatarname());
-			claims.add(avatarname);
+		if (enableAvatarNameClaim) {
+			Claim avatarName = new Claim();
+			avatarName.setName("avatarName");
+			avatarName.setValue(id.getAvatarName());
+			claims.add(avatarName);
 		}
-		if (enableAvatarpicClaim) {
+		if (enableAvatarPicClaim) {
 			
 			
 			
@@ -2950,18 +2926,18 @@ public class Service {
 			image.setValue(encPhoto);
 			
 			if (debug) {
-				logger.info("sendCredential: avatarpic: " + encPhoto);
-				logger.info("sendCredential: avatarpic: " + JsonUtil.serialize(image, false));
-				logger.info("sendCredential: avatarpic: encPhoto.length: " + encPhoto.length());
+				logger.info("sendCredential: avatarPic: " + encPhoto);
+				logger.info("sendCredential: avatarPic: " + JsonUtil.serialize(image, false));
+				logger.info("sendCredential: avatarPic: encPhoto.length: " + encPhoto.length());
 				
 			}
 			claims.add(image);
 		}
-		if (enableBirthdateClaim) {
-			Claim birthdate = new Claim();
-			birthdate.setName("birthdate");
-			birthdate.setValue(id.getBirthdate().toString());
-			claims.add(birthdate);
+		if (enableBirthDateClaim) {
+			Claim birthDate = new Claim();
+			birthDate.setName("birthDate");
+			birthDate.setValue(id.getBirthDate().toString());
+			claims.add(birthDate);
 		}
 		if (enableBirthplaceClaim) {
 			Claim placeOfBirth = new Claim();
@@ -2973,9 +2949,9 @@ public class Service {
 		if (enableMrzClaim) {
 			this.addClaim(claims, "documentType", Optional.ofNullable(id.getDocumentType()).map(Object::toString).orElse("null"));
 			this.addClaim(claims, "country", Optional.ofNullable(id.getPlaceOfBirth()).map(Object::toString).orElse("null"));
-			this.addClaim(claims, "firstname", Optional.ofNullable(id.getFirstname()).map(Object::toString).orElse("null"));
-			this.addClaim(claims, "lastname", Optional.ofNullable(id.getLastname()).map(Object::toString).orElse("null"));
-			this.addClaim(claims, "birthdate", Optional.ofNullable(id.getBirthdate()).map(Object::toString).orElse("null"));
+			this.addClaim(claims, "firstName", Optional.ofNullable(id.getFirstName()).map(Object::toString).orElse("null"));
+			this.addClaim(claims, "lastName", Optional.ofNullable(id.getLastName()).map(Object::toString).orElse("null"));
+			this.addClaim(claims, "birthDate", Optional.ofNullable(id.getBirthDate()).map(Object::toString).orElse("null"));
 			this.addClaim(claims, "documentNumber", Optional.ofNullable(id.getDocumentNumber()).map(Object::toString).orElse("null"));
 			this.addClaim(claims, "photo", Optional.ofNullable(null).map(Object::toString).orElse("null"));
 		}
@@ -3082,11 +3058,11 @@ public class Service {
 	
 	private void purgeSession(Session session) {
 		if (session != null) {
-			session.setBirthdate(null);
+			session.setBirthDate(null);
 			session.setCreateStep(null);
-			session.setFirstname(null);
+			session.setFirstName(null);
 			session.setIdentity(null);
-			session.setLastname(null);
+			session.setLastName(null);
 			session.setPlaceOfBirth(null);
 			session.setMrz(null);
 			session.setDocumentType(null);
@@ -3105,11 +3081,11 @@ public class Service {
 			session.setConnectionId(connectionId);
 			em.persist(session);
 		} else {
-			session.setBirthdate(null);
+			session.setBirthDate(null);
 			session.setCreateStep(null);
-			session.setFirstname(null);
+			session.setFirstName(null);
 			session.setIdentity(null);
-			session.setLastname(null);
+			session.setLastName(null);
 			session.setPlaceOfBirth(null);
 			session.setMrz(null);
 			session.setDocumentType(null);

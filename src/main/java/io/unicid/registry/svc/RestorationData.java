@@ -6,9 +6,9 @@ import io.unicid.registry.enums.RestorationState;
 
 public class RestorationData {
 	private RestorationState state;
-	private String firstname;
-	private String lastname;
-	private LocalDate birthdate;
+	private String firstName;
+	private String lastName;
+	private LocalDate birthDate;
 
 	public RestorationState getState() {
 		return state;
@@ -16,23 +16,23 @@ public class RestorationData {
 	public void setState(RestorationState state) {
 		this.state = state;
 	}
-	public String getFirstname() {
-		return firstname;
+	public String getFirstName() {
+		return firstName;
 	}
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
-	public String getLastname() {
-		return lastname;
+	public String getLastName() {
+		return lastName;
 	}
-	public void setLastname(String lastname) {
-		this.lastname = lastname;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
-	public LocalDate getBirthdate() {
-		return birthdate;
+	public LocalDate getBirthDate() {
+		return birthDate;
 	}
-	public void setBirthdate(LocalDate birthdate) {
-		this.birthdate = birthdate;
+	public void setBirthDate(LocalDate birthDate) {
+		this.birthDate = birthDate;
 	}
 	
 }

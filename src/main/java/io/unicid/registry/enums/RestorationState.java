@@ -1,6 +1,6 @@
 package io.unicid.registry.enums;
 
 public enum RestorationState {
-	FIRSTNAME, LASTNAME, BIRTHDATE, METHOD, PASSWORD, FACE
+	FIRST_NAME, LAST_NAME, BIRTH_DATE, METHOD, PASSWORD, FACE
 	
 }

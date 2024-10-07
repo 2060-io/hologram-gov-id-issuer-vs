@@ -33,10 +33,10 @@ import io.unicid.registry.enums.Protection;
 @DynamicInsert
 @NamedQueries({
 	@NamedQuery(name="Identity.findForConnection", query="SELECT i FROM Identity i where i.connectionId=:connectionId and (i.deletedTs IS NULL or i.deletedTs>:deletedTs)  ORDER by i.id ASC"),
-	@NamedQuery(name="Identity.findForRestorePassword", query="SELECT i FROM Identity i where i.connectionId<>:connectionId and (i.deletedTs IS NULL or i.deletedTs>:deletedTs) and i.firstname=:firstname and i.lastname=:lastname and i.birthdate=:birthdate and i.password=:password and i.protection=:protection  ORDER by i.id ASC"),
-	@NamedQuery(name="Identity.findForRestoreOthers", query="SELECT i FROM Identity i where i.connectionId<>:connectionId and (i.deletedTs IS NULL or i.deletedTs>:deletedTs) and i.firstname=:firstname and i.lastname=:lastname and i.birthdate=:birthdate and i.protection=:protection  ORDER by i.id ASC"),
+	@NamedQuery(name="Identity.findForRestorePassword", query="SELECT i FROM Identity i where i.connectionId<>:connectionId and (i.deletedTs IS NULL or i.deletedTs>:deletedTs) and i.firstName=:firstName and i.lastName=:lastName and i.birthDate=:birthDate and i.password=:password and i.protection=:protection  ORDER by i.id ASC"),
+	@NamedQuery(name="Identity.findForRestoreOthers", query="SELECT i FROM Identity i where i.connectionId<>:connectionId and (i.deletedTs IS NULL or i.deletedTs>:deletedTs) and i.firstName=:firstName and i.lastName=:lastName and i.birthDate=:birthDate and i.protection=:protection  ORDER by i.id ASC"),
 	// existing: same claims, and not deleted or deleted for less than recoverable period
-	@NamedQuery(name="Identity.findExisting", query="SELECT i FROM Identity i where i.firstname=:firstname and i.lastname=:lastname and i.birthdate=:birthdate and i.placeOfBirth=:placeOfBirth and (i.deletedTs IS NULL or i.deletedTs>:deletedTs)"),
+	@NamedQuery(name="Identity.findExisting", query="SELECT i FROM Identity i where i.firstName=:firstName and i.lastName=:lastName and i.birthDate=:birthDate and i.placeOfBirth=:placeOfBirth and (i.deletedTs IS NULL or i.deletedTs>:deletedTs)"),
 	
 })
 @Getter
@@ -77,11 +77,11 @@ public class Identity implements Serializable {
 	@Column(columnDefinition="text")
 	private String citizenId;
 	@Column(columnDefinition="text")
-	private String firstname;
+	private String firstName;
 	@Column(columnDefinition="text")
-	private String lastname;
+	private String lastName;
 	@Column(columnDefinition="text")
-	private String avatarname;
+	private String avatarName;
 	@Column(columnDefinition="text")
 	private String mrz;
 	private Mrz.Format documentType;
@@ -103,7 +103,7 @@ public class Identity implements Serializable {
 	
 	
 	@Column(columnDefinition="date")
-	private LocalDate birthdate;
+	private LocalDate birthDate;
 	@Column(columnDefinition="text")
 	private String placeOfBirth;
 	@Column(columnDefinition="timestamptz")

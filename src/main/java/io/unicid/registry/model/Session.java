@@ -62,11 +62,11 @@ public class Session implements Serializable {
 	@Column(columnDefinition="text")
 	private String citizenId;
 	@Column(columnDefinition="text")
-	private String firstname;
+	private String firstName;
 	@Column(columnDefinition="text")
-	private String lastname;
+	private String lastName;
 	@Column(columnDefinition="text")
-	private String avatarname;
+	private String avatarName;
 	@Column(columnDefinition="text")
 	private String mrz;
 	private Mrz.Format documentType;
@@ -90,13 +90,13 @@ public class Session implements Serializable {
 	
 	
 	@Column(columnDefinition="date")
-	private LocalDate birthdate;
+	private LocalDate birthDate;
 	@Column(columnDefinition="text")
 	private String placeOfBirth;
 
 	public void updateSessionWithMrzData(MrzDataSubmitMessage mrz, Session session) {
-        session.setFirstname(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.FIRST_NAME));
-        session.setLastname(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.LAST_NAME));
+        session.setFirstName(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.FIRST_NAME));
+        session.setLastName(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.LAST_NAME));
         session.setPlaceOfBirth(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.NATIONALITY));
 		session.setDocumentType(mrz.getMrzData().getParsed().getFormat());
 		session.setDocumentNumber(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.DOCUMENT_NUMBER));

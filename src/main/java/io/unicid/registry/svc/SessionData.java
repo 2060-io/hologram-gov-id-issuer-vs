@@ -7,35 +7,35 @@ import java.util.UUID;
 public class SessionData {
 	
 	
-	private String firstname;
-	private String lastname;
-	private LocalDate birthdate;
+	private String firstName;
+	private String lastName;
+	private LocalDate birthDate;
 	private String placeOfBirth;
 
 	private UUID identityId;
 
-	public String getFirstname() {
-		return firstname;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
 
-	public String getLastname() {
-		return lastname;
+	public String getLastName() {
+		return lastName;
 	}
 
-	public void setLastname(String lastname) {
-		this.lastname = lastname;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
-	public LocalDate getBirthdate() {
-		return birthdate;
+	public LocalDate getBirthDate() {
+		return birthDate;
 	}
 
-	public void setBirthdate(LocalDate birthdate) {
-		this.birthdate = birthdate;
+	public void setBirthDate(LocalDate birthDate) {
+		this.birthDate = birthDate;
 	}
 
 	
