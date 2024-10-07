@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.unicid</groupId>
   <artifactId>unicid-issuer-dts</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <name>UnicID Issuer DTS</name>
   <description>Decentralised Trust Service for issuing UnicID Verifiable Credentials</description>
   <url>https://github.com/2060-io/2060-demos</url>
@@ -54,7 +54,7 @@
   <dependency> 
  <groupId>io.2060</groupId>
   <artifactId>service-agent-java-client</artifactId>
-  <version>2.0.9</version>
+  <version>2.0.10</version>
   </dependency>
      <dependency>
       <groupId>io.quarkus</groupId>
