@@ -1,5 +1,8 @@
 package io.unicid.registry.enums;
 
 public enum Protection {
-	FINGERPRINTS, FACE, PASSWORD, WEBRTC
+  FINGERPRINTS,
+  FACE,
+  PASSWORD,
+  WEBRTC
 }

@@ -3,58 +3,52 @@ package io.unicid.registry.svc;
 import java.time.LocalDate;
 import java.util.UUID;
 
-
 public class SessionData {
-	
-	
-	private String firstName;
-	private String lastName;
-	private LocalDate birthDate;
-	private String placeOfBirth;
 
-	private UUID identityId;
+  private String firstName;
+  private String lastName;
+  private LocalDate birthDate;
+  private String placeOfBirth;
 
-	public String getFirstName() {
-		return firstName;
-	}
+  private UUID identityId;
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+  public String getFirstName() {
+    return firstName;
+  }
 
-	public String getLastName() {
-		return lastName;
-	}
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+  public String getLastName() {
+    return lastName;
+  }
 
-	public LocalDate getBirthDate() {
-		return birthDate;
-	}
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
 
-	public void setBirthDate(LocalDate birthDate) {
-		this.birthDate = birthDate;
-	}
+  public LocalDate getBirthDate() {
+    return birthDate;
+  }
 
-	
+  public void setBirthDate(LocalDate birthDate) {
+    this.birthDate = birthDate;
+  }
 
-	public String getPlaceOfBirth() {
-		return placeOfBirth;
-	}
+  public String getPlaceOfBirth() {
+    return placeOfBirth;
+  }
 
-	public void setPlaceOfBirth(String placeOfBirth) {
-		this.placeOfBirth = placeOfBirth;
-	}
+  public void setPlaceOfBirth(String placeOfBirth) {
+    this.placeOfBirth = placeOfBirth;
+  }
 
-	public UUID getIdentityId() {
-		return identityId;
-	}
+  public UUID getIdentityId() {
+    return identityId;
+  }
 
-	public void setIdentityId(UUID identityId) {
-		this.identityId = identityId;
-	}
-	
-	
+  public void setIdentityId(UUID identityId) {
+    this.identityId = identityId;
+  }
 }

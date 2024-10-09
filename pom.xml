@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.unicid</groupId>
   <artifactId>unicid-issuer-dts</artifactId>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
   <name>UnicID Issuer DTS</name>
   <description>Decentralised Trust Service for issuing UnicID Verifiable Credentials</description>
   <url>https://github.com/2060-io/2060-demos</url>
@@ -119,6 +119,21 @@
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <groupId>com.spotify.fmt</groupId>
+        <artifactId>fmt-maven-plugin</artifactId>
+        <version>2.23</version>
+        <executions>
+            <execution>
+              <goals>
+                  <goal>format</goal>
+              </goals>
+            </execution>
+        </executions>
+        <configuration>
+            <verbose>true</verbose>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>${quarkus.platform.group-id}</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>

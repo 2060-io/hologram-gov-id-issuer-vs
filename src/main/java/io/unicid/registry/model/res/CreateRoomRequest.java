@@ -1,11 +1,9 @@
 package io.unicid.registry.model.res;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,9 +14,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class CreateRoomRequest implements Serializable {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private String eventNotificationUri;
-    private int maxPeerCount;
-
+  private String eventNotificationUri;
+  private int maxPeerCount;
 }

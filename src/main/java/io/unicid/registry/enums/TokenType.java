@@ -1,35 +1,27 @@
 package io.unicid.registry.enums;
 
 public enum TokenType {
+  FACE_CAPTURE("Face Capture"),
+  FACE_VERIFICATION("Face Verification"),
 
-	FACE_CAPTURE("Face Capture"),
-	FACE_VERIFICATION("Face Verification"),
-	
-	FINGERPRINT_CAPTURE("Fingerprint Capture"),
-	FINGERPRINT_VERIFICATION("Fingerprint Verification"),
-	
-	WEBRTC_CAPTURE("WebRTC Capture"),
-	WEBRTC_VERIFICATION("WebRTC Verification"),
-	
-	
-	;
-	
-	private String typeName;
-	
-	private TokenType(String typeName) {
-		this.typeName = typeName;
-		
-	}
+  FINGERPRINT_CAPTURE("Fingerprint Capture"),
+  FINGERPRINT_VERIFICATION("Fingerprint Verification"),
 
-	public String getTypeName() {
-		return typeName;
-	}
+  WEBRTC_CAPTURE("WebRTC Capture"),
+  WEBRTC_VERIFICATION("WebRTC Verification"),
+  ;
 
-	public void setTypeName(String typeName) {
-		this.typeName = typeName;
-	}
+  private String typeName;
 
-	
-	
-	
+  private TokenType(String typeName) {
+    this.typeName = typeName;
+  }
+
+  public String getTypeName() {
+    return typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
 }
