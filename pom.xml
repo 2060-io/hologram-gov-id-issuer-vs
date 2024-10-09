@@ -128,6 +128,7 @@
               <goals>
                   <goal>format</goal>
               </goals>
+              <phase>clean</phase>
             </execution>
         </executions>
         <configuration>
