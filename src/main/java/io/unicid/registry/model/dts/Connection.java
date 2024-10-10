@@ -1,69 +1,56 @@
 package io.unicid.registry.model.dts;
 
-import java.io.Serializable;
-import java.time.Instant;
-import java.util.UUID;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
-
-
-/**
- * The persistent class for the session database table.
- *
- */
+/** The persistent class for the session database table. */
 @Entity
 @DynamicUpdate
 @DynamicInsert
 @NamedQueries({
-	@NamedQuery(name="Connection.countConnections", query="SELECT COUNT(s) FROM Connection s WHERE s.deletedTs IS NULL"),
+  @NamedQuery(
+      name = "Connection.countConnections",
+      query = "SELECT COUNT(s) FROM Connection s WHERE s.deletedTs IS NULL"),
 })
 @Setter
 @Getter
 public class Connection implements Serializable {
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
+  @Id private UUID id;
 
-	@Id
-	private UUID id;
+  @Column(columnDefinition = "text")
+  private String avatarName;
 
+  private UUID avatarPic;
 
-	@Column(columnDefinition="text")
-	private String avatarName;
+  @Column(columnDefinition = "text")
+  private String language;
 
-	private UUID avatarPic;
+  @Column(columnDefinition = "timestamptz")
+  private Instant createdTs;
 
-	@Column(columnDefinition="text")
-	private String language;
+  @Column(columnDefinition = "timestamptz")
+  private Instant deletedTs;
 
-	@Column(columnDefinition="timestamptz")
-	private Instant createdTs;
+  @Column(columnDefinition = "timestamptz")
+  private Instant authTs;
 
-	@Column(columnDefinition="timestamptz")
-	private Instant deletedTs;
+  @Column(columnDefinition = "timestamptz")
+  private Instant lastBcTs;
 
+  @Column(columnDefinition = "timestamptz")
+  private Instant nextBcTs;
 
-
-	@Column(columnDefinition="timestamptz")
-	private Instant authTs;
-
-
-	@Column(columnDefinition="timestamptz")
-	private Instant lastBcTs;
-
-	@Column(columnDefinition="timestamptz")
-	private Instant nextBcTs;
-
-
-	private Integer sentBcasts;
-
+  private Integer sentBcasts;
 }

@@ -25,4 +25,4 @@ jobs:
       - name: Clean and verify
         run: |
           # Skipping Docker image build for PR verification
-          ./mvnw clean verify -B -Dquarkus.container-image.build=false -Dquarkus.container-image.push=false -Djib.skip=true
+          ./mvnw clean verify fmt:check -B -Dquarkus.container-image.build=false -Dquarkus.container-image.push=false -Djib.skip=true
