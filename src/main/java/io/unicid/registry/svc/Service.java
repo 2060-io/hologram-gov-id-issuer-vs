@@ -50,6 +50,7 @@ import io.unicid.registry.res.c.MediaResource;
 import io.unicid.registry.res.c.Resource;
 import io.unicid.registry.res.c.WebRtcResource;
 import io.unicid.registry.utils.I18n;
+import io.unicid.registry.utils.ServiceLabel;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -220,46 +221,6 @@ public class Service {
   private static DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
   ObjectMapper objectMapper = new ObjectMapper();
 
-  // private static String ROOT_MENU_TITLE = "🌎 Gaia Identity Registry";
-  // private static String ROOT_MENU_NO_SELECTED_ID_DESCRIPTION = "Use the contextual menu to select
-  // an Identity, or create a new one.";
-
-  // private static String WELCOME = "Welcome to GIR (🌎 Gaia Identity Registry). Use the contextual
-  // menu to get started.";
-
-  private static String CMD_SELECT_ID = "/select@";
-
-  private static String CMD_CREATE = "/create";
-  // private static String CMD_CREATE_LABEL = "Create a new Identity";
-
-  private static String CMD_RESTORE = "/restore";
-  // private static String CMD_RESTORE_LABEL = "Restore an Identity";
-
-  private static String CMD_CREATE_ABORT = "/create_abort";
-  // private static String CMD_CREATE_ABORT_LABEL = "Abort and return to main menu";
-  private static String CMD_RESTORE_ABORT = "/restore_abort";
-  // private static String CMD_RESTORE_ABORT_LABEL = "Abort and return to main menu";
-  private static String CMD_EDIT_ABORT = "/edit_abort";
-  // private static String CMD_EDIT_ABORT_LABEL = "Return to main menu";
-  private static String CMD_VIEW_ID = "/view";
-  // private static String CMD_VIEW_ID_LABEL = "View Identity";
-  private static String CMD_UNDELETE = "/undelete";
-  // private static String CMD_UNDELETE_LABEL = "Undelete this Identity";
-  private static String CMD_ISSUE = "/issue";
-  // private static String CMD_ISSUE_LABEL = "Issue Credential";
-  private static String CMD_ISSUE_ABORT = "/issue_abort";
-  // private static String CMD_ISSUE_ABORT_LABEL = "Abort and return to previous menu";
-
-  private static String CMD_CONTINUE_SETUP = "/continue";
-  // private static String CMD_CONTINUE_SETUP_LABEL = "Finish Identity Setup";
-
-  private static String CMD_DELETE = "/delete";
-  // private static String CMD_DELETE_LABEL = "Delete this Identity";
-  private static String CMD_REVOKE = "/revoke";
-
-  private static String COMPLETE_IDENTITY_CONFIRM_YES_VALUE = "CI_Yes";
-  private static String COMPLETE_IDENTITY_CONFIRM_NO_VALUE = "CI_No";
-
   @PostConstruct
   void init() {
     if (Boolean.TRUE.equals(enableMrzClaim)) {
@@ -314,7 +275,7 @@ public class Service {
         for (Identity currentIdentity : myIdentities) {
           i++;
           String label = this.getIdentityLabel(currentIdentity);
-          String id = CMD_SELECT_ID + currentIdentity.getId();
+          String id = ServiceLabel.CMD_SELECT_ID + currentIdentity.getId();
 
           options.add(ContextualMenuItem.build(id, label, null));
         }
@@ -324,10 +285,10 @@ public class Service {
         // max 5 identities
         options.add(
             ContextualMenuItem.build(
-                CMD_CREATE, getMessage("CMD_CREATE_LABEL", connectionId), null));
+                ServiceLabel.CMD_CREATE, getMessage("CMD_CREATE_LABEL", connectionId), null));
         options.add(
             ContextualMenuItem.build(
-                CMD_RESTORE, getMessage("CMD_RESTORE_LABEL", connectionId), null));
+                ServiceLabel.CMD_RESTORE, getMessage("CMD_RESTORE_LABEL", connectionId), null));
       }
 
     } else
@@ -339,7 +300,7 @@ public class Service {
             // abort and return to main menu
             options.add(
                 ContextualMenuItem.build(
-                    CMD_CREATE_ABORT, getMessage("CMD_CREATE_ABORT_LABEL", connectionId), null));
+                    ServiceLabel.CMD_CREATE_ABORT, getMessage("CMD_CREATE_ABORT_LABEL", connectionId), null));
             break;
           }
 
@@ -349,7 +310,7 @@ public class Service {
             // abort and return to main menu
             options.add(
                 ContextualMenuItem.build(
-                    CMD_RESTORE_ABORT, getMessage("CMD_RESTORE_ABORT_LABEL", connectionId), null));
+                    ServiceLabel.CMD_RESTORE_ABORT, getMessage("CMD_RESTORE_ABORT_LABEL", connectionId), null));
             break;
           }
         case EDIT:
@@ -363,65 +324,65 @@ public class Service {
             if (identity.getDeletedTs() != null) {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_UNDELETE, getMessage("CMD_UNDELETE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_UNDELETE, getMessage("CMD_UNDELETE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
             } else if (identity.getRevokedTs() != null) {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
             } else if (identity.getIssuedTs() != null) {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_REVOKE, getMessage("CMD_REVOKE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_REVOKE, getMessage("CMD_REVOKE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
             } else if (identity.getProtectedTs() == null) {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_CONTINUE_SETUP,
+                      ServiceLabel.CMD_CONTINUE_SETUP,
                       getMessage("CMD_CONTINUE_SETUP_LABEL", connectionId),
                       null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
             } else if (identity.getIssuedTs() == null) {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
             } else {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
             }
             break;
           }
@@ -435,7 +396,7 @@ public class Service {
             menu.setDescription(idStr.toString());
             options.add(
                 ContextualMenuItem.build(
-                    CMD_ISSUE_ABORT, getMessage("CMD_ISSUE_ABORT_LABEL", connectionId), null));
+                  ServiceLabel.CMD_ISSUE_ABORT, getMessage("CMD_ISSUE_ABORT_LABEL", connectionId), null));
           }
         default:
           {
@@ -604,7 +565,7 @@ public class Service {
 
     UUID identityId = null;
 
-    if (content.startsWith(CMD_SELECT_ID)) {
+    if (content.startsWith(ServiceLabel.CMD_SELECT_ID)) {
 
       logger.info("userInput: CMD_SELECT_ID : session before: " + session);
 
@@ -645,7 +606,7 @@ public class Service {
         session = null;
       }
 
-    } else if (content.equals(CMD_CREATE)) {
+    } else if (content.equals(ServiceLabel.CMD_CREATE)) {
       logger.info("userInput: CMD_CREATE : session before: " + session);
 
       session = createSession(session, message.getConnectionId());
@@ -654,7 +615,7 @@ public class Service {
 
       this.createEntryPoint(message.getConnectionId(), message.getThreadId(), session, null, null);
 
-    } else if (content.equals(CMD_RESTORE)) {
+    } else if (content.equals(ServiceLabel.CMD_RESTORE)) {
 
       logger.info("userInput: CMD_RESTORE : session before: " + session);
 
@@ -663,7 +624,7 @@ public class Service {
       session = em.merge(session);
       this.restoreEntryPoint(message.getConnectionId(), message.getThreadId(), session, null);
 
-    } else if (content.equals(CMD_CONTINUE_SETUP)) {
+    } else if (content.equals(ServiceLabel.CMD_CONTINUE_SETUP)) {
       logger.info("userInput: CMD_CONTINUE_SETUP : session before: " + session);
 
       if (session != null) {
@@ -677,7 +638,7 @@ public class Service {
       }
 
       logger.info("userInput: CMD_CONTINUE_SETUP : session after: " + session);
-    } else if (content.equals(CMD_CREATE_ABORT)) {
+    } else if (content.equals(ServiceLabel.CMD_CREATE_ABORT)) {
       logger.info("userInput: CMD_CREATE_ABORT : session before: " + session);
 
       if (session != null) {
@@ -691,7 +652,7 @@ public class Service {
               getMessage("IDENTITY_CREATE_ABORTED", message.getConnectionId())));
 
       logger.info("userInput: CMD_CREATE_ABORT : session after: " + session);
-    } else if (content.equals(CMD_RESTORE_ABORT)) {
+    } else if (content.equals(ServiceLabel.CMD_RESTORE_ABORT)) {
       logger.info("userInput: CMD_RESTORE_ABORT : session before: " + session);
       if (session != null) {
         em.remove(session);
@@ -703,7 +664,7 @@ public class Service {
               message.getThreadId(),
               getMessage("IDENTITY_RESTORE_ABORTED", message.getConnectionId())));
 
-    } else if (content.equals(CMD_VIEW_ID)) {
+    } else if (content.equals(ServiceLabel.CMD_VIEW_ID)) {
       logger.info("userInput: CMD_VIEW_ID : session before: " + session);
       if ((session != null)
           && (session.getType() != null)
@@ -721,7 +682,7 @@ public class Service {
                 getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
       }
 
-    } else if (content.equals(CMD_UNDELETE)) {
+    } else if (content.equals(ServiceLabel.CMD_UNDELETE)) {
       logger.info("userInput: CMD_UNDELETE : session before: " + session);
       if ((session != null)
           && (session.getType() != null)
@@ -753,7 +714,7 @@ public class Service {
                 getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
       }
 
-    } else if (content.equals(CMD_EDIT_ABORT)) {
+    } else if (content.equals(ServiceLabel.CMD_EDIT_ABORT)) {
       logger.info("userInput: CMD_EDIT_ABORT : session before: " + session);
       if (session != null) {
         em.remove(session);
@@ -765,7 +726,7 @@ public class Service {
               message.getThreadId(),
               getMessage("IDENTITY_EDIT_ABORTED", message.getConnectionId())));
 
-    } else if (content.equals(CMD_ISSUE)) {
+    } else if (content.equals(ServiceLabel.CMD_ISSUE)) {
       logger.info("userInput: CMD_ISSUE : session before: " + session);
       if ((session != null)
           && (session.getType() != null)
@@ -785,7 +746,7 @@ public class Service {
                 getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
       }
 
-    } else if (content.equals(CMD_ISSUE_ABORT)) {
+    } else if (content.equals(ServiceLabel.CMD_ISSUE_ABORT)) {
       logger.info("userInput: CMD_ISSUE_ABORT : session before: " + session);
       if (session != null) {
         session.setType(SessionType.EDIT);
@@ -797,7 +758,7 @@ public class Service {
               message.getThreadId(),
               getMessage("IDENTITY_ISSUANCE_ABORTED", message.getConnectionId())));
 
-    } else if (content.equals(CMD_DELETE)) {
+    } else if (content.equals(ServiceLabel.CMD_DELETE)) {
       logger.info("userInput: CMD_DELETE : session before: " + session);
 
       if ((session != null)
@@ -824,7 +785,7 @@ public class Service {
                 getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
       }
 
-    } else if (content.equals(CMD_REVOKE)) {
+    } else if (content.equals(ServiceLabel.CMD_REVOKE)) {
       logger.info("userInput: CMD_REVOKE : session before: " + session);
       if ((session != null)
           && (session.getType() != null)
@@ -1890,7 +1851,7 @@ public class Service {
           {
             Identity identity = null;
             if (content != null) {
-              if (content.equals(COMPLETE_IDENTITY_CONFIRM_YES_VALUE)) {
+              if (content.equals(ServiceLabel.COMPLETE_IDENTITY_CONFIRM_YES_VALUE)) {
 
                 if (!this.identityAlreadyExists(session)) {
                   identity = new Identity();
@@ -1921,7 +1882,7 @@ public class Service {
                 session.setCreateStep(CreateStep.CAPTURE);
                 session = em.merge(session);
 
-              } else if (content.equals(COMPLETE_IDENTITY_CONFIRM_NO_VALUE)) {
+              } else if (content.equals(ServiceLabel.COMPLETE_IDENTITY_CONFIRM_NO_VALUE)) {
                 session.setCreateStep(CreateStep.WANT_TO_CHANGE);
                 session = em.merge(session);
                 if (session.getAvatarPic() == null) {
@@ -2671,11 +2632,11 @@ public class Service {
     confirm.setPrompt(getMessage("COMPLETE_IDENTITY_CONFIRM_TITLE", connectionId));
 
     MenuItem yes = new MenuItem();
-    yes.setId(COMPLETE_IDENTITY_CONFIRM_YES_VALUE);
+    yes.setId(ServiceLabel.COMPLETE_IDENTITY_CONFIRM_YES_VALUE);
     yes.setText(getMessage("COMPLETE_IDENTITY_CONFIRM_YES", connectionId));
 
     MenuItem no = new MenuItem();
-    no.setId(COMPLETE_IDENTITY_CONFIRM_NO_VALUE);
+    no.setId(ServiceLabel.COMPLETE_IDENTITY_CONFIRM_NO_VALUE);
     no.setText(getMessage("COMPLETE_IDENTITY_CONFIRM_NO", connectionId));
 
     List<MenuItem> menuItems = new ArrayList<MenuItem>();
