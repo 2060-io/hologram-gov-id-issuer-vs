@@ -15,6 +15,10 @@ If you lose you cellphone or delete the App, then can restore your Identity by s
 ![](arch.svg)
 
 
+## ID Document reading flow
+
+![](id-document-reading.svg)
+
 ## Call coordination flow
 
 ![](call-coordination.svg)
