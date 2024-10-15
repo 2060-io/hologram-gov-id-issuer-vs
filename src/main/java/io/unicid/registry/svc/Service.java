@@ -300,7 +300,9 @@ public class Service {
             // abort and return to main menu
             options.add(
                 ContextualMenuItem.build(
-                    ServiceLabel.CMD_CREATE_ABORT, getMessage("CMD_CREATE_ABORT_LABEL", connectionId), null));
+                    ServiceLabel.CMD_CREATE_ABORT,
+                    getMessage("CMD_CREATE_ABORT_LABEL", connectionId),
+                    null));
             break;
           }
 
@@ -310,7 +312,9 @@ public class Service {
             // abort and return to main menu
             options.add(
                 ContextualMenuItem.build(
-                    ServiceLabel.CMD_RESTORE_ABORT, getMessage("CMD_RESTORE_ABORT_LABEL", connectionId), null));
+                    ServiceLabel.CMD_RESTORE_ABORT,
+                    getMessage("CMD_RESTORE_ABORT_LABEL", connectionId),
+                    null));
             break;
           }
         case EDIT:
@@ -324,17 +328,25 @@ public class Service {
             if (identity.getDeletedTs() != null) {
               options.add(
                   ContextualMenuItem.build(
-                      ServiceLabel.CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID,
+                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
+                      null));
               options.add(
                   ContextualMenuItem.build(
-                      ServiceLabel.CMD_UNDELETE, getMessage("CMD_UNDELETE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_UNDELETE,
+                      getMessage("CMD_UNDELETE_LABEL", connectionId),
+                      null));
               options.add(
                   ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             } else if (identity.getRevokedTs() != null) {
               options.add(
                   ContextualMenuItem.build(
-                      ServiceLabel.CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID,
+                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
+                      null));
               options.add(
                   ContextualMenuItem.build(
                       ServiceLabel.CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
@@ -343,17 +355,23 @@ public class Service {
                       ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             } else if (identity.getIssuedTs() != null) {
               options.add(
                   ContextualMenuItem.build(
-                      ServiceLabel.CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID,
+                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
+                      null));
               options.add(
                   ContextualMenuItem.build(
                       ServiceLabel.CMD_REVOKE, getMessage("CMD_REVOKE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             } else if (identity.getProtectedTs() == null) {
               options.add(
                   ContextualMenuItem.build(
@@ -365,11 +383,15 @@ public class Service {
                       ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             } else if (identity.getIssuedTs() == null) {
               options.add(
                   ContextualMenuItem.build(
-                      ServiceLabel.CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID,
+                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
+                      null));
               options.add(
                   ContextualMenuItem.build(
                       ServiceLabel.CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
@@ -378,11 +400,15 @@ public class Service {
                       ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             } else {
               options.add(
                   ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             }
             break;
           }
@@ -396,7 +422,9 @@ public class Service {
             menu.setDescription(idStr.toString());
             options.add(
                 ContextualMenuItem.build(
-                  ServiceLabel.CMD_ISSUE_ABORT, getMessage("CMD_ISSUE_ABORT_LABEL", connectionId), null));
+                    ServiceLabel.CMD_ISSUE_ABORT,
+                    getMessage("CMD_ISSUE_ABORT_LABEL", connectionId),
+                    null));
           }
         default:
           {
