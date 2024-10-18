@@ -1099,9 +1099,7 @@ public class Service {
 
         case FINGERPRINT_VERIFICATION:
           {
-            Token token =
-                this.getToken(
-                    connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
+            this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
 
             break;
           }
@@ -1287,7 +1285,7 @@ public class Service {
               session.setRestoreStep(RestoreStep.FINGERPRINT_VERIFICATION);
               session = em.merge(session);
 
-              Token token = this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, res);
+              this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, res);
 
               break;
             }
@@ -3203,28 +3201,28 @@ public class Service {
 
     List<Claim> claims = new ArrayList<Claim>();
 
-    Claim idId = new Claim();
-    idId.setName("id");
-    idId.setValue(id.getId().toString());
-    claims.add(idId);
+    this.addClaim(
+      claims,
+      "id",
+      Optional.ofNullable(id.getId().toString()).map(Object::toString).orElse("null"));
 
     if (enableCitizenIdClaim) {
-      Claim citizenId = new Claim();
-      citizenId.setName("citizenId");
-      citizenId.setValue(id.getCitizenId().toString());
-      claims.add(citizenId);
+      this.addClaim(
+          claims,
+          "citizenId",
+          Optional.ofNullable(id.getCitizenId().toString()).map(Object::toString).orElse("null"));
     }
     if (enableFirstNameClaim) {
-      Claim firstName = new Claim();
-      firstName.setName("firstName");
-      firstName.setValue(id.getFirstName());
-      claims.add(firstName);
+      this.addClaim(
+          claims,
+          "firstName",
+          Optional.ofNullable(id.getFirstName()).map(Object::toString).orElse("null"));
     }
     if (enableLastNameClaim) {
-      Claim lastName = new Claim();
-      lastName.setName("lastName");
-      lastName.setValue(id.getLastName());
-      claims.add(lastName);
+      this.addClaim(
+          claims,
+          "lastName",
+          Optional.ofNullable(id.getLastName()).map(Object::toString).orElse("null"));
     }
     if (enableAvatarNameClaim) {
       Claim avatarName = new Claim();
@@ -3282,17 +3280,16 @@ public class Service {
       claims.add(image);
     }
     if (enableBirthDateClaim) {
-      Claim birthDate = new Claim();
-      birthDate.setName("birthDate");
-      birthDate.setValue(id.getBirthDate().toString());
-      claims.add(birthDate);
+      this.addClaim(
+          claims,
+          "birthDate",
+          Optional.ofNullable(id.getBirthDate()).map(Object::toString).orElse("null"));
     }
     if (enableBirthplaceClaim) {
-      Claim placeOfBirth = new Claim();
-      placeOfBirth.setName("placeOfBirth");
-      placeOfBirth.setValue(id.getPlaceOfBirth());
-
-      claims.add(placeOfBirth);
+      this.addClaim(
+          claims,
+          "placeOfBirth",
+          Optional.ofNullable(id.getPlaceOfBirth()).map(Object::toString).orElse("null"));
     }
     if (enableMrzClaim) {
       this.addClaim(

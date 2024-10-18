@@ -24,6 +24,16 @@ services:
       - POSTGRES_USER=gaia
       - POSTGRES_PASSWORD=2060demo
       - AGENT_WALLET_KEY_DERIVATION_METHOD=ARGON2I_INT
+      - AGENT_INVITATION_BASE_URL=https://hologram.zone/
+  
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - chatbot
+    ports:
+      - 6379:6379
+    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru
   
   postgres:
     image: postgres:15.2
