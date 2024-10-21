@@ -2394,7 +2394,7 @@ public class Service {
                 this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
             EMrtdDataSubmitMessage emrtd =
                 objectMapper.readValue(content, EMrtdDataSubmitMessage.class);
-            this.saveBase64Picture(
+            this.saveJp2Picture(
                 emrtd.getDataGroups().getParsed().getFields().getImages().get(0).convertToByte(),
                 emrtd
                     .getDataGroups()
@@ -3917,7 +3917,7 @@ public class Service {
     }
   }
 
-  private void saveBase64Picture(byte[] imageBytes, String mimeType, Session session)
+  private void saveJp2Picture(byte[] imageBytes, String mimeType, Session session)
       throws Exception {
 
     MediaMessage mms = new MediaMessage();
