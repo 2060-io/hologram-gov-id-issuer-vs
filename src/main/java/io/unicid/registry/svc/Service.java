@@ -2417,7 +2417,7 @@ public class Service {
       }
   }
 
-  private Identity setAvatarPictureData(Identity identity, Session session){
+  private Identity setAvatarPictureData(Identity identity, Session session) {
     identity.setAvatarPic(session.getAvatarPic());
     identity.setAvatarPicCiphAlg(session.getAvatarPicCiphAlg());
     identity.setAvatarPicCiphIv(session.getAvatarPicCiphIv());
