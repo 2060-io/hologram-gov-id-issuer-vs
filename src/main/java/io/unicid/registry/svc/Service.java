@@ -21,6 +21,8 @@ import io.twentysixty.sa.client.model.message.Parameters;
 import io.twentysixty.sa.client.model.message.ProfileMessage;
 import io.twentysixty.sa.client.model.message.TextMessage;
 import io.twentysixty.sa.client.model.message.calls.CallOfferRequestMessage;
+import io.twentysixty.sa.client.model.message.mrtd.EMrtdDataRequestMessage;
+import io.twentysixty.sa.client.model.message.mrtd.EMrtdDataSubmitMessage;
 import io.twentysixty.sa.client.model.message.mrtd.MrzDataRequestMessage;
 import io.twentysixty.sa.client.model.message.mrtd.MrzDataSubmitMessage;
 import io.twentysixty.sa.client.util.Aes256cbc;
@@ -535,6 +537,9 @@ public class Service {
               null,
               getMessage("MRZ_SUCCESSFULL", message.getConnectionId())));
       content = JsonUtil.serialize(mrz, false);
+    } else if ((message instanceof EMrtdDataSubmitMessage)) {
+      EMrtdDataSubmitMessage emrtd = (EMrtdDataSubmitMessage) message;
+      content = JsonUtil.serialize(emrtd, false);
     } else if ((message instanceof CredentialReceptionMessage)) {
       CredentialReceptionMessage crp = (CredentialReceptionMessage) message;
       switch (crp.getState()) {
@@ -869,10 +874,13 @@ public class Service {
             + " session: "
             + session
             + " identity: "
-            + session.getIdentity());
+            + ((session != null) ? session.getIdentity() : identity));
 
     messageResource.sendMessage(
-        this.getRootMenu(message.getConnectionId(), session, session.getIdentity()));
+        this.getRootMenu(
+            message.getConnectionId(),
+            session,
+            ((session != null) ? session.getIdentity() : identity)));
   }
 
   private void updatePreferLanguage(ProfileMessage profile) {
@@ -1731,7 +1739,7 @@ public class Service {
           {
             if (mm != null) {
 
-              this.saveAvatarPicture(mm, session);
+              this.saveAvatarPicture(mm, session, null);
 
               if (session.getAvatarPic() != null) {
                 session.setCreateStep(getNextCreateStep(session.getCreateStep()));
@@ -1844,6 +1852,7 @@ public class Service {
             if (content != null) {
               session.updateSessionWithMrzData(
                   objectMapper.readValue(content, MrzDataSubmitMessage.class), session);
+              this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, threadId);
               session.setCreateStep(getNextCreateStep(session.getCreateStep()));
 
               if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
@@ -1885,11 +1894,6 @@ public class Service {
                   identity.setCitizenId(session.getCitizenId());
                   identity.setFirstName(session.getFirstName());
                   identity.setLastName(session.getLastName());
-                  identity.setAvatarPic(session.getAvatarPic());
-                  identity.setAvatarPicCiphAlg(session.getAvatarPicCiphAlg());
-                  identity.setAvatarPicCiphIv(session.getAvatarPicCiphIv());
-                  identity.setAvatarPicCiphKey(session.getAvatarPicCiphKey());
-                  identity.setAvatarMimeType(session.getAvatarMimeType());
                   identity.setAvatarName(session.getAvatarName());
                   identity.setBirthDate(session.getBirthDate());
                   identity.setPlaceOfBirth(session.getPlaceOfBirth());
@@ -1899,7 +1903,7 @@ public class Service {
                   identity.setCitizenSinceTs(Instant.now());
                   identity.setConnectionId(connectionId);
                   identity.setProtection(protection);
-                  em.persist(identity);
+                  em.persist(this.setAvatarPictureData(identity, session));
 
                   session.setIdentity(identity);
                   session = em.merge(session);
@@ -1996,13 +2000,15 @@ public class Service {
                     session.setCreateStep(CreateStep.WEBRTC_CAPTURE);
                     session = em.merge(session);
 
-                    Token token =
-                        this.getToken(
-                            connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
+                    this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
                     messageResource.sendMessage(
                         TextMessage.build(
                             connectionId, threadId, getMessage("WEBRTC_REQUIRED", connectionId)));
-                    this.notifySuccess(token);
+                    Token mrzToken =
+                        this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, null);
+                    messageResource.sendMessage(
+                        EMrtdDataRequestMessage.build(connectionId, mrzToken.getThreadId()));
+                    if (mrzToken != null) em.remove(mrzToken);
                     break;
                   }
               }
@@ -2192,7 +2198,7 @@ public class Service {
           {
             if (mm != null) {
 
-              this.saveAvatarPicture(mm, session);
+              this.saveAvatarPicture(mm, session, null);
 
               if (session.getAvatarPic() != null) {
                 session.setCreateStep(CreateStep.PENDING_CONFIRM);
@@ -2306,6 +2312,7 @@ public class Service {
             if (content != null) {
               session.updateSessionWithMrzData(
                   objectMapper.readValue(content, MrzDataSubmitMessage.class), session);
+              this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, threadId);
 
               if (this.identityAlreadyExists(session)) {
                 messageResource.sendMessage(
@@ -2377,8 +2384,7 @@ public class Service {
           }
         case FINGERPRINT_CAPTURE:
           {
-            Token token =
-                this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
+            this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
 
             break;
           }
@@ -2386,7 +2392,22 @@ public class Service {
           {
             Token token =
                 this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
-            this.notifySuccess(token);
+            EMrtdDataSubmitMessage emrtd =
+                objectMapper.readValue(content, EMrtdDataSubmitMessage.class);
+            this.saveBase64Picture(
+                emrtd.getDataGroups().getParsed().getFields().getImages().get(0).convertToByte(),
+                emrtd
+                    .getDataGroups()
+                    .getParsed()
+                    .getFields()
+                    .getImages()
+                    .get(0)
+                    .getStringImageType(),
+                session);
+            if (session != null && session.getAvatarPic() != null) {
+              em.merge(this.setAvatarPictureData(session.getIdentity(), session));
+              this.notifySuccess(token);
+            }
 
             break;
           }
@@ -2394,6 +2415,15 @@ public class Service {
         default:
           break;
       }
+  }
+
+  private Identity setAvatarPictureData(Identity identity, Session session){
+    identity.setAvatarPic(session.getAvatarPic());
+    identity.setAvatarPicCiphAlg(session.getAvatarPicCiphAlg());
+    identity.setAvatarPicCiphIv(session.getAvatarPicCiphIv());
+    identity.setAvatarPicCiphKey(session.getAvatarPicCiphKey());
+    identity.setAvatarMimeType(session.getAvatarMimeType());
+    return identity;
   }
 
   private CallOfferRequestMessage generateOfferMessage(
@@ -2435,6 +2465,12 @@ public class Service {
     return mms;
   }
 
+  private Token getTokenThreadId(UUID connectionId, TokenType type, UUID threadId) {
+    Token token = this.getToken(connectionId, type, null);
+    if (threadId != null) token.setThreadId(threadId);
+    return em.merge(token);
+  }
+
   private Token getToken(UUID connectionId, TokenType type, Identity identity) {
 
     Query q = em.createNamedQuery("Token.findForConnection");
@@ -2463,6 +2499,10 @@ public class Service {
             token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
             break;
           }
+        case MRZ_VERIFICATION:
+          {
+            break;
+          }
       }
       em.persist(token);
     } else {
@@ -2482,6 +2522,10 @@ public class Service {
         case WEBRTC_VERIFICATION:
           {
             token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
+            break;
+          }
+        case MRZ_VERIFICATION:
+          {
             break;
           }
       }
@@ -3202,9 +3246,9 @@ public class Service {
     List<Claim> claims = new ArrayList<Claim>();
 
     this.addClaim(
-      claims,
-      "id",
-      Optional.ofNullable(id.getId().toString()).map(Object::toString).orElse("null"));
+        claims,
+        "id",
+        Optional.ofNullable(id.getId().toString()).map(Object::toString).orElse("null"));
 
     if (enableCitizenIdClaim) {
       this.addClaim(
@@ -3232,58 +3276,24 @@ public class Service {
     }
     if (enableAvatarPicClaim) {
 
-      UUID mediaId = id.getAvatarPic();
-      String mimeType = id.getAvatarMimeType();
-
-      if (mediaId == null) {
-        logger.error("sendCredential: no media defined for id " + id.getId());
-        throw new NoMediaException();
-      }
-
-      byte[] imageBytes = mediaResource.render(mediaId);
-
-      if (imageBytes == null) {
-        logger.error(
-            "sendCredential: datastore returned null value for mediaId "
-                + mediaId
-                + " id "
-                + id.getId());
-        throw new NoMediaException();
-      }
-      if (mimeType == null) {
-        mimeType = "image/jpeg";
-      }
-
-      logger.info(
-          "sendCredential: imageBytes: "
-              + imageBytes.length
-              + " "
-              + id.getAvatarPicCiphIv()
-              + " "
-              + id.getAvatarPicCiphKey());
-
-      byte[] decrypted =
-          Aes256cbc.decrypt(id.getAvatarPicCiphKey(), id.getAvatarPicCiphIv(), imageBytes);
-      logger.info("sendCredential: decrypted: " + decrypted.length);
-
-      Claim image = new Claim();
-      image.setName("avatarPic");
-      String encPhoto = "data:" + mimeType + ";base64," + Base64.encodeBytes(decrypted);
-
-      image.setValue(encPhoto);
-
+      String encPhoto = this.getDataStorePic(id);
+      this.addClaim(
+          claims, "avatarPic", Optional.ofNullable(encPhoto).map(Object::toString).orElse("null"));
       if (debug) {
         logger.info("sendCredential: avatarPic: " + encPhoto);
-        logger.info("sendCredential: avatarPic: " + JsonUtil.serialize(image, false));
+        logger.info(
+            "sendCredential: avatarPic: "
+                + JsonUtil.serialize(claims.get(claims.size() - 1), false));
         logger.info("sendCredential: avatarPic: encPhoto.length: " + encPhoto.length());
       }
-      claims.add(image);
     }
     if (enableBirthDateClaim) {
       this.addClaim(
           claims,
           "birthDate",
-          Optional.ofNullable(id.getBirthDate()).map(Object::toString).orElse("null"));
+          Optional.ofNullable(id.getBirthDate() != null ? id.getBirthDate().toString() : null)
+              .map(Object::toString)
+              .orElse("null"));
     }
     if (enableBirthplaceClaim) {
       this.addClaim(
@@ -3311,54 +3321,28 @@ public class Service {
       this.addClaim(
           claims,
           "birthDate",
-          Optional.ofNullable(id.getBirthDate()).map(Object::toString).orElse("null"));
+          Optional.ofNullable(id.getBirthDate() != null ? id.getBirthDate().toString() : null)
+              .map(Object::toString)
+              .orElse("null"));
       this.addClaim(
           claims,
           "documentNumber",
           Optional.ofNullable(id.getDocumentNumber()).map(Object::toString).orElse("null"));
       this.addClaim(
-          claims, "photo", Optional.ofNullable(null).map(Object::toString).orElse("null"));
+          claims,
+          "photo",
+          Optional.ofNullable(this.getDataStorePic(id)).map(Object::toString).orElse("null"));
     }
 
     if (enablePhotoClaim) {
-
-      Query q = this.em.createNamedQuery("Media.find");
-      q.setParameter("identity", id);
-      q.setParameter("type", MediaType.FACE);
-      List<UUID> faceMedias = q.getResultList();
-
-      if (faceMedias.size() < 1) {
-        logger.error(
-            "sendCredential: faceMedias.size() " + faceMedias.size() + " id " + id.getId());
-        throw new NoMediaException();
-      }
-      UUID mediaId = faceMedias.iterator().next();
-      byte[] imageBytes = mediaResource.render(mediaId);
-
-      if (imageBytes == null) {
-        logger.error(
-            "sendCredential: datastore returned null value for mediaId "
-                + mediaId
-                + " id "
-                + id.getId());
-        throw new NoMediaException();
-      }
-
-      String mimeType = em.find(Media.class, mediaId).getMimeType();
-      if (mimeType == null) {
-        mimeType = "image/jpeg";
-      }
-
-      Claim image = new Claim();
-      image.setName("photo");
-      String encPhoto = "data:" + mimeType + ";base64," + Base64.encodeBytes(imageBytes);
-      image.setValue(encPhoto);
-
-      claims.add(image);
+      String encPhoto = this.getEncryptedPhoto(id, MediaType.FACE);
+      this.addClaim(
+          claims, "photo", Optional.ofNullable(encPhoto).map(Object::toString).orElse("null"));
 
       if (debug) {
         logger.info("sendCredential: photo: " + encPhoto);
-        logger.info("sendCredential: photo: " + JsonUtil.serialize(image, false));
+        logger.info(
+            "sendCredential: photo: " + JsonUtil.serialize(claims.get(claims.size() - 1), false));
       }
     }
 
@@ -3380,11 +3364,87 @@ public class Service {
     messageResource.sendMessage(cred);
   }
 
+  private String getDataStorePic(Identity id) throws Exception {
+    UUID mediaId = id.getAvatarPic();
+    String mimeType = id.getAvatarMimeType();
+
+    if (mediaId == null) {
+      logger.error("sendCredential: no media defined for id " + id.getId());
+      throw new NoMediaException();
+    }
+
+    byte[] imageBytes = mediaResource.render(mediaId);
+
+    if (imageBytes == null) {
+      logger.error(
+          "sendCredential: datastore returned null value for mediaId "
+              + mediaId
+              + " id "
+              + id.getId());
+      throw new NoMediaException();
+    }
+    if (mimeType == null) {
+      mimeType = "image/jpeg";
+    }
+
+    logger.info(
+        "sendCredential: imageBytes: "
+            + imageBytes.length
+            + " "
+            + id.getAvatarPicCiphIv()
+            + " "
+            + id.getAvatarPicCiphKey());
+
+    byte[] decrypted = null;
+    if (!(mimeType.equals("image/jp2"))) {
+      decrypted = Aes256cbc.decrypt(id.getAvatarPicCiphKey(), id.getAvatarPicCiphIv(), imageBytes);
+      logger.info("sendCredential: decrypted: " + decrypted.length);
+    } else {
+      BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ImageIO.write(image, "jpg", baos);
+      byte[] jpgImageBytes = baos.toByteArray();
+
+      decrypted = jpgImageBytes;
+    }
+    return "data:" + mimeType + ";base64," + Base64.encodeBytes(decrypted);
+  }
+
   private void addClaim(List<Claim> claims, String name, String value) {
     Claim claim = new Claim();
     claim.setName(name);
     claim.setValue(value);
     claims.add(claim);
+  }
+
+  private String getEncryptedPhoto(Identity id, MediaType face) throws Exception {
+    Query q = this.em.createNamedQuery("Media.find");
+    q.setParameter("identity", id);
+    q.setParameter("type", face);
+    List<UUID> faceMedias = q.getResultList();
+
+    if (faceMedias.size() < 1) {
+      logger.error("sendCredential: faceMedias.size() " + faceMedias.size() + " id " + id.getId());
+      throw new NoMediaException();
+    }
+    UUID mediaId = faceMedias.iterator().next();
+    byte[] imageBytes = mediaResource.render(mediaId);
+
+    if (imageBytes == null) {
+      logger.error(
+          "sendCredential: datastore returned null value for mediaId "
+              + mediaId
+              + " id "
+              + id.getId());
+      throw new NoMediaException();
+    }
+
+    String mimeType = em.find(Media.class, mediaId).getMimeType();
+    if (mimeType == null) {
+      mimeType = "image/jpeg";
+    }
+
+    return "data:" + mimeType + ";base64," + Base64.encodeBytes(imageBytes);
   }
 
   @Transactional
@@ -3857,15 +3917,28 @@ public class Service {
     }
   }
 
-  /*
-  private static String MEDIA_NO_ATTACHMENT_ERROR = "Received message does not include any attachment.";
-  private static String MEDIA_SIZE_ERROR = "Received media is too big. Make sure it is smaller than 5MB.";
-  private static String MEDIA_TYPE_ERROR = "Received media is not an image. Accepted: image/jpeg, image/png, image/svg+xml";
-  private static String MEDIA_URI_ERROR = "Received media has no URI";
-  private static String MEDIA_SAVE_ERROR = "Cannot save Avatar";
-  */
+  private void saveBase64Picture(byte[] imageBytes, String mimeType, Session session)
+      throws Exception {
 
-  private void saveAvatarPicture(MediaMessage mm, Session session) throws Exception {
+    MediaMessage mms = new MediaMessage();
+    mms.setConnectionId(session.getConnectionId());
+    mms.setTimestamp(Instant.now());
+
+    List<MediaItem> items = new ArrayList<MediaItem>();
+    MediaItem item = new MediaItem();
+    item.setMimeType(mimeType);
+
+    Ciphering c = Aes256cbc.randomCipheringData();
+    item.setByteCount(imageBytes.length);
+    item.setCiphering(c);
+    items.add(item);
+    mms.setItems(items);
+
+    this.saveAvatarPicture(mms, session, imageBytes);
+  }
+
+  private void saveAvatarPicture(MediaMessage mm, Session session, byte[] encrypted)
+      throws Exception {
     UUID uuid = null;
     String mediaType = null;
     List<MediaItem> items = mm.getItems();
@@ -3898,6 +3971,7 @@ public class Service {
         if ((mediaType.equals("image/svg+xml"))
             || (mediaType.equals("image/jpg"))
             || (mediaType.equals("image/jpeg"))
+            || (mediaType.equals("image/jp2"))
             || (mediaType.equals("image/png"))) {
 
           Ciphering c = item.getCiphering();
@@ -3905,13 +3979,13 @@ public class Service {
           // logger.info("saveAvatarPicture: ciphering: " + c.getAlgorithm() + " Key " + p.getKey()
           // + " Iv " + p.getIv());
 
-          if (item.getUri() != null) {
+          if (item.getUri() != null || encrypted != null) {
 
             try {
-              byte[] encrypted = this.getMedia(item.getUri());
+              if (encrypted == null) encrypted = this.getMedia(item.getUri());
               byte[] reencrypted = encrypted;
 
-              if (!(mediaType.equals("image/svg+xml"))) {
+              if (!(mediaType.equals("image/svg+xml")) && !(mediaType.equals("image/jp2"))) {
                 byte[] decrypted = Aes256cbc.decrypt(p.getKey(), p.getIv(), encrypted);
                 InputStream inputStream = new ByteArrayInputStream(decrypted);
                 BufferedImage image = ImageIO.read(inputStream);
@@ -3989,6 +4063,7 @@ public class Service {
 
               Resource r = new Resource();
               r.chunk = new FileInputStream(file);
+              if (mediaType.equals("image/jp2")) r.chunk = new ByteArrayInputStream(reencrypted);
               mediaResource.uploadChunk(uuid, 0, null, r);
 
               file.delete();
