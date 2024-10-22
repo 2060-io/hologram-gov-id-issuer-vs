@@ -1739,7 +1739,7 @@ public class Service {
           {
             if (mm != null) {
 
-              this.saveAvatarPicture(mm, session, null);
+              this.saveAvatarPicture(mm, session);
 
               if (session.getAvatarPic() != null) {
                 session.setCreateStep(getNextCreateStep(session.getCreateStep()));
@@ -2198,7 +2198,7 @@ public class Service {
           {
             if (mm != null) {
 
-              this.saveAvatarPicture(mm, session, null);
+              this.saveAvatarPicture(mm, session);
 
               if (session.getAvatarPic() != null) {
                 session.setCreateStep(CreateStep.PENDING_CONFIRM);
@@ -2395,15 +2395,7 @@ public class Service {
             EMrtdDataSubmitMessage emrtd =
                 objectMapper.readValue(content, EMrtdDataSubmitMessage.class);
             this.saveJp2Picture(
-                emrtd.getDataGroups().getParsed().getFields().getImages().get(0).convertToByte(),
-                emrtd
-                    .getDataGroups()
-                    .getParsed()
-                    .getFields()
-                    .getImages()
-                    .get(0)
-                    .getStringImageType(),
-                session);
+                emrtd.getDataGroups().getProcessed().getFields().getFaceDataUrl(), session);
             if (session != null && session.getAvatarPic() != null) {
               em.merge(this.setAvatarPictureData(session.getIdentity(), session));
               this.notifySuccess(token);
@@ -3398,15 +3390,10 @@ public class Service {
     byte[] decrypted = null;
     if (!(mimeType.equals("image/jp2"))) {
       decrypted = Aes256cbc.decrypt(id.getAvatarPicCiphKey(), id.getAvatarPicCiphIv(), imageBytes);
-      logger.info("sendCredential: decrypted: " + decrypted.length);
     } else {
-      BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageBytes));
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ImageIO.write(image, "jpg", baos);
-      byte[] jpgImageBytes = baos.toByteArray();
-
-      decrypted = jpgImageBytes;
+      decrypted = imageBytes;
     }
+    logger.info("sendCredential: decrypted: " + decrypted.length);
     return "data:" + mimeType + ";base64," + Base64.encodeBytes(decrypted);
   }
 
@@ -3917,8 +3904,11 @@ public class Service {
     }
   }
 
-  private void saveJp2Picture(byte[] imageBytes, String mimeType, Session session)
-      throws Exception {
+  private void saveJp2Picture(String imageDataUrl, Session session) throws Exception {
+
+    String[] parts = imageDataUrl.split(",", 2);
+    String base64Data = parts[1];
+    byte[] dataBytes = Base64.decode(base64Data);
 
     MediaMessage mms = new MediaMessage();
     mms.setConnectionId(session.getConnectionId());
@@ -3926,19 +3916,21 @@ public class Service {
 
     List<MediaItem> items = new ArrayList<MediaItem>();
     MediaItem item = new MediaItem();
-    item.setMimeType(mimeType);
+    item.setMimeType(parts[0].substring(5).split(";")[0]);
 
     Ciphering c = Aes256cbc.randomCipheringData();
-    item.setByteCount(imageBytes.length);
+    item.setByteCount(dataBytes.length);
     item.setCiphering(c);
+    item.setUri(imageDataUrl);
     items.add(item);
     mms.setItems(items);
 
-    this.saveAvatarPicture(mms, session, imageBytes);
+    UUID uuid = UUID.randomUUID();
+    this.setAvatarPictureSession(session, item.getMimeType(), uuid, c, item.getUri());
+    this.dataStoreLoad(uuid, new ByteArrayInputStream(dataBytes));
   }
 
-  private void saveAvatarPicture(MediaMessage mm, Session session, byte[] encrypted)
-      throws Exception {
+  private void saveAvatarPicture(MediaMessage mm, Session session) throws Exception {
     UUID uuid = null;
     String mediaType = null;
     List<MediaItem> items = mm.getItems();
@@ -3971,7 +3963,6 @@ public class Service {
         if ((mediaType.equals("image/svg+xml"))
             || (mediaType.equals("image/jpg"))
             || (mediaType.equals("image/jpeg"))
-            || (mediaType.equals("image/jp2"))
             || (mediaType.equals("image/png"))) {
 
           Ciphering c = item.getCiphering();
@@ -3979,14 +3970,13 @@ public class Service {
           // logger.info("saveAvatarPicture: ciphering: " + c.getAlgorithm() + " Key " + p.getKey()
           // + " Iv " + p.getIv());
 
-          if (item.getUri() != null || encrypted != null) {
+          if (item.getUri() != null) {
 
             try {
-              if (encrypted == null) encrypted = this.getMedia(item.getUri());
-              byte[] reencrypted = encrypted;
+              byte[] reencrypted = this.getMedia(item.getUri());
 
-              if (!(mediaType.equals("image/svg+xml")) && !(mediaType.equals("image/jp2"))) {
-                byte[] decrypted = Aes256cbc.decrypt(p.getKey(), p.getIv(), encrypted);
+              if (!(mediaType.equals("image/svg+xml"))) {
+                byte[] decrypted = Aes256cbc.decrypt(p.getKey(), p.getIv(), reencrypted);
                 InputStream inputStream = new ByteArrayInputStream(decrypted);
                 BufferedImage image = ImageIO.read(inputStream);
                 BufferedImage outputImage = image;
@@ -4053,7 +4043,6 @@ public class Service {
               // properly deciphered
 
               uuid = UUID.randomUUID();
-              mediaResource.createOrUpdate(uuid, 1, null);
               File file = new File(System.getProperty("java.io.tmpdir") + "/" + uuid);
 
               FileOutputStream fos = new FileOutputStream(file);
@@ -4061,20 +4050,11 @@ public class Service {
               fos.flush();
               fos.close();
 
-              Resource r = new Resource();
-              r.chunk = new FileInputStream(file);
-              if (mediaType.equals("image/jp2")) r.chunk = new ByteArrayInputStream(reencrypted);
-              mediaResource.uploadChunk(uuid, 0, null, r);
+              this.dataStoreLoad(uuid, new FileInputStream(file));
 
               file.delete();
 
-              session.setAvatarMimeType(mediaType);
-              session.setAvatarPic(uuid);
-              session.setAvatarPicCiphAlg(c.getAlgorithm());
-              session.setAvatarPicCiphIv(p.getIv());
-              session.setAvatarPicCiphKey(p.getKey());
-              session.setAvatarURI(item.getUri());
-
+              this.setAvatarPictureSession(session, mediaType, uuid, c, item.getUri());
             } catch (Exception e) {
               logger.error("incomingAvatarPicture", e);
               logger.info("incomingAvatarPicture: could not save avatar");
@@ -4155,6 +4135,23 @@ public class Service {
       session.setAvatarURI(null);
       return;
     }
+  }
+
+  private void setAvatarPictureSession(
+      Session session, String mediaType, UUID uuid, Ciphering c, String uri) {
+    session.setAvatarMimeType(mediaType);
+    session.setAvatarPic(uuid);
+    session.setAvatarPicCiphAlg(c.getAlgorithm());
+    session.setAvatarPicCiphIv(c.getParameters().getIv());
+    session.setAvatarPicCiphKey(c.getParameters().getKey());
+    session.setAvatarURI(uri);
+  }
+
+  private void dataStoreLoad(UUID uuid, InputStream inputStream) {
+    mediaResource.createOrUpdate(uuid, 1, null);
+    Resource r = new Resource();
+    r.chunk = inputStream;
+    mediaResource.uploadChunk(uuid, 0, null, r);
   }
 
   private byte[] getMedia(String uri) throws IOException, ClientProtocolException {
