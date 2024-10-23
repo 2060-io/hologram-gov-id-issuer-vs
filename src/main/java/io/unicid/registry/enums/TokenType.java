@@ -9,6 +9,8 @@ public enum TokenType {
 
   WEBRTC_CAPTURE("WebRTC Capture"),
   WEBRTC_VERIFICATION("WebRTC Verification"),
+
+  MRZ_VERIFICATION("Mrz Verification"),
   ;
 
   private String typeName;

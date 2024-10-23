@@ -21,6 +21,8 @@ import io.twentysixty.sa.client.model.message.Parameters;
 import io.twentysixty.sa.client.model.message.ProfileMessage;
 import io.twentysixty.sa.client.model.message.TextMessage;
 import io.twentysixty.sa.client.model.message.calls.CallOfferRequestMessage;
+import io.twentysixty.sa.client.model.message.mrtd.EMrtdDataRequestMessage;
+import io.twentysixty.sa.client.model.message.mrtd.EMrtdDataSubmitMessage;
 import io.twentysixty.sa.client.model.message.mrtd.MrzDataRequestMessage;
 import io.twentysixty.sa.client.model.message.mrtd.MrzDataSubmitMessage;
 import io.twentysixty.sa.client.util.Aes256cbc;
@@ -50,6 +52,7 @@ import io.unicid.registry.res.c.MediaResource;
 import io.unicid.registry.res.c.Resource;
 import io.unicid.registry.res.c.WebRtcResource;
 import io.unicid.registry.utils.I18n;
+import io.unicid.registry.utils.ServiceLabel;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -220,46 +223,6 @@ public class Service {
   private static DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
   ObjectMapper objectMapper = new ObjectMapper();
 
-  // private static String ROOT_MENU_TITLE = "🌎 Gaia Identity Registry";
-  // private static String ROOT_MENU_NO_SELECTED_ID_DESCRIPTION = "Use the contextual menu to select
-  // an Identity, or create a new one.";
-
-  // private static String WELCOME = "Welcome to GIR (🌎 Gaia Identity Registry). Use the contextual
-  // menu to get started.";
-
-  private static String CMD_SELECT_ID = "/select@";
-
-  private static String CMD_CREATE = "/create";
-  // private static String CMD_CREATE_LABEL = "Create a new Identity";
-
-  private static String CMD_RESTORE = "/restore";
-  // private static String CMD_RESTORE_LABEL = "Restore an Identity";
-
-  private static String CMD_CREATE_ABORT = "/create_abort";
-  // private static String CMD_CREATE_ABORT_LABEL = "Abort and return to main menu";
-  private static String CMD_RESTORE_ABORT = "/restore_abort";
-  // private static String CMD_RESTORE_ABORT_LABEL = "Abort and return to main menu";
-  private static String CMD_EDIT_ABORT = "/edit_abort";
-  // private static String CMD_EDIT_ABORT_LABEL = "Return to main menu";
-  private static String CMD_VIEW_ID = "/view";
-  // private static String CMD_VIEW_ID_LABEL = "View Identity";
-  private static String CMD_UNDELETE = "/undelete";
-  // private static String CMD_UNDELETE_LABEL = "Undelete this Identity";
-  private static String CMD_ISSUE = "/issue";
-  // private static String CMD_ISSUE_LABEL = "Issue Credential";
-  private static String CMD_ISSUE_ABORT = "/issue_abort";
-  // private static String CMD_ISSUE_ABORT_LABEL = "Abort and return to previous menu";
-
-  private static String CMD_CONTINUE_SETUP = "/continue";
-  // private static String CMD_CONTINUE_SETUP_LABEL = "Finish Identity Setup";
-
-  private static String CMD_DELETE = "/delete";
-  // private static String CMD_DELETE_LABEL = "Delete this Identity";
-  private static String CMD_REVOKE = "/revoke";
-
-  private static String COMPLETE_IDENTITY_CONFIRM_YES_VALUE = "CI_Yes";
-  private static String COMPLETE_IDENTITY_CONFIRM_NO_VALUE = "CI_No";
-
   @PostConstruct
   void init() {
     if (Boolean.TRUE.equals(enableMrzClaim)) {
@@ -314,7 +277,7 @@ public class Service {
         for (Identity currentIdentity : myIdentities) {
           i++;
           String label = this.getIdentityLabel(currentIdentity);
-          String id = CMD_SELECT_ID + currentIdentity.getId();
+          String id = ServiceLabel.CMD_SELECT_ID + currentIdentity.getId();
 
           options.add(ContextualMenuItem.build(id, label, null));
         }
@@ -324,10 +287,10 @@ public class Service {
         // max 5 identities
         options.add(
             ContextualMenuItem.build(
-                CMD_CREATE, getMessage("CMD_CREATE_LABEL", connectionId), null));
+                ServiceLabel.CMD_CREATE, getMessage("CMD_CREATE_LABEL", connectionId), null));
         options.add(
             ContextualMenuItem.build(
-                CMD_RESTORE, getMessage("CMD_RESTORE_LABEL", connectionId), null));
+                ServiceLabel.CMD_RESTORE, getMessage("CMD_RESTORE_LABEL", connectionId), null));
       }
 
     } else
@@ -339,7 +302,9 @@ public class Service {
             // abort and return to main menu
             options.add(
                 ContextualMenuItem.build(
-                    CMD_CREATE_ABORT, getMessage("CMD_CREATE_ABORT_LABEL", connectionId), null));
+                    ServiceLabel.CMD_CREATE_ABORT,
+                    getMessage("CMD_CREATE_ABORT_LABEL", connectionId),
+                    null));
             break;
           }
 
@@ -349,7 +314,9 @@ public class Service {
             // abort and return to main menu
             options.add(
                 ContextualMenuItem.build(
-                    CMD_RESTORE_ABORT, getMessage("CMD_RESTORE_ABORT_LABEL", connectionId), null));
+                    ServiceLabel.CMD_RESTORE_ABORT,
+                    getMessage("CMD_RESTORE_ABORT_LABEL", connectionId),
+                    null));
             break;
           }
         case EDIT:
@@ -363,65 +330,87 @@ public class Service {
             if (identity.getDeletedTs() != null) {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID,
+                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
+                      null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_UNDELETE, getMessage("CMD_UNDELETE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_UNDELETE,
+                      getMessage("CMD_UNDELETE_LABEL", connectionId),
+                      null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             } else if (identity.getRevokedTs() != null) {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID,
+                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
+                      null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             } else if (identity.getIssuedTs() != null) {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID,
+                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
+                      null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_REVOKE, getMessage("CMD_REVOKE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_REVOKE, getMessage("CMD_REVOKE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             } else if (identity.getProtectedTs() == null) {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_CONTINUE_SETUP,
+                      ServiceLabel.CMD_CONTINUE_SETUP,
                       getMessage("CMD_CONTINUE_SETUP_LABEL", connectionId),
                       null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             } else if (identity.getIssuedTs() == null) {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_VIEW_ID, getMessage("CMD_VIEW_ID_LABEL", connectionId), null));
+                      ServiceLabel.CMD_VIEW_ID,
+                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
+                      null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
+                      ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             } else {
               options.add(
                   ContextualMenuItem.build(
-                      CMD_EDIT_ABORT, getMessage("CMD_EDIT_ABORT_LABEL", connectionId), null));
+                      ServiceLabel.CMD_EDIT_ABORT,
+                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
+                      null));
             }
             break;
           }
@@ -435,7 +424,9 @@ public class Service {
             menu.setDescription(idStr.toString());
             options.add(
                 ContextualMenuItem.build(
-                    CMD_ISSUE_ABORT, getMessage("CMD_ISSUE_ABORT_LABEL", connectionId), null));
+                    ServiceLabel.CMD_ISSUE_ABORT,
+                    getMessage("CMD_ISSUE_ABORT_LABEL", connectionId),
+                    null));
           }
         default:
           {
@@ -546,6 +537,9 @@ public class Service {
               null,
               getMessage("MRZ_SUCCESSFULL", message.getConnectionId())));
       content = JsonUtil.serialize(mrz, false);
+    } else if ((message instanceof EMrtdDataSubmitMessage)) {
+      EMrtdDataSubmitMessage emrtd = (EMrtdDataSubmitMessage) message;
+      content = JsonUtil.serialize(emrtd, false);
     } else if ((message instanceof CredentialReceptionMessage)) {
       CredentialReceptionMessage crp = (CredentialReceptionMessage) message;
       switch (crp.getState()) {
@@ -604,7 +598,7 @@ public class Service {
 
     UUID identityId = null;
 
-    if (content.startsWith(CMD_SELECT_ID)) {
+    if (content.startsWith(ServiceLabel.CMD_SELECT_ID)) {
 
       logger.info("userInput: CMD_SELECT_ID : session before: " + session);
 
@@ -645,7 +639,7 @@ public class Service {
         session = null;
       }
 
-    } else if (content.equals(CMD_CREATE)) {
+    } else if (content.equals(ServiceLabel.CMD_CREATE)) {
       logger.info("userInput: CMD_CREATE : session before: " + session);
 
       session = createSession(session, message.getConnectionId());
@@ -654,7 +648,7 @@ public class Service {
 
       this.createEntryPoint(message.getConnectionId(), message.getThreadId(), session, null, null);
 
-    } else if (content.equals(CMD_RESTORE)) {
+    } else if (content.equals(ServiceLabel.CMD_RESTORE)) {
 
       logger.info("userInput: CMD_RESTORE : session before: " + session);
 
@@ -663,7 +657,7 @@ public class Service {
       session = em.merge(session);
       this.restoreEntryPoint(message.getConnectionId(), message.getThreadId(), session, null);
 
-    } else if (content.equals(CMD_CONTINUE_SETUP)) {
+    } else if (content.equals(ServiceLabel.CMD_CONTINUE_SETUP)) {
       logger.info("userInput: CMD_CONTINUE_SETUP : session before: " + session);
 
       if (session != null) {
@@ -677,7 +671,7 @@ public class Service {
       }
 
       logger.info("userInput: CMD_CONTINUE_SETUP : session after: " + session);
-    } else if (content.equals(CMD_CREATE_ABORT)) {
+    } else if (content.equals(ServiceLabel.CMD_CREATE_ABORT)) {
       logger.info("userInput: CMD_CREATE_ABORT : session before: " + session);
 
       if (session != null) {
@@ -691,7 +685,7 @@ public class Service {
               getMessage("IDENTITY_CREATE_ABORTED", message.getConnectionId())));
 
       logger.info("userInput: CMD_CREATE_ABORT : session after: " + session);
-    } else if (content.equals(CMD_RESTORE_ABORT)) {
+    } else if (content.equals(ServiceLabel.CMD_RESTORE_ABORT)) {
       logger.info("userInput: CMD_RESTORE_ABORT : session before: " + session);
       if (session != null) {
         em.remove(session);
@@ -703,7 +697,7 @@ public class Service {
               message.getThreadId(),
               getMessage("IDENTITY_RESTORE_ABORTED", message.getConnectionId())));
 
-    } else if (content.equals(CMD_VIEW_ID)) {
+    } else if (content.equals(ServiceLabel.CMD_VIEW_ID)) {
       logger.info("userInput: CMD_VIEW_ID : session before: " + session);
       if ((session != null)
           && (session.getType() != null)
@@ -721,7 +715,7 @@ public class Service {
                 getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
       }
 
-    } else if (content.equals(CMD_UNDELETE)) {
+    } else if (content.equals(ServiceLabel.CMD_UNDELETE)) {
       logger.info("userInput: CMD_UNDELETE : session before: " + session);
       if ((session != null)
           && (session.getType() != null)
@@ -753,7 +747,7 @@ public class Service {
                 getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
       }
 
-    } else if (content.equals(CMD_EDIT_ABORT)) {
+    } else if (content.equals(ServiceLabel.CMD_EDIT_ABORT)) {
       logger.info("userInput: CMD_EDIT_ABORT : session before: " + session);
       if (session != null) {
         em.remove(session);
@@ -765,7 +759,7 @@ public class Service {
               message.getThreadId(),
               getMessage("IDENTITY_EDIT_ABORTED", message.getConnectionId())));
 
-    } else if (content.equals(CMD_ISSUE)) {
+    } else if (content.equals(ServiceLabel.CMD_ISSUE)) {
       logger.info("userInput: CMD_ISSUE : session before: " + session);
       if ((session != null)
           && (session.getType() != null)
@@ -785,7 +779,7 @@ public class Service {
                 getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
       }
 
-    } else if (content.equals(CMD_ISSUE_ABORT)) {
+    } else if (content.equals(ServiceLabel.CMD_ISSUE_ABORT)) {
       logger.info("userInput: CMD_ISSUE_ABORT : session before: " + session);
       if (session != null) {
         session.setType(SessionType.EDIT);
@@ -797,7 +791,7 @@ public class Service {
               message.getThreadId(),
               getMessage("IDENTITY_ISSUANCE_ABORTED", message.getConnectionId())));
 
-    } else if (content.equals(CMD_DELETE)) {
+    } else if (content.equals(ServiceLabel.CMD_DELETE)) {
       logger.info("userInput: CMD_DELETE : session before: " + session);
 
       if ((session != null)
@@ -824,7 +818,7 @@ public class Service {
                 getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
       }
 
-    } else if (content.equals(CMD_REVOKE)) {
+    } else if (content.equals(ServiceLabel.CMD_REVOKE)) {
       logger.info("userInput: CMD_REVOKE : session before: " + session);
       if ((session != null)
           && (session.getType() != null)
@@ -880,10 +874,13 @@ public class Service {
             + " session: "
             + session
             + " identity: "
-            + session.getIdentity());
+            + ((session != null) ? session.getIdentity() : identity));
 
     messageResource.sendMessage(
-        this.getRootMenu(message.getConnectionId(), session, session.getIdentity()));
+        this.getRootMenu(
+            message.getConnectionId(),
+            session,
+            ((session != null) ? session.getIdentity() : identity)));
   }
 
   private void updatePreferLanguage(ProfileMessage profile) {
@@ -1084,8 +1081,9 @@ public class Service {
         case MRZ:
           {
             if (content != null) {
-              session.updateSessionWithMrzData(
-                  objectMapper.readValue(content, MrzDataSubmitMessage.class), session);
+              session.updateSessionWithData(
+                  objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
+                  session);
               session.setRestoreStep(getNextRestoreStep(session.getRestoreStep()));
               session = em.merge(session);
             }
@@ -1110,9 +1108,7 @@ public class Service {
 
         case FINGERPRINT_VERIFICATION:
           {
-            Token token =
-                this.getToken(
-                    connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
+            this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
 
             break;
           }
@@ -1298,7 +1294,7 @@ public class Service {
               session.setRestoreStep(RestoreStep.FINGERPRINT_VERIFICATION);
               session = em.merge(session);
 
-              Token token = this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, res);
+              this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, res);
 
               break;
             }
@@ -1855,8 +1851,10 @@ public class Service {
         case MRZ:
           {
             if (content != null) {
-              session.updateSessionWithMrzData(
-                  objectMapper.readValue(content, MrzDataSubmitMessage.class), session);
+              session.updateSessionWithData(
+                  objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
+                  session);
+              this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, threadId);
               session.setCreateStep(getNextCreateStep(session.getCreateStep()));
 
               if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
@@ -1890,29 +1888,18 @@ public class Service {
           {
             Identity identity = null;
             if (content != null) {
-              if (content.equals(COMPLETE_IDENTITY_CONFIRM_YES_VALUE)) {
+              if (content.equals(ServiceLabel.COMPLETE_IDENTITY_CONFIRM_YES_VALUE)) {
 
                 if (!this.identityAlreadyExists(session)) {
                   identity = new Identity();
                   identity.setId(UUID.randomUUID());
                   identity.setCitizenId(session.getCitizenId());
-                  identity.setFirstName(session.getFirstName());
-                  identity.setLastName(session.getLastName());
-                  identity.setAvatarPic(session.getAvatarPic());
-                  identity.setAvatarPicCiphAlg(session.getAvatarPicCiphAlg());
-                  identity.setAvatarPicCiphIv(session.getAvatarPicCiphIv());
-                  identity.setAvatarPicCiphKey(session.getAvatarPicCiphKey());
-                  identity.setAvatarMimeType(session.getAvatarMimeType());
                   identity.setAvatarName(session.getAvatarName());
-                  identity.setBirthDate(session.getBirthDate());
-                  identity.setPlaceOfBirth(session.getPlaceOfBirth());
                   identity.setMrz(session.getMrz());
-                  identity.setDocumentType(session.getDocumentType());
-                  identity.setDocumentNumber(session.getDocumentNumber());
                   identity.setCitizenSinceTs(Instant.now());
                   identity.setConnectionId(connectionId);
                   identity.setProtection(protection);
-                  em.persist(identity);
+                  em.persist(this.setAvatarPictureData(identity, session));
 
                   session.setIdentity(identity);
                   session = em.merge(session);
@@ -1921,7 +1908,7 @@ public class Service {
                 session.setCreateStep(CreateStep.CAPTURE);
                 session = em.merge(session);
 
-              } else if (content.equals(COMPLETE_IDENTITY_CONFIRM_NO_VALUE)) {
+              } else if (content.equals(ServiceLabel.COMPLETE_IDENTITY_CONFIRM_NO_VALUE)) {
                 session.setCreateStep(CreateStep.WANT_TO_CHANGE);
                 session = em.merge(session);
                 if (session.getAvatarPic() == null) {
@@ -2009,13 +1996,15 @@ public class Service {
                     session.setCreateStep(CreateStep.WEBRTC_CAPTURE);
                     session = em.merge(session);
 
-                    Token token =
-                        this.getToken(
-                            connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
+                    this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
                     messageResource.sendMessage(
                         TextMessage.build(
                             connectionId, threadId, getMessage("WEBRTC_REQUIRED", connectionId)));
-                    this.notifySuccess(token);
+                    Token mrzToken =
+                        this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, null);
+                    messageResource.sendMessage(
+                        EMrtdDataRequestMessage.build(connectionId, mrzToken.getThreadId()));
+                    if (mrzToken != null) em.remove(mrzToken);
                     break;
                   }
               }
@@ -2317,8 +2306,10 @@ public class Service {
         case CHANGE_MRZ:
           {
             if (content != null) {
-              session.updateSessionWithMrzData(
-                  objectMapper.readValue(content, MrzDataSubmitMessage.class), session);
+              session.updateSessionWithData(
+                  objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
+                  session);
+              this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, threadId);
 
               if (this.identityAlreadyExists(session)) {
                 messageResource.sendMessage(
@@ -2390,8 +2381,7 @@ public class Service {
           }
         case FINGERPRINT_CAPTURE:
           {
-            Token token =
-                this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
+            this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
 
             break;
           }
@@ -2399,7 +2389,15 @@ public class Service {
           {
             Token token =
                 this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
-            this.notifySuccess(token);
+            EMrtdDataSubmitMessage emrtd =
+                objectMapper.readValue(content, EMrtdDataSubmitMessage.class);
+            session.updateSessionWithData(emrtd.getDataGroups(), session);
+            this.saveJp2Picture(
+                emrtd.getDataGroups().getProcessed().getFaceImages().get(0), session);
+            if (session != null && session.getAvatarPic() != null) {
+              em.merge(this.setAvatarPictureData(session.getIdentity(), session));
+              this.notifySuccess(token);
+            }
 
             break;
           }
@@ -2407,6 +2405,23 @@ public class Service {
         default:
           break;
       }
+  }
+
+  private Identity setAvatarPictureData(Identity identity, Session session) {
+    identity.setFirstName(session.getFirstName());
+    identity.setLastName(session.getLastName());
+    identity.setBirthDate(session.getBirthDate());
+    identity.setPlaceOfBirth(session.getPlaceOfBirth());
+    identity.setDocumentType(session.getDocumentType());
+    identity.setDocumentNumber(session.getDocumentNumber());
+
+    identity.setAvatarPic(session.getAvatarPic());
+    identity.setIsAvatarPicCiphered(session.getIsAvatarPicCiphered());
+    identity.setAvatarPicCiphAlg(session.getAvatarPicCiphAlg());
+    identity.setAvatarPicCiphIv(session.getAvatarPicCiphIv());
+    identity.setAvatarPicCiphKey(session.getAvatarPicCiphKey());
+    identity.setAvatarMimeType(session.getAvatarMimeType());
+    return identity;
   }
 
   private CallOfferRequestMessage generateOfferMessage(
@@ -2448,6 +2463,12 @@ public class Service {
     return mms;
   }
 
+  private Token getTokenThreadId(UUID connectionId, TokenType type, UUID threadId) {
+    Token token = this.getToken(connectionId, type, null);
+    if (threadId != null) token.setThreadId(threadId);
+    return em.merge(token);
+  }
+
   private Token getToken(UUID connectionId, TokenType type, Identity identity) {
 
     Query q = em.createNamedQuery("Token.findForConnection");
@@ -2476,6 +2497,10 @@ public class Service {
             token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
             break;
           }
+        case MRZ_VERIFICATION:
+          {
+            break;
+          }
       }
       em.persist(token);
     } else {
@@ -2495,6 +2520,10 @@ public class Service {
         case WEBRTC_VERIFICATION:
           {
             token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
+            break;
+          }
+        case MRZ_VERIFICATION:
+          {
             break;
           }
       }
@@ -2671,11 +2700,11 @@ public class Service {
     confirm.setPrompt(getMessage("COMPLETE_IDENTITY_CONFIRM_TITLE", connectionId));
 
     MenuItem yes = new MenuItem();
-    yes.setId(COMPLETE_IDENTITY_CONFIRM_YES_VALUE);
+    yes.setId(ServiceLabel.COMPLETE_IDENTITY_CONFIRM_YES_VALUE);
     yes.setText(getMessage("COMPLETE_IDENTITY_CONFIRM_YES", connectionId));
 
     MenuItem no = new MenuItem();
-    no.setId(COMPLETE_IDENTITY_CONFIRM_NO_VALUE);
+    no.setId(ServiceLabel.COMPLETE_IDENTITY_CONFIRM_NO_VALUE);
     no.setText(getMessage("COMPLETE_IDENTITY_CONFIRM_NO", connectionId));
 
     List<MenuItem> menuItems = new ArrayList<MenuItem>();
@@ -3214,28 +3243,28 @@ public class Service {
 
     List<Claim> claims = new ArrayList<Claim>();
 
-    Claim idId = new Claim();
-    idId.setName("id");
-    idId.setValue(id.getId().toString());
-    claims.add(idId);
+    this.addClaim(
+        claims,
+        "id",
+        Optional.ofNullable(id.getId().toString()).map(Object::toString).orElse("null"));
 
     if (enableCitizenIdClaim) {
-      Claim citizenId = new Claim();
-      citizenId.setName("citizenId");
-      citizenId.setValue(id.getCitizenId().toString());
-      claims.add(citizenId);
+      this.addClaim(
+          claims,
+          "citizenId",
+          Optional.ofNullable(id.getCitizenId().toString()).map(Object::toString).orElse("null"));
     }
     if (enableFirstNameClaim) {
-      Claim firstName = new Claim();
-      firstName.setName("firstName");
-      firstName.setValue(id.getFirstName());
-      claims.add(firstName);
+      this.addClaim(
+          claims,
+          "firstName",
+          Optional.ofNullable(id.getFirstName()).map(Object::toString).orElse("null"));
     }
     if (enableLastNameClaim) {
-      Claim lastName = new Claim();
-      lastName.setName("lastName");
-      lastName.setValue(id.getLastName());
-      claims.add(lastName);
+      this.addClaim(
+          claims,
+          "lastName",
+          Optional.ofNullable(id.getLastName()).map(Object::toString).orElse("null"));
     }
     if (enableAvatarNameClaim) {
       Claim avatarName = new Claim();
@@ -3245,65 +3274,30 @@ public class Service {
     }
     if (enableAvatarPicClaim) {
 
-      UUID mediaId = id.getAvatarPic();
-      String mimeType = id.getAvatarMimeType();
-
-      if (mediaId == null) {
-        logger.error("sendCredential: no media defined for id " + id.getId());
-        throw new NoMediaException();
-      }
-
-      byte[] imageBytes = mediaResource.render(mediaId);
-
-      if (imageBytes == null) {
-        logger.error(
-            "sendCredential: datastore returned null value for mediaId "
-                + mediaId
-                + " id "
-                + id.getId());
-        throw new NoMediaException();
-      }
-      if (mimeType == null) {
-        mimeType = "image/jpeg";
-      }
-
-      logger.info(
-          "sendCredential: imageBytes: "
-              + imageBytes.length
-              + " "
-              + id.getAvatarPicCiphIv()
-              + " "
-              + id.getAvatarPicCiphKey());
-
-      byte[] decrypted =
-          Aes256cbc.decrypt(id.getAvatarPicCiphKey(), id.getAvatarPicCiphIv(), imageBytes);
-      logger.info("sendCredential: decrypted: " + decrypted.length);
-
-      Claim image = new Claim();
-      image.setName("avatarPic");
-      String encPhoto = "data:" + mimeType + ";base64," + Base64.encodeBytes(decrypted);
-
-      image.setValue(encPhoto);
-
+      String encPhoto = this.getDataStorePic(id);
+      this.addClaim(
+          claims, "avatarPic", Optional.ofNullable(encPhoto).map(Object::toString).orElse("null"));
       if (debug) {
         logger.info("sendCredential: avatarPic: " + encPhoto);
-        logger.info("sendCredential: avatarPic: " + JsonUtil.serialize(image, false));
+        logger.info(
+            "sendCredential: avatarPic: "
+                + JsonUtil.serialize(claims.get(claims.size() - 1), false));
         logger.info("sendCredential: avatarPic: encPhoto.length: " + encPhoto.length());
       }
-      claims.add(image);
     }
     if (enableBirthDateClaim) {
-      Claim birthDate = new Claim();
-      birthDate.setName("birthDate");
-      birthDate.setValue(id.getBirthDate().toString());
-      claims.add(birthDate);
+      this.addClaim(
+          claims,
+          "birthDate",
+          Optional.ofNullable(id.getBirthDate() != null ? id.getBirthDate().toString() : null)
+              .map(Object::toString)
+              .orElse("null"));
     }
     if (enableBirthplaceClaim) {
-      Claim placeOfBirth = new Claim();
-      placeOfBirth.setName("placeOfBirth");
-      placeOfBirth.setValue(id.getPlaceOfBirth());
-
-      claims.add(placeOfBirth);
+      this.addClaim(
+          claims,
+          "placeOfBirth",
+          Optional.ofNullable(id.getPlaceOfBirth()).map(Object::toString).orElse("null"));
     }
     if (enableMrzClaim) {
       this.addClaim(
@@ -3325,54 +3319,28 @@ public class Service {
       this.addClaim(
           claims,
           "birthDate",
-          Optional.ofNullable(id.getBirthDate()).map(Object::toString).orElse("null"));
+          Optional.ofNullable(id.getBirthDate() != null ? id.getBirthDate().toString() : null)
+              .map(Object::toString)
+              .orElse("null"));
       this.addClaim(
           claims,
           "documentNumber",
           Optional.ofNullable(id.getDocumentNumber()).map(Object::toString).orElse("null"));
       this.addClaim(
-          claims, "photo", Optional.ofNullable(null).map(Object::toString).orElse("null"));
+          claims,
+          "photo",
+          Optional.ofNullable(this.getDataStorePic(id)).map(Object::toString).orElse("null"));
     }
 
     if (enablePhotoClaim) {
-
-      Query q = this.em.createNamedQuery("Media.find");
-      q.setParameter("identity", id);
-      q.setParameter("type", MediaType.FACE);
-      List<UUID> faceMedias = q.getResultList();
-
-      if (faceMedias.size() < 1) {
-        logger.error(
-            "sendCredential: faceMedias.size() " + faceMedias.size() + " id " + id.getId());
-        throw new NoMediaException();
-      }
-      UUID mediaId = faceMedias.iterator().next();
-      byte[] imageBytes = mediaResource.render(mediaId);
-
-      if (imageBytes == null) {
-        logger.error(
-            "sendCredential: datastore returned null value for mediaId "
-                + mediaId
-                + " id "
-                + id.getId());
-        throw new NoMediaException();
-      }
-
-      String mimeType = em.find(Media.class, mediaId).getMimeType();
-      if (mimeType == null) {
-        mimeType = "image/jpeg";
-      }
-
-      Claim image = new Claim();
-      image.setName("photo");
-      String encPhoto = "data:" + mimeType + ";base64," + Base64.encodeBytes(imageBytes);
-      image.setValue(encPhoto);
-
-      claims.add(image);
+      String encPhoto = this.getEncryptedPhoto(id, MediaType.FACE);
+      this.addClaim(
+          claims, "photo", Optional.ofNullable(encPhoto).map(Object::toString).orElse("null"));
 
       if (debug) {
         logger.info("sendCredential: photo: " + encPhoto);
-        logger.info("sendCredential: photo: " + JsonUtil.serialize(image, false));
+        logger.info(
+            "sendCredential: photo: " + JsonUtil.serialize(claims.get(claims.size() - 1), false));
       }
     }
 
@@ -3394,11 +3362,83 @@ public class Service {
     messageResource.sendMessage(cred);
   }
 
+  private String getDataStorePic(Identity id) throws Exception {
+    UUID mediaId = id.getAvatarPic();
+    String mimeType = id.getAvatarMimeType();
+
+    if (mediaId == null) {
+      logger.error("getDataStorePic: no media defined for id " + id.getId());
+      throw new NoMediaException();
+    }
+
+    byte[] imageBytes = mediaResource.render(mediaId);
+
+    if (imageBytes == null) {
+      logger.error(
+          "getDataStorePic: datastore returned null value for mediaId "
+              + mediaId
+              + " id "
+              + id.getId());
+      throw new NoMediaException();
+    }
+    if (mimeType == null) {
+      mimeType = "image/jpeg";
+    }
+
+    logger.info(
+        "getDataStorePic: imageBytes: "
+            + imageBytes.length
+            + " "
+            + id.getAvatarPicCiphIv()
+            + " "
+            + id.getAvatarPicCiphKey());
+
+    byte[] decrypted = null;
+    if (id.getIsAvatarPicCiphered()) {
+      decrypted = Aes256cbc.decrypt(id.getAvatarPicCiphKey(), id.getAvatarPicCiphIv(), imageBytes);
+    } else {
+      decrypted = imageBytes;
+    }
+    logger.info("sendCredential: decrypted: " + decrypted.length);
+    return "data:" + mimeType + ";base64," + Base64.encodeBytes(decrypted);
+  }
+
   private void addClaim(List<Claim> claims, String name, String value) {
     Claim claim = new Claim();
     claim.setName(name);
     claim.setValue(value);
     claims.add(claim);
+  }
+
+  private String getEncryptedPhoto(Identity id, MediaType face) throws Exception {
+    Query q = this.em.createNamedQuery("Media.find");
+    q.setParameter("identity", id);
+    q.setParameter("type", face);
+    List<UUID> faceMedias = q.getResultList();
+
+    if (faceMedias.size() < 1) {
+      logger.error(
+          "getEncryptedPhoto: faceMedias.size() " + faceMedias.size() + " id " + id.getId());
+      throw new NoMediaException();
+    }
+    UUID mediaId = faceMedias.iterator().next();
+    byte[] imageBytes = mediaResource.render(mediaId);
+
+    if (imageBytes == null) {
+      logger.error(
+          "getEncryptedPhoto: datastore returned null value for mediaId "
+              + mediaId
+              + " id "
+              + id.getId());
+      throw new NoMediaException();
+    }
+
+    String mimeType = em.find(Media.class, mediaId).getMimeType();
+    if (mimeType == null) {
+      mimeType = "image/jpeg";
+    }
+
+    return "data:" + mimeType + ";base64," + Base64.encodeBytes(imageBytes);
   }
 
   @Transactional
@@ -3871,13 +3911,31 @@ public class Service {
     }
   }
 
-  /*
-  private static String MEDIA_NO_ATTACHMENT_ERROR = "Received message does not include any attachment.";
-  private static String MEDIA_SIZE_ERROR = "Received media is too big. Make sure it is smaller than 5MB.";
-  private static String MEDIA_TYPE_ERROR = "Received media is not an image. Accepted: image/jpeg, image/png, image/svg+xml";
-  private static String MEDIA_URI_ERROR = "Received media has no URI";
-  private static String MEDIA_SAVE_ERROR = "Cannot save Avatar";
-  */
+  private void saveJp2Picture(String imageDataUrl, Session session) throws Exception {
+
+    String[] parts = imageDataUrl.split(",", 2);
+    String base64Data = parts[1];
+    byte[] dataBytes = Base64.decode(base64Data);
+
+    MediaMessage mms = new MediaMessage();
+    mms.setConnectionId(session.getConnectionId());
+    mms.setTimestamp(Instant.now());
+
+    List<MediaItem> items = new ArrayList<MediaItem>();
+    MediaItem item = new MediaItem();
+    item.setMimeType(parts[0].substring(5).split(";")[0]);
+
+    Ciphering c = Aes256cbc.randomCipheringData();
+    item.setByteCount(dataBytes.length);
+    item.setCiphering(c);
+    item.setUri(imageDataUrl);
+    items.add(item);
+    mms.setItems(items);
+
+    UUID uuid = UUID.randomUUID();
+    this.setAvatarPictureSession(session, item.getMimeType(), uuid, c, item.getUri(), false);
+    this.dataStoreLoad(uuid, new ByteArrayInputStream(dataBytes));
+  }
 
   private void saveAvatarPicture(MediaMessage mm, Session session) throws Exception {
     UUID uuid = null;
@@ -3891,12 +3949,7 @@ public class Service {
               session.getConnectionId(),
               null,
               getMessage("MEDIA_NO_ATTACHMENT_ERROR", session.getConnectionId())));
-      session.setAvatarPic(null);
-      session.setAvatarPicCiphAlg(null);
-      session.setAvatarPicCiphIv(null);
-      session.setAvatarPicCiphKey(null);
-      session.setAvatarMimeType(null);
-      session.setAvatarURI(null);
+      this.resetPictureValues(session);
       return;
     }
 
@@ -3922,11 +3975,10 @@ public class Service {
           if (item.getUri() != null) {
 
             try {
-              byte[] encrypted = this.getMedia(item.getUri());
-              byte[] reencrypted = encrypted;
+              byte[] reencrypted = this.getMedia(item.getUri());
 
               if (!(mediaType.equals("image/svg+xml"))) {
-                byte[] decrypted = Aes256cbc.decrypt(p.getKey(), p.getIv(), encrypted);
+                byte[] decrypted = Aes256cbc.decrypt(p.getKey(), p.getIv(), reencrypted);
                 InputStream inputStream = new ByteArrayInputStream(decrypted);
                 BufferedImage image = ImageIO.read(inputStream);
                 BufferedImage outputImage = image;
@@ -3993,7 +4045,6 @@ public class Service {
               // properly deciphered
 
               uuid = UUID.randomUUID();
-              mediaResource.createOrUpdate(uuid, 1, null);
               File file = new File(System.getProperty("java.io.tmpdir") + "/" + uuid);
 
               FileOutputStream fos = new FileOutputStream(file);
@@ -4001,19 +4052,11 @@ public class Service {
               fos.flush();
               fos.close();
 
-              Resource r = new Resource();
-              r.chunk = new FileInputStream(file);
-              mediaResource.uploadChunk(uuid, 0, null, r);
+              this.dataStoreLoad(uuid, new FileInputStream(file));
 
               file.delete();
 
-              session.setAvatarMimeType(mediaType);
-              session.setAvatarPic(uuid);
-              session.setAvatarPicCiphAlg(c.getAlgorithm());
-              session.setAvatarPicCiphIv(p.getIv());
-              session.setAvatarPicCiphKey(p.getKey());
-              session.setAvatarURI(item.getUri());
-
+              this.setAvatarPictureSession(session, mediaType, uuid, c, item.getUri(), true);
             } catch (Exception e) {
               logger.error("incomingAvatarPicture", e);
               logger.info("incomingAvatarPicture: could not save avatar");
@@ -4022,12 +4065,7 @@ public class Service {
                       session.getConnectionId(),
                       null,
                       getMessage("MEDIA_SAVE_ERROR", session.getConnectionId())));
-              session.setAvatarPic(null);
-              session.setAvatarPicCiphAlg(null);
-              session.setAvatarPicCiphIv(null);
-              session.setAvatarPicCiphKey(null);
-              session.setAvatarMimeType(null);
-              session.setAvatarURI(null);
+              this.resetPictureValues(session);
               return;
             }
           } else {
@@ -4038,12 +4076,7 @@ public class Service {
                     session.getConnectionId(),
                     null,
                     getMessage("MEDIA_URI_ERROR", session.getConnectionId())));
-            session.setAvatarPic(null);
-            session.setAvatarPicCiphAlg(null);
-            session.setAvatarPicCiphIv(null);
-            session.setAvatarPicCiphKey(null);
-            session.setAvatarMimeType(null);
-            session.setAvatarURI(null);
+            this.resetPictureValues(session);
             return;
           }
 
@@ -4054,12 +4087,7 @@ public class Service {
                   session.getConnectionId(),
                   null,
                   getMessage("MEDIA_TYPE_ERROR", session.getConnectionId())));
-          session.setAvatarPic(null);
-          session.setAvatarPicCiphAlg(null);
-          session.setAvatarPicCiphIv(null);
-          session.setAvatarPicCiphKey(null);
-          session.setAvatarMimeType(null);
-          session.setAvatarURI(null);
+          this.resetPictureValues(session);
           return;
         }
       } else {
@@ -4069,12 +4097,7 @@ public class Service {
                 session.getConnectionId(),
                 null,
                 getMessage("MEDIA_TYPE_ERROR", session.getConnectionId())));
-        session.setAvatarPic(null);
-        session.setAvatarPicCiphAlg(null);
-        session.setAvatarPicCiphIv(null);
-        session.setAvatarPicCiphKey(null);
-        session.setAvatarMimeType(null);
-        session.setAvatarURI(null);
+        this.resetPictureValues(session);
         return;
       }
 
@@ -4086,14 +4109,37 @@ public class Service {
               session.getConnectionId(),
               null,
               getMessage("MEDIA_SIZE_ERROR", session.getConnectionId())));
-      session.setAvatarPic(null);
-      session.setAvatarPicCiphAlg(null);
-      session.setAvatarPicCiphIv(null);
-      session.setAvatarPicCiphKey(null);
-      session.setAvatarMimeType(null);
-      session.setAvatarURI(null);
+      this.resetPictureValues(session);
       return;
     }
+  }
+
+  private void resetPictureValues(Session session) {
+    session.setAvatarPic(null);
+    session.setIsAvatarPicCiphered(null);
+    session.setAvatarPicCiphAlg(null);
+    session.setAvatarPicCiphIv(null);
+    session.setAvatarPicCiphKey(null);
+    session.setAvatarMimeType(null);
+    session.setAvatarURI(null);
+  }
+
+  private void setAvatarPictureSession(
+      Session session, String mediaType, UUID uuid, Ciphering c, String uri, Boolean ciphered) {
+    session.setAvatarMimeType(mediaType);
+    session.setAvatarPic(uuid);
+    session.setIsAvatarPicCiphered(ciphered);
+    session.setAvatarPicCiphAlg(c.getAlgorithm());
+    session.setAvatarPicCiphIv(c.getParameters().getIv());
+    session.setAvatarPicCiphKey(c.getParameters().getKey());
+    session.setAvatarURI(uri);
+  }
+
+  private void dataStoreLoad(UUID uuid, InputStream inputStream) {
+    mediaResource.createOrUpdate(uuid, 1, null);
+    Resource r = new Resource();
+    r.chunk = inputStream;
+    mediaResource.uploadChunk(uuid, 0, null, r);
   }
 
   private byte[] getMedia(String uri) throws IOException, ClientProtocolException {
