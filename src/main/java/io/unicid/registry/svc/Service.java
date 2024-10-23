@@ -2395,7 +2395,7 @@ public class Service {
             EMrtdDataSubmitMessage emrtd =
                 objectMapper.readValue(content, EMrtdDataSubmitMessage.class);
             this.saveJp2Picture(
-                emrtd.getDataGroups().getProcessed().getFields().getFaceDataUrl(), session);
+                emrtd.getDataGroups().getProcessed().getEf_dg2().getFaceImages().get(0), session);
             if (session != null && session.getAvatarPic() != null) {
               em.merge(this.setAvatarPictureData(session.getIdentity(), session));
               this.notifySuccess(token);
