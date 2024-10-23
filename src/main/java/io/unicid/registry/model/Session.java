@@ -1,11 +1,13 @@
 package io.unicid.registry.model;
 
 import io.twentysixty.sa.client.enums.Mrz;
-import io.twentysixty.sa.client.model.message.mrtd.MrzDataSubmitMessage;
+import io.twentysixty.sa.client.model.message.mrtd.EMrtdData;
+import io.twentysixty.sa.client.model.message.mrtd.MrzData;
 import io.unicid.registry.enums.CreateStep;
 import io.unicid.registry.enums.IssueStep;
 import io.unicid.registry.enums.RestoreStep;
 import io.unicid.registry.enums.SessionType;
+import io.unicid.registry.utils.DateUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -61,7 +63,8 @@ public class Session implements Serializable {
   @Column(columnDefinition = "text")
   private String mrz;
 
-  private Mrz.Format documentType;
+  @Column(columnDefinition = "text")
+  private String documentType;
 
   @Column(columnDefinition = "text")
   private String documentNumber;
@@ -73,6 +76,8 @@ public class Session implements Serializable {
 
   @Column(columnDefinition = "text")
   private String avatarMimeType;
+
+  private Boolean isAvatarPicCiphered;
 
   @Column(columnDefinition = "text")
   private String avatarPicCiphKey;
@@ -89,14 +94,37 @@ public class Session implements Serializable {
   @Column(columnDefinition = "text")
   private String placeOfBirth;
 
-  public void updateSessionWithMrzData(MrzDataSubmitMessage mrz, Session session) {
-    session.setFirstName(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.FIRST_NAME));
-    session.setLastName(mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.LAST_NAME));
-    session.setPlaceOfBirth(
-        mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.NATIONALITY));
-    session.setDocumentType(mrz.getMrzData().getParsed().getFormat());
-    session.setDocumentNumber(
-        mrz.getMrzData().getParsed().getFields().get(Mrz.FieldName.DOCUMENT_NUMBER));
-    session.setMrz(mrz.getMrzData().getRaw());
+  public void updateSessionWithData(Object data, Session session) {
+    if (data instanceof MrzData) {
+      MrzData mrz = (MrzData) data;
+      session.setFirstName(mrz.getParsed().getFields().get(Mrz.FieldName.FIRST_NAME));
+      session.setLastName(mrz.getParsed().getFields().get(Mrz.FieldName.LAST_NAME));
+      session.setBirthDate(
+          DateUtils.parseDateString(
+              mrz.getParsed().getFields().get(Mrz.FieldName.BIRTH_DATE), "yyMMdd"));
+      session.setPlaceOfBirth(mrz.getParsed().getFields().get(Mrz.FieldName.NATIONALITY));
+      session.setDocumentType(mrz.getParsed().getFormat().toString());
+      session.setDocumentNumber(mrz.getParsed().getFields().get(Mrz.FieldName.DOCUMENT_NUMBER));
+      session.setMrz(mrz.getRaw());
+    } else if (data instanceof EMrtdData) {
+      EMrtdData nfc = (EMrtdData) data;
+      if (nfc.getProcessed().getFirstName() != null)
+        session.setFirstName(nfc.getProcessed().getFirstName());
+      if (nfc.getProcessed().getLastName() != null)
+        session.setLastName(nfc.getProcessed().getLastName());
+      if (isValidDateOfBirth(nfc.getProcessed().getDateOfBirth()))
+        session.setBirthDate(
+            DateUtils.parseDateString(nfc.getProcessed().getDateOfBirth(), "yyyyMMdd"));
+      if (nfc.getProcessed().getNationality() != null)
+        session.setPlaceOfBirth(nfc.getProcessed().getNationality());
+      if (nfc.getProcessed().getDocumentType() != null)
+        session.setDocumentType(nfc.getProcessed().getDocumentType());
+      if (nfc.getProcessed().getDocumentNumber() != null)
+        session.setDocumentNumber(nfc.getProcessed().getDocumentNumber());
+    }
+  }
+
+  public static boolean isValidDateOfBirth(String dateOfBirth) {
+    return dateOfBirth != null && !dateOfBirth.isEmpty() && !"0".equals(dateOfBirth);
   }
 }

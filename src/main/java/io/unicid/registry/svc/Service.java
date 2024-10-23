@@ -1081,8 +1081,9 @@ public class Service {
         case MRZ:
           {
             if (content != null) {
-              session.updateSessionWithMrzData(
-                  objectMapper.readValue(content, MrzDataSubmitMessage.class), session);
+              session.updateSessionWithData(
+                  objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
+                  session);
               session.setRestoreStep(getNextRestoreStep(session.getRestoreStep()));
               session = em.merge(session);
             }
@@ -1850,8 +1851,9 @@ public class Service {
         case MRZ:
           {
             if (content != null) {
-              session.updateSessionWithMrzData(
-                  objectMapper.readValue(content, MrzDataSubmitMessage.class), session);
+              session.updateSessionWithData(
+                  objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
+                  session);
               this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, threadId);
               session.setCreateStep(getNextCreateStep(session.getCreateStep()));
 
@@ -1892,14 +1894,8 @@ public class Service {
                   identity = new Identity();
                   identity.setId(UUID.randomUUID());
                   identity.setCitizenId(session.getCitizenId());
-                  identity.setFirstName(session.getFirstName());
-                  identity.setLastName(session.getLastName());
                   identity.setAvatarName(session.getAvatarName());
-                  identity.setBirthDate(session.getBirthDate());
-                  identity.setPlaceOfBirth(session.getPlaceOfBirth());
                   identity.setMrz(session.getMrz());
-                  identity.setDocumentType(session.getDocumentType());
-                  identity.setDocumentNumber(session.getDocumentNumber());
                   identity.setCitizenSinceTs(Instant.now());
                   identity.setConnectionId(connectionId);
                   identity.setProtection(protection);
@@ -2310,8 +2306,9 @@ public class Service {
         case CHANGE_MRZ:
           {
             if (content != null) {
-              session.updateSessionWithMrzData(
-                  objectMapper.readValue(content, MrzDataSubmitMessage.class), session);
+              session.updateSessionWithData(
+                  objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
+                  session);
               this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, threadId);
 
               if (this.identityAlreadyExists(session)) {
@@ -2394,6 +2391,7 @@ public class Service {
                 this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
             EMrtdDataSubmitMessage emrtd =
                 objectMapper.readValue(content, EMrtdDataSubmitMessage.class);
+            session.updateSessionWithData(emrtd.getDataGroups(), session);
             this.saveJp2Picture(
                 emrtd.getDataGroups().getProcessed().getFaceImages().get(0), session);
             if (session != null && session.getAvatarPic() != null) {
@@ -2410,7 +2408,15 @@ public class Service {
   }
 
   private Identity setAvatarPictureData(Identity identity, Session session) {
+    identity.setFirstName(session.getFirstName());
+    identity.setLastName(session.getLastName());
+    identity.setBirthDate(session.getBirthDate());
+    identity.setPlaceOfBirth(session.getPlaceOfBirth());
+    identity.setDocumentType(session.getDocumentType());
+    identity.setDocumentNumber(session.getDocumentNumber());
+
     identity.setAvatarPic(session.getAvatarPic());
+    identity.setIsAvatarPicCiphered(session.getIsAvatarPicCiphered());
     identity.setAvatarPicCiphAlg(session.getAvatarPicCiphAlg());
     identity.setAvatarPicCiphIv(session.getAvatarPicCiphIv());
     identity.setAvatarPicCiphKey(session.getAvatarPicCiphKey());
@@ -3361,7 +3367,7 @@ public class Service {
     String mimeType = id.getAvatarMimeType();
 
     if (mediaId == null) {
-      logger.error("sendCredential: no media defined for id " + id.getId());
+      logger.error("getDataStorePic: no media defined for id " + id.getId());
       throw new NoMediaException();
     }
 
@@ -3369,7 +3375,7 @@ public class Service {
 
     if (imageBytes == null) {
       logger.error(
-          "sendCredential: datastore returned null value for mediaId "
+          "getDataStorePic: datastore returned null value for mediaId "
               + mediaId
               + " id "
               + id.getId());
@@ -3380,7 +3386,7 @@ public class Service {
     }
 
     logger.info(
-        "sendCredential: imageBytes: "
+        "getDataStorePic: imageBytes: "
             + imageBytes.length
             + " "
             + id.getAvatarPicCiphIv()
@@ -3388,7 +3394,7 @@ public class Service {
             + id.getAvatarPicCiphKey());
 
     byte[] decrypted = null;
-    if (!(mimeType.equals("image/jp2"))) {
+    if (id.getIsAvatarPicCiphered()) {
       decrypted = Aes256cbc.decrypt(id.getAvatarPicCiphKey(), id.getAvatarPicCiphIv(), imageBytes);
     } else {
       decrypted = imageBytes;
@@ -3411,7 +3417,8 @@ public class Service {
     List<UUID> faceMedias = q.getResultList();
 
     if (faceMedias.size() < 1) {
-      logger.error("sendCredential: faceMedias.size() " + faceMedias.size() + " id " + id.getId());
+      logger.error(
+          "getEncryptedPhoto: faceMedias.size() " + faceMedias.size() + " id " + id.getId());
       throw new NoMediaException();
     }
     UUID mediaId = faceMedias.iterator().next();
@@ -3419,7 +3426,7 @@ public class Service {
 
     if (imageBytes == null) {
       logger.error(
-          "sendCredential: datastore returned null value for mediaId "
+          "getEncryptedPhoto: datastore returned null value for mediaId "
               + mediaId
               + " id "
               + id.getId());
@@ -3926,7 +3933,7 @@ public class Service {
     mms.setItems(items);
 
     UUID uuid = UUID.randomUUID();
-    this.setAvatarPictureSession(session, item.getMimeType(), uuid, c, item.getUri());
+    this.setAvatarPictureSession(session, item.getMimeType(), uuid, c, item.getUri(), false);
     this.dataStoreLoad(uuid, new ByteArrayInputStream(dataBytes));
   }
 
@@ -3942,12 +3949,7 @@ public class Service {
               session.getConnectionId(),
               null,
               getMessage("MEDIA_NO_ATTACHMENT_ERROR", session.getConnectionId())));
-      session.setAvatarPic(null);
-      session.setAvatarPicCiphAlg(null);
-      session.setAvatarPicCiphIv(null);
-      session.setAvatarPicCiphKey(null);
-      session.setAvatarMimeType(null);
-      session.setAvatarURI(null);
+      this.resetPictureValues(session);
       return;
     }
 
@@ -4054,7 +4056,7 @@ public class Service {
 
               file.delete();
 
-              this.setAvatarPictureSession(session, mediaType, uuid, c, item.getUri());
+              this.setAvatarPictureSession(session, mediaType, uuid, c, item.getUri(), true);
             } catch (Exception e) {
               logger.error("incomingAvatarPicture", e);
               logger.info("incomingAvatarPicture: could not save avatar");
@@ -4063,12 +4065,7 @@ public class Service {
                       session.getConnectionId(),
                       null,
                       getMessage("MEDIA_SAVE_ERROR", session.getConnectionId())));
-              session.setAvatarPic(null);
-              session.setAvatarPicCiphAlg(null);
-              session.setAvatarPicCiphIv(null);
-              session.setAvatarPicCiphKey(null);
-              session.setAvatarMimeType(null);
-              session.setAvatarURI(null);
+              this.resetPictureValues(session);
               return;
             }
           } else {
@@ -4079,12 +4076,7 @@ public class Service {
                     session.getConnectionId(),
                     null,
                     getMessage("MEDIA_URI_ERROR", session.getConnectionId())));
-            session.setAvatarPic(null);
-            session.setAvatarPicCiphAlg(null);
-            session.setAvatarPicCiphIv(null);
-            session.setAvatarPicCiphKey(null);
-            session.setAvatarMimeType(null);
-            session.setAvatarURI(null);
+            this.resetPictureValues(session);
             return;
           }
 
@@ -4095,12 +4087,7 @@ public class Service {
                   session.getConnectionId(),
                   null,
                   getMessage("MEDIA_TYPE_ERROR", session.getConnectionId())));
-          session.setAvatarPic(null);
-          session.setAvatarPicCiphAlg(null);
-          session.setAvatarPicCiphIv(null);
-          session.setAvatarPicCiphKey(null);
-          session.setAvatarMimeType(null);
-          session.setAvatarURI(null);
+          this.resetPictureValues(session);
           return;
         }
       } else {
@@ -4110,12 +4097,7 @@ public class Service {
                 session.getConnectionId(),
                 null,
                 getMessage("MEDIA_TYPE_ERROR", session.getConnectionId())));
-        session.setAvatarPic(null);
-        session.setAvatarPicCiphAlg(null);
-        session.setAvatarPicCiphIv(null);
-        session.setAvatarPicCiphKey(null);
-        session.setAvatarMimeType(null);
-        session.setAvatarURI(null);
+        this.resetPictureValues(session);
         return;
       }
 
@@ -4127,20 +4109,26 @@ public class Service {
               session.getConnectionId(),
               null,
               getMessage("MEDIA_SIZE_ERROR", session.getConnectionId())));
-      session.setAvatarPic(null);
-      session.setAvatarPicCiphAlg(null);
-      session.setAvatarPicCiphIv(null);
-      session.setAvatarPicCiphKey(null);
-      session.setAvatarMimeType(null);
-      session.setAvatarURI(null);
+      this.resetPictureValues(session);
       return;
     }
   }
 
+  private void resetPictureValues(Session session) {
+    session.setAvatarPic(null);
+    session.setIsAvatarPicCiphered(null);
+    session.setAvatarPicCiphAlg(null);
+    session.setAvatarPicCiphIv(null);
+    session.setAvatarPicCiphKey(null);
+    session.setAvatarMimeType(null);
+    session.setAvatarURI(null);
+  }
+
   private void setAvatarPictureSession(
-      Session session, String mediaType, UUID uuid, Ciphering c, String uri) {
+      Session session, String mediaType, UUID uuid, Ciphering c, String uri, Boolean ciphered) {
     session.setAvatarMimeType(mediaType);
     session.setAvatarPic(uuid);
+    session.setIsAvatarPicCiphered(ciphered);
     session.setAvatarPicCiphAlg(c.getAlgorithm());
     session.setAvatarPicCiphIv(c.getParameters().getIv());
     session.setAvatarPicCiphKey(c.getParameters().getKey());

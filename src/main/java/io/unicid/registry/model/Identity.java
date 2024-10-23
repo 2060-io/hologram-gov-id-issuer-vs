@@ -1,6 +1,5 @@
 package io.unicid.registry.model;
 
-import io.twentysixty.sa.client.enums.Mrz;
 import io.unicid.registry.enums.IdentityClaim;
 import io.unicid.registry.enums.Protection;
 import jakarta.persistence.Column;
@@ -95,7 +94,8 @@ public class Identity implements Serializable {
   @Column(columnDefinition = "text")
   private String mrz;
 
-  private Mrz.Format documentType;
+  @Column(columnDefinition = "text")
+  private String documentType;
 
   @Column(columnDefinition = "text")
   private String documentNumber;
@@ -104,6 +104,8 @@ public class Identity implements Serializable {
 
   @Column(columnDefinition = "text")
   private String avatarMimeType;
+
+  private Boolean isAvatarPicCiphered;
 
   @Column(columnDefinition = "text")
   private String avatarPicCiphKey;

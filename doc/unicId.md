@@ -1,6 +1,6 @@
 # UnicId
 ## Description
-This chatbot is a demo developed by [2060](https://2060.io/), aimed at generating verifiable credentials from the reading of various official documents, [for more...](/README.md)
+This application is a Decentralized Trust Service aimed to generate Verifiable Credentials from the reading of official travel documents and biometric verification. For more details see [README](/README.md)
 
 - [UnicId](#unicid)
   - [Description](#description)
@@ -40,13 +40,16 @@ Vision Service
 - Token management to identify different connections.
 - List associated images.
 
-Additionally, the required endpoints for coexistence with the 2060 Service Agent are provided. Keep in mind that this connection is mandatory for any chatbot that intends to utilize a 2060 agent.
+Additionally, the required endpoints for coexistence with the [2060 Service Agent](https://github.com/2060-io/2060-service-agent) are provided. Keep in mind that this connection is mandatory for any chatbot that intends to utilize a DIDComm agent.
 
 ### WebRTC Service
 The RESTful API includes the following options:
+For more information, check out the [WebRTC Service](https://github.com/2060-io/webrtc-server).
 
 #### Call event
 Endpoint deployment for retrieving join and left notifications
+For more information, check out the [create rooms](https://github.com/2060-io/webrtc-server?tab=readme-ov-file#parameters-all-optional) section in the WebRTC server documentation.
+
 ```json
 {
     "event": EventNotificationType
