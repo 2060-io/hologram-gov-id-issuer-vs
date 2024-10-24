@@ -699,10 +699,7 @@ public class Service {
 
     } else if (content.equals(ServiceLabel.CMD_VIEW_ID)) {
       logger.info("userInput: CMD_VIEW_ID : session before: " + session);
-      if ((session != null)
-          && (session.getType() != null)
-          && (session.getType().equals(SessionType.EDIT))
-          && (identity != null)) {
+      if (this.isEditSession(session, identity)) {
 
         String idstr = this.getIdentityDataString(identity);
         messageResource.sendMessage(
@@ -717,10 +714,7 @@ public class Service {
 
     } else if (content.equals(ServiceLabel.CMD_UNDELETE)) {
       logger.info("userInput: CMD_UNDELETE : session before: " + session);
-      if ((session != null)
-          && (session.getType() != null)
-          && (session.getType().equals(SessionType.EDIT))
-          && (identity != null)) {
+      if (this.isEditSession(session, identity)) {
         if (identity.getDeletedTs().plusSeconds(86400).compareTo(Instant.now()) > 0) {
           identity.setDeletedTs(null);
           identity = em.merge(identity);
@@ -761,10 +755,7 @@ public class Service {
 
     } else if (content.equals(ServiceLabel.CMD_ISSUE)) {
       logger.info("userInput: CMD_ISSUE : session before: " + session);
-      if ((session != null)
-          && (session.getType() != null)
-          && (session.getType().equals(SessionType.EDIT))
-          && (identity != null)) {
+      if (this.isEditSession(session, identity)) {
 
         session.setType(SessionType.ISSUE);
         session.setIdentity(identity);
@@ -794,10 +785,7 @@ public class Service {
     } else if (content.equals(ServiceLabel.CMD_DELETE)) {
       logger.info("userInput: CMD_DELETE : session before: " + session);
 
-      if ((session != null)
-          && (session.getType() != null)
-          && (session.getType().equals(SessionType.EDIT))
-          && (identity != null)) {
+      if (this.isEditSession(session, identity)) {
         if ((identity.getIssuedTs() == null) || (identity.getRevokedTs() != null)) {
 
           identity.setDeletedTs(Instant.now());
@@ -820,10 +808,7 @@ public class Service {
 
     } else if (content.equals(ServiceLabel.CMD_REVOKE)) {
       logger.info("userInput: CMD_REVOKE : session before: " + session);
-      if ((session != null)
-          && (session.getType() != null)
-          && (session.getType().equals(SessionType.EDIT))
-          && (identity != null)) {
+      if (this.isEditSession(session, identity)) {
         if (identity.getIssuedTs() != null) {
           identity.setRevokedTs(Instant.now());
           identity = em.merge(identity);
@@ -881,6 +866,10 @@ public class Service {
             message.getConnectionId(),
             session,
             ((session != null) ? session.getIdentity() : identity)));
+  }
+
+  private boolean isEditSession(Session session, Identity identity) {
+    return (session != null) && (session.getType() != null) && (session.getType().equals(SessionType.EDIT)) && (identity != null);
   }
 
   private void updatePreferLanguage(ProfileMessage profile) {
@@ -1247,7 +1236,10 @@ public class Service {
         session = em.merge(session);
         this.restoreSendMessage(connectionId, threadId, session);
       } else {
+        res.setConnectionId(connectionId);
+        session.setConnectionId(connectionId);
         session.setIdentity(res);
+        em.merge(res);
         switch (res.getProtection()) {
           case PASSWORD:
             {
@@ -1255,7 +1247,6 @@ public class Service {
                   "restoreEntryPoint: found password method for identity "
                       + this.getIdentityDataString(res));
               session.setRestoreStep(RestoreStep.PASSWORD);
-              session = em.merge(session);
               this.restoreSendMessage(connectionId, threadId, session);
               break;
             }
@@ -1267,7 +1258,6 @@ public class Service {
                       + this.getIdentityDataString(res));
 
               session.setRestoreStep(RestoreStep.FACE_VERIFICATION);
-              session = em.merge(session);
 
               Token token = this.getToken(connectionId, TokenType.FACE_VERIFICATION, res);
 
@@ -1292,7 +1282,6 @@ public class Service {
                       + this.getIdentityDataString(res));
 
               session.setRestoreStep(RestoreStep.FINGERPRINT_VERIFICATION);
-              session = em.merge(session);
 
               this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, res);
 
@@ -1305,7 +1294,6 @@ public class Service {
                       + this.getIdentityDataString(res));
 
               session.setRestoreStep(RestoreStep.WEBRTC_VERIFICATION);
-              session = em.merge(session);
 
               this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res);
               this.sendWebRTCCapture(session, threadId);
@@ -1314,6 +1302,7 @@ public class Service {
             }
         }
       }
+      session = em.merge(session);
     }
   }
 
@@ -1373,7 +1362,9 @@ public class Service {
         case MRZ:
           {
             messageResource.sendMessage(
-                TextMessage.build(connectionId, threadId, getMessage("RESTORE_MRZ", connectionId)));
+                TextMessage.build(connectionId, threadId, getMessage("MRZ_REQUEST", connectionId)));
+            messageResource.sendMessage(
+                TextMessage.build(connectionId, threadId, getMessage("WEBRTC_REQUIRED", connectionId)));
             messageResource.sendMessage(MrzDataRequestMessage.build(connectionId, threadId));
             break;
           }
@@ -1982,9 +1973,6 @@ public class Service {
                     session = em.merge(session);
 
                     this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
-                    messageResource.sendMessage(
-                        TextMessage.build(
-                            connectionId, threadId, getMessage("WEBRTC_REQUIRED", connectionId)));
                     Token mrzToken =
                         this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, null);
                     messageResource.sendMessage(
@@ -2799,6 +2787,8 @@ public class Service {
           {
             messageResource.sendMessage(
                 TextMessage.build(connectionId, threadId, getMessage("MRZ_REQUEST", connectionId)));
+            messageResource.sendMessage(
+                TextMessage.build(connectionId, threadId, getMessage("WEBRTC_REQUIRED", connectionId)));
             messageResource.sendMessage(MrzDataRequestMessage.build(connectionId, threadId));
             break;
           }
@@ -2890,8 +2880,7 @@ public class Service {
 
     if ((session.getIssueStep() == null)) {
 
-      messageResource.sendMessage(
-          TextMessage.build(connectionId, threadId, getMessage("IDENTITY_LOCKED", connectionId)));
+      if(!enableMrzClaim) messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_LOCKED", connectionId)));
 
       switch (identity.getProtection()) {
         case PASSWORD:
@@ -3820,11 +3809,7 @@ public class Service {
       case FACE_VERIFICATION:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.ISSUE)
-                    || session.getType().equals(SessionType.RESTORE))
-                && (identity.getProtection().equals(Protection.FACE))
-                && (identity.getProtectedTs() != null)) {
+            if (this.isValidIssueRestoreSession(session, identity, Protection.FACE)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3850,11 +3835,7 @@ public class Service {
       case FINGERPRINT_VERIFICATION:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.ISSUE)
-                    || session.getType().equals(SessionType.RESTORE))
-                && (identity.getProtection().equals(Protection.FINGERPRINTS))
-                && (identity.getProtectedTs() != null)) {
+            if (this.isValidIssueRestoreSession(session, identity, Protection.FINGERPRINTS)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3880,11 +3861,7 @@ public class Service {
       case WEBRTC_VERIFICATION:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.CREATE)
-                    || session.getType().equals(SessionType.RESTORE))
-                && (identity.getProtection().equals(Protection.WEBRTC))
-                && (identity.getProtectedTs() != null)) {
+            if (this.isValidIssueRestoreSession(session, identity, Protection.WEBRTC)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3907,6 +3884,10 @@ public class Service {
           break;
         }
     }
+  }
+
+  private boolean isValidIssueRestoreSession(Session session, Identity identity, Protection fingerprints) {
+    return (session.getType() != null) && (session.getType().equals(SessionType.ISSUE) || session.getType().equals(SessionType.RESTORE)) && (identity.getProtection().equals(Protection.FINGERPRINTS)) && (identity.getProtectedTs() != null);
   }
 
   private void saveJp2Picture(String imageDataUrl, Session session) throws Exception {
