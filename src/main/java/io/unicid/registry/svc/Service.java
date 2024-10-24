@@ -867,7 +867,10 @@ public class Service {
   }
 
   private boolean isEditSession(Session session, Identity identity) {
-    return (session != null) && (session.getType() != null) && (session.getType().equals(SessionType.EDIT)) && (identity != null);
+    return (session != null)
+        && (session.getType() != null)
+        && (session.getType().equals(SessionType.EDIT))
+        && (identity != null);
   }
 
   private void updatePreferLanguage(ProfileMessage profile) {
@@ -881,12 +884,15 @@ public class Service {
   }
 
   private void sendWelcomeMessages(UUID connectionId, UUID threadId) {
-    messageResource.sendMessage(TextMessage.build(connectionId,threadId, getMessage("WELCOME", connectionId)));
+    messageResource.sendMessage(
+        TextMessage.build(connectionId, threadId, getMessage("WELCOME", connectionId)));
     if (WELCOME2.isPresent()) {
-      messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WELCOME2", connectionId)));
+      messageResource.sendMessage(
+          TextMessage.build(connectionId, threadId, getMessage("WELCOME2", connectionId)));
     }
     if (WELCOME3.isPresent()) {
-      messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WELCOME3", connectionId)));
+      messageResource.sendMessage(
+          TextMessage.build(connectionId, threadId, getMessage("WELCOME3", connectionId)));
     }
   }
 
@@ -1314,7 +1320,8 @@ public class Service {
             messageResource.sendMessage(
                 TextMessage.build(connectionId, threadId, getMessage("MRZ_REQUEST", connectionId)));
             messageResource.sendMessage(
-                TextMessage.build(connectionId, threadId, getMessage("WEBRTC_REQUIRED", connectionId)));
+                TextMessage.build(
+                    connectionId, threadId, getMessage("WEBRTC_REQUIRED", connectionId)));
             messageResource.sendMessage(MrzDataRequestMessage.build(connectionId, threadId));
             break;
           }
@@ -1892,7 +1899,8 @@ public class Service {
                     session.setCreateStep(CreateStep.FINGERPRINT_CAPTURE);
                     session = em.merge(session);
 
-                    this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
+                    this.getToken(
+                        connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
                     messageResource.sendMessage(
                         TextMessage.build(
                             connectionId,
@@ -2672,7 +2680,8 @@ public class Service {
             messageResource.sendMessage(
                 TextMessage.build(connectionId, threadId, getMessage("MRZ_REQUEST", connectionId)));
             messageResource.sendMessage(
-                TextMessage.build(connectionId, threadId, getMessage("WEBRTC_REQUIRED", connectionId)));
+                TextMessage.build(
+                    connectionId, threadId, getMessage("WEBRTC_REQUIRED", connectionId)));
             messageResource.sendMessage(MrzDataRequestMessage.build(connectionId, threadId));
             break;
           }
@@ -2766,7 +2775,9 @@ public class Service {
 
     if ((session.getIssueStep() == null)) {
 
-      if(!enableMrzClaim) messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("IDENTITY_LOCKED", connectionId)));
+      if (!enableMrzClaim)
+        messageResource.sendMessage(
+            TextMessage.build(connectionId, threadId, getMessage("IDENTITY_LOCKED", connectionId)));
 
       switch (identity.getProtection()) {
         case PASSWORD:
@@ -3392,7 +3403,8 @@ public class Service {
       case FACE_CAPTURE:
         {
           if (session != null) {
-            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.FACE, CreateStep.FACE_CAPTURE)) {
+            if (this.isValidSessionIdentity(
+                session, identity, SessionType.CREATE, Protection.FACE, CreateStep.FACE_CAPTURE)) {
 
               identity.setProtectedTs(Instant.now());
 
@@ -3422,7 +3434,12 @@ public class Service {
       case FINGERPRINT_CAPTURE:
         {
           if (session != null) {
-            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.FINGERPRINTS, CreateStep.FINGERPRINT_CAPTURE)) {
+            if (this.isValidSessionIdentity(
+                session,
+                identity,
+                SessionType.CREATE,
+                Protection.FINGERPRINTS,
+                CreateStep.FINGERPRINT_CAPTURE)) {
 
               identity.setProtectedTs(Instant.now());
 
@@ -3452,7 +3469,12 @@ public class Service {
       case WEBRTC_CAPTURE:
         {
           if (session != null) {
-            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.WEBRTC, CreateStep.WEBRTC_CAPTURE)) {
+            if (this.isValidSessionIdentity(
+                session,
+                identity,
+                SessionType.CREATE,
+                Protection.WEBRTC,
+                CreateStep.WEBRTC_CAPTURE)) {
 
               identity.setProtectedTs(Instant.now());
 
@@ -3587,7 +3609,8 @@ public class Service {
       case FACE_CAPTURE:
         {
           if (session != null) {
-            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.FACE, CreateStep.FACE_CAPTURE)) {
+            if (this.isValidSessionIdentity(
+                session, identity, SessionType.CREATE, Protection.FACE, CreateStep.FACE_CAPTURE)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3609,7 +3632,12 @@ public class Service {
       case FINGERPRINT_CAPTURE:
         {
           if (session != null) {
-            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.FINGERPRINTS, CreateStep.FINGERPRINT_CAPTURE)) {
+            if (this.isValidSessionIdentity(
+                session,
+                identity,
+                SessionType.CREATE,
+                Protection.FINGERPRINTS,
+                CreateStep.FINGERPRINT_CAPTURE)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3631,7 +3659,12 @@ public class Service {
       case WEBRTC_CAPTURE:
         {
           if (session != null) {
-            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.WEBRTC, CreateStep.WEBRTC_CAPTURE)) {
+            if (this.isValidSessionIdentity(
+                session,
+                identity,
+                SessionType.CREATE,
+                Protection.WEBRTC,
+                CreateStep.WEBRTC_CAPTURE)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3732,13 +3765,26 @@ public class Service {
     }
   }
 
-  private boolean isValidSessionIdentity(Session session, Identity identity, SessionType sessionType, Protection protection,
+  private boolean isValidSessionIdentity(
+      Session session,
+      Identity identity,
+      SessionType sessionType,
+      Protection protection,
       CreateStep createStep) {
-    return (session.getType() != null) && (session.getType().equals(sessionType)) && (identity.getProtection().equals(protection)) && (session.getCreateStep().equals(createStep)) && (identity.getProtectedTs() == null);
+    return (session.getType() != null)
+        && (session.getType().equals(sessionType))
+        && (identity.getProtection().equals(protection))
+        && (session.getCreateStep().equals(createStep))
+        && (identity.getProtectedTs() == null);
   }
 
-  private boolean isIssueOrRestoreSession(Session session, Identity identity, Protection protection) {
-    return (session.getType() != null) && (session.getType().equals(SessionType.ISSUE) || session.getType().equals(SessionType.RESTORE)) && (identity.getProtection().equals(protection)) && (identity.getProtectedTs() != null);
+  private boolean isIssueOrRestoreSession(
+      Session session, Identity identity, Protection protection) {
+    return (session.getType() != null)
+        && (session.getType().equals(SessionType.ISSUE)
+            || session.getType().equals(SessionType.RESTORE))
+        && (identity.getProtection().equals(protection))
+        && (identity.getProtectedTs() != null);
   }
 
   private void saveJp2Picture(String imageDataUrl, Session session) throws Exception {
@@ -3773,7 +3819,8 @@ public class Service {
     List<MediaItem> items = mm.getItems();
 
     if (items.size() == 0) {
-      this.resetPictureValues(session, "MEDIA_NO_ATTACHMENT_ERROR", "incomingAvatarPicture: no items");
+      this.resetPictureValues(
+          session, "MEDIA_NO_ATTACHMENT_ERROR", "incomingAvatarPicture: no items");
       return;
     }
 
@@ -3881,7 +3928,8 @@ public class Service {
               this.setAvatarPictureSession(session, mediaType, uuid, c, item.getUri(), true);
             } catch (Exception e) {
               logger.error("incomingAvatarPicture", e);
-              this.resetPictureValues(session, "MEDIA_SAVE_ERROR", "incomingAvatarPicture: could not save avatar");
+              this.resetPictureValues(
+                  session, "MEDIA_SAVE_ERROR", "incomingAvatarPicture: could not save avatar");
               return;
             }
           } else {
@@ -3891,11 +3939,13 @@ public class Service {
           }
 
         } else {
-          this.resetPictureValues(session, "MEDIA_TYPE_ERROR", "incomingAvatarPicture: invalid type: " + mediaType);
+          this.resetPictureValues(
+              session, "MEDIA_TYPE_ERROR", "incomingAvatarPicture: invalid type: " + mediaType);
           return;
         }
       } else {
-        this.resetPictureValues(session, "MEDIA_TYPE_ERROR", "incomingAvatarPicture: invalid type: " + mediaType);
+        this.resetPictureValues(
+            session, "MEDIA_TYPE_ERROR", "incomingAvatarPicture: invalid type: " + mediaType);
         return;
       }
 
@@ -3908,7 +3958,9 @@ public class Service {
 
   private void resetPictureValues(Session session, String messageError, String log) {
     logger.info(log);
-    messageResource.sendMessage(TextMessage.build(session.getConnectionId(),null,getMessage(messageError, session.getConnectionId())));
+    messageResource.sendMessage(
+        TextMessage.build(
+            session.getConnectionId(), null, getMessage(messageError, session.getConnectionId())));
     session.setAvatarPic(null);
     session.setIsAvatarPicCiphered(null);
     session.setAvatarPicCiphAlg(null);
