@@ -827,21 +827,15 @@ public class Service {
                 getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
       }
 
-    } else if ((session != null)
-        && (session.getType() != null)
-        && (session.getType().equals(SessionType.CREATE))) {
+    } else if (this.isSessionType(session, SessionType.CREATE)) {
       logger.info("userInput: CREATE entryPoint session before: " + session);
 
       this.createEntryPoint(message.getConnectionId(), message.getThreadId(), session, content, mm);
-    } else if ((session != null)
-        && (session.getType() != null)
-        && (session.getType().equals(SessionType.RESTORE))) {
+    } else if (this.isSessionType(session, SessionType.RESTORE)) {
       logger.info("userInput: RESTORE entryPoint session before: " + session);
 
       this.restoreEntryPoint(message.getConnectionId(), message.getThreadId(), session, content);
-    } else if ((session != null)
-        && (session.getType() != null)
-        && (session.getType().equals(SessionType.ISSUE))) {
+    } else if (this.isSessionType(session, SessionType.ISSUE)) {
       logger.info("userInput: ISSUE entryPoint session before: " + session);
 
       this.issueEntryPoint(message.getConnectionId(), message.getThreadId(), session, content);
@@ -866,6 +860,10 @@ public class Service {
             message.getConnectionId(),
             session,
             ((session != null) ? session.getIdentity() : identity)));
+  }
+
+  private boolean isSessionType(Session session, SessionType issue) {
+    return (session != null) && (session.getType() != null) && (session.getType().equals(issue));
   }
 
   private boolean isEditSession(Session session, Identity identity) {
@@ -1167,47 +1165,7 @@ public class Service {
 
     if ((session.getRestoreStep() != null) && (session.getRestoreStep().equals(RestoreStep.DONE))) {
 
-      CriteriaBuilder builder = em.getCriteriaBuilder();
-      CriteriaQuery<Identity> query = builder.createQuery(Identity.class);
-      Root<Identity> root = query.from(Identity.class);
-
-      List<Predicate> allPredicates = new ArrayList<Predicate>();
-
-      if (restoreCitizenidClaim) {
-        Predicate predicate = builder.equal(root.get("citizenId"), session.getCitizenId());
-        allPredicates.add(predicate);
-      }
-
-      if (restoreFirstNameClaim) {
-        Predicate predicate = builder.equal(root.get("firstName"), session.getFirstName());
-        allPredicates.add(predicate);
-      }
-      if (restoreLastNameClaim) {
-        Predicate predicate = builder.equal(root.get("lastName"), session.getLastName());
-        allPredicates.add(predicate);
-      }
-      if (restoreAvatarNameClaim) {
-        Predicate predicate = builder.equal(root.get("avatarName"), session.getAvatarName());
-        allPredicates.add(predicate);
-      }
-
-      if (restoreBirthDateClaim) {
-        Predicate predicate = builder.equal(root.get("birthDate"), session.getBirthDate());
-        allPredicates.add(predicate);
-      }
-      if (restoreBirthplaceClaim) {
-        Predicate predicate = builder.equal(root.get("placeOfBirth"), session.getPlaceOfBirth());
-        allPredicates.add(predicate);
-      }
-      if (restoreMrzClaim) {
-        Predicate predicate = builder.equal(root.get("mrz"), session.getMrz());
-        allPredicates.add(predicate);
-      }
-
-      query.where(builder.and(allPredicates.toArray(new Predicate[allPredicates.size()])));
-
-      query.orderBy(builder.desc(root.get("id")));
-      Query q = em.createQuery(query);
+      Query q = em.createQuery(this.queryDuplicatePredicate(session));
 
       Identity res = (Identity) q.getResultList().stream().findFirst().orElse(null);
 
@@ -1380,6 +1338,14 @@ public class Service {
   }
 
   private boolean identityAlreadyExists(Session session) {
+    Query q = em.createQuery(this.queryDuplicatePredicate(session));
+
+    List<Identity> founds = q.getResultList();
+    loggerInfoSerializeObject("identityAlreadyExists: found: ", founds);
+    return (founds.size() > 0);
+  }
+
+  private CriteriaQuery<Identity> queryDuplicatePredicate(Session session) {
 
     CriteriaBuilder builder = em.getCriteriaBuilder();
     CriteriaQuery<Identity> query = builder.createQuery(Identity.class);
@@ -1390,58 +1356,47 @@ public class Service {
     if (restoreCitizenidClaim) {
       Predicate predicate = builder.equal(root.get("citizenId"), session.getCitizenId());
       allPredicates.add(predicate);
-      if (debug) logger.info("identityAlreadyExists: citizenId: " + session.getCitizenId());
+      loggerInfoSerializeObject("identityAlreadyExists: citizenId: ", session.getCitizenId());
     }
 
     if (restoreFirstNameClaim) {
       Predicate predicate = builder.equal(root.get("firstName"), session.getFirstName());
       allPredicates.add(predicate);
 
-      if (debug) logger.info("identityAlreadyExists: firstName: " + session.getFirstName());
+      loggerInfoSerializeObject("identityAlreadyExists: firstName: ", session.getFirstName());
     }
     if (restoreLastNameClaim) {
       Predicate predicate = builder.equal(root.get("lastName"), session.getLastName());
       allPredicates.add(predicate);
-      if (debug) logger.info("identityAlreadyExists: lastName: " + session.getLastName());
+      loggerInfoSerializeObject("identityAlreadyExists: lastName: ", session.getLastName());
     }
     if (restoreAvatarNameClaim) {
       Predicate predicate = builder.equal(root.get("avatarName"), session.getAvatarName());
       allPredicates.add(predicate);
-      if (debug) logger.info("identityAlreadyExists: avatarName: " + session.getAvatarName());
+      loggerInfoSerializeObject("identityAlreadyExists: avatarName: ", session.getAvatarName());
     }
 
     if (restoreBirthDateClaim) {
       Predicate predicate = builder.equal(root.get("birthDate"), session.getBirthDate());
       allPredicates.add(predicate);
-      if (debug) logger.info("identityAlreadyExists: birthDate: " + session.getBirthDate());
+      loggerInfoSerializeObject("identityAlreadyExists: birthDate: ", session.getBirthDate());
     }
 
     if (restoreMrzClaim) {
       Predicate predicate = builder.equal(root.get("mrz"), session.getMrz());
       allPredicates.add(predicate);
-      if (debug) logger.info("identityAlreadyExists: mrz: " + session.getMrz());
+      loggerInfoSerializeObject("identityAlreadyExists: mrz: ", session.getMrz());
     }
     if (restoreBirthplaceClaim) {
       Predicate predicate = builder.equal(root.get("placeOfBirth"), session.getPlaceOfBirth());
       allPredicates.add(predicate);
-      if (debug) logger.info("identityAlreadyExists: placeOfBirth: " + session.getPlaceOfBirth());
+      loggerInfoSerializeObject("identityAlreadyExists: placeOfBirth: ", session.getPlaceOfBirth());
     }
 
     query.where(builder.and(allPredicates.toArray(new Predicate[allPredicates.size()])));
 
     query.orderBy(builder.desc(root.get("id")));
-    Query q = em.createQuery(query);
-
-    List<Identity> founds = q.getResultList();
-    if (debug) {
-      try {
-        logger.info("identityAlreadyExists: found: " + JsonUtil.serialize(founds, false));
-      } catch (JsonProcessingException e) {
-        logger.error("", e);
-      }
-    }
-
-    return (founds.size() > 0);
+    return query;
   }
 
   private CreateStep getNextCreateStep(CreateStep current) throws Exception {
@@ -2762,6 +2717,8 @@ public class Service {
             messageResource.sendMessage(this.getWhichToChangeNeeded(connectionId, threadId));
             break;
           }
+        default:
+          break;
       }
   }
 
@@ -2833,10 +2790,6 @@ public class Service {
                 this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
             messageResource.sendMessage(
                 generateFaceVerificationMediaMessage(connectionId, threadId, token));
-            /*messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
-            .replaceFirst("REDIRDOMAIN", redirDomain)
-            .replaceFirst("Q_DOMAIN", qRedirDomain)
-            .replaceFirst("D_DOMAIN", dRedirDomain))));*/
 
             break;
           }
@@ -3439,11 +3392,7 @@ public class Service {
       case FACE_CAPTURE:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.CREATE))
-                && (identity.getProtection().equals(Protection.FACE))
-                && (session.getCreateStep().equals(CreateStep.FACE_CAPTURE))
-                && (identity.getProtectedTs() == null)) {
+            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.FACE, CreateStep.FACE_CAPTURE)) {
 
               identity.setProtectedTs(Instant.now());
 
@@ -3473,11 +3422,7 @@ public class Service {
       case FINGERPRINT_CAPTURE:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.CREATE))
-                && (identity.getProtection().equals(Protection.FINGERPRINTS))
-                && (session.getCreateStep().equals(CreateStep.FINGERPRINT_CAPTURE))
-                && (identity.getProtectedTs() == null)) {
+            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.FINGERPRINTS, CreateStep.FINGERPRINT_CAPTURE)) {
 
               identity.setProtectedTs(Instant.now());
 
@@ -3507,11 +3452,7 @@ public class Service {
       case WEBRTC_CAPTURE:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.CREATE))
-                && (identity.getProtection().equals(Protection.WEBRTC))
-                && (session.getCreateStep().equals(CreateStep.WEBRTC_CAPTURE))
-                && (identity.getProtectedTs() == null)) {
+            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.WEBRTC, CreateStep.WEBRTC_CAPTURE)) {
 
               identity.setProtectedTs(Instant.now());
 
@@ -3541,11 +3482,7 @@ public class Service {
       case FACE_VERIFICATION:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.ISSUE)
-                    || session.getType().equals(SessionType.RESTORE))
-                && (identity.getProtection().equals(Protection.FACE))
-                && (identity.getProtectedTs() != null)) {
+            if (this.isIssueOrRestoreSession(session, identity, Protection.FACE)) {
 
               identity.setAuthenticatedTs(Instant.now());
               identity.setConnectionId(session.getConnectionId());
@@ -3576,11 +3513,7 @@ public class Service {
       case FINGERPRINT_VERIFICATION:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.ISSUE)
-                    || session.getType().equals(SessionType.RESTORE))
-                && (identity.getProtection().equals(Protection.FINGERPRINTS))
-                && (identity.getProtectedTs() != null)) {
+            if (this.isIssueOrRestoreSession(session, identity, Protection.FINGERPRINTS)) {
 
               identity.setAuthenticatedTs(Instant.now());
               identity.setConnectionId(session.getConnectionId());
@@ -3609,11 +3542,7 @@ public class Service {
       case WEBRTC_VERIFICATION:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.ISSUE)
-                    || session.getType().equals(SessionType.RESTORE))
-                && (identity.getProtection().equals(Protection.WEBRTC))
-                && (identity.getProtectedTs() != null)) {
+            if (this.isIssueOrRestoreSession(session, identity, Protection.WEBRTC)) {
 
               identity.setAuthenticatedTs(Instant.now());
               identity.setConnectionId(session.getConnectionId());
@@ -3640,6 +3569,8 @@ public class Service {
           }
           break;
         }
+      default:
+        break;
     }
   }
 
@@ -3656,11 +3587,7 @@ public class Service {
       case FACE_CAPTURE:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.CREATE))
-                && (identity.getProtection().equals(Protection.FACE))
-                && (session.getCreateStep().equals(CreateStep.FACE_CAPTURE))
-                && (identity.getProtectedTs() == null)) {
+            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.FACE, CreateStep.FACE_CAPTURE)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3682,11 +3609,7 @@ public class Service {
       case FINGERPRINT_CAPTURE:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.CREATE))
-                && (identity.getProtection().equals(Protection.FINGERPRINTS))
-                && (session.getCreateStep().equals(CreateStep.FINGERPRINT_CAPTURE))
-                && (identity.getProtectedTs() == null)) {
+            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.FINGERPRINTS, CreateStep.FINGERPRINT_CAPTURE)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3708,11 +3631,7 @@ public class Service {
       case WEBRTC_CAPTURE:
         {
           if (session != null) {
-            if ((session.getType() != null)
-                && (session.getType().equals(SessionType.CREATE))
-                && (identity.getProtection().equals(Protection.WEBRTC))
-                && (session.getCreateStep().equals(CreateStep.WEBRTC_CAPTURE))
-                && (identity.getProtectedTs() == null)) {
+            if (this.isValidSessionIdentity(session, identity, SessionType.CREATE, Protection.WEBRTC, CreateStep.WEBRTC_CAPTURE)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3734,7 +3653,7 @@ public class Service {
       case FACE_VERIFICATION:
         {
           if (session != null) {
-            if (this.isValidIssueRestoreSession(session, identity, Protection.FACE)) {
+            if (this.isIssueOrRestoreSession(session, identity, Protection.FACE)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3760,7 +3679,7 @@ public class Service {
       case FINGERPRINT_VERIFICATION:
         {
           if (session != null) {
-            if (this.isValidIssueRestoreSession(session, identity, Protection.FINGERPRINTS)) {
+            if (this.isIssueOrRestoreSession(session, identity, Protection.FINGERPRINTS)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3786,7 +3705,7 @@ public class Service {
       case WEBRTC_VERIFICATION:
         {
           if (session != null) {
-            if (this.isValidIssueRestoreSession(session, identity, Protection.WEBRTC)) {
+            if (this.isIssueOrRestoreSession(session, identity, Protection.WEBRTC)) {
 
               messageResource.sendMessage(
                   TextMessage.build(
@@ -3808,11 +3727,18 @@ public class Service {
           }
           break;
         }
+      default:
+        break;
     }
   }
 
-  private boolean isValidIssueRestoreSession(Session session, Identity identity, Protection fingerprints) {
-    return (session.getType() != null) && (session.getType().equals(SessionType.ISSUE) || session.getType().equals(SessionType.RESTORE)) && (identity.getProtection().equals(Protection.FINGERPRINTS)) && (identity.getProtectedTs() != null);
+  private boolean isValidSessionIdentity(Session session, Identity identity, SessionType sessionType, Protection protection,
+      CreateStep createStep) {
+    return (session.getType() != null) && (session.getType().equals(sessionType)) && (identity.getProtection().equals(protection)) && (session.getCreateStep().equals(createStep)) && (identity.getProtectedTs() == null);
+  }
+
+  private boolean isIssueOrRestoreSession(Session session, Identity identity, Protection protection) {
+    return (session.getType() != null) && (session.getType().equals(SessionType.ISSUE) || session.getType().equals(SessionType.RESTORE)) && (identity.getProtection().equals(protection)) && (identity.getProtectedTs() != null);
   }
 
   private void saveJp2Picture(String imageDataUrl, Session session) throws Exception {
@@ -3867,8 +3793,6 @@ public class Service {
 
           Ciphering c = item.getCiphering();
           Parameters p = c.getParameters();
-          // logger.info("saveAvatarPicture: ciphering: " + c.getAlgorithm() + " Key " + p.getKey()
-          // + " Iv " + p.getIv());
 
           if (item.getUri() != null) {
 
