@@ -1522,7 +1522,6 @@ public class Service {
             return CreateStep.PENDING_CONFIRM;
           }
         case PLACE_OF_BIRTH:
-        case MRZ:
         default:
           {
             return CreateStep.PENDING_CONFIRM;
@@ -1855,29 +1854,23 @@ public class Service {
                   objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
                   session);
               this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, threadId);
-              session.setCreateStep(getNextCreateStep(session.getCreateStep()));
 
-              if (session.getCreateStep().equals(CreateStep.PENDING_CONFIRM)) {
+              if (this.identityAlreadyExists(session)) {
+                messageResource.sendMessage(
+                    TextMessage.build(
+                        connectionId,
+                        threadId,
+                        getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
+                messageResource.sendMessage(
+                    TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
 
-                if (this.identityAlreadyExists(session)) {
-                  messageResource.sendMessage(
-                      TextMessage.build(
-                          connectionId,
-                          threadId,
-                          getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
-                  if (session.getAvatarPic() == null) {
-                    messageResource.sendMessage(
-                        TextMessage.build(
-                            connectionId, threadId, this.getSessionDataString(session)));
-                  } else {
-                    MediaMessage mms =
-                        this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-                    messageResource.sendMessage(mms);
-                  }
-                  session.setCreateStep(CreateStep.NEED_TO_CHANGE);
-                }
+                session.setCreateStep(CreateStep.NEED_TO_CHANGE);
+              } else {
+                Identity identity = this.setAvatarPictureData(null, session);
+                em.persist(identity);
+                session.setCreateStep(CreateStep.CAPTURE);
+                this.createEntryPoint(connectionId, threadId, session, null, null);
               }
-
               session = em.merge(session);
             }
             this.createSendMessage(connectionId, threadId, session);
@@ -1891,17 +1884,9 @@ public class Service {
               if (content.equals(ServiceLabel.COMPLETE_IDENTITY_CONFIRM_YES_VALUE)) {
 
                 if (!this.identityAlreadyExists(session)) {
-                  identity = new Identity();
-                  identity.setId(UUID.randomUUID());
-                  identity.setCitizenId(session.getCitizenId());
-                  identity.setAvatarName(session.getAvatarName());
-                  identity.setMrz(session.getMrz());
-                  identity.setCitizenSinceTs(Instant.now());
-                  identity.setConnectionId(connectionId);
-                  identity.setProtection(protection);
-                  em.persist(this.setAvatarPictureData(identity, session));
-
-                  session.setIdentity(identity);
+                  session.setConnectionId(connectionId);
+                  identity = this.setAvatarPictureData(identity, session);
+                  em.persist(identity);
                   session = em.merge(session);
                 }
 
@@ -2408,6 +2393,17 @@ public class Service {
   }
 
   private Identity setAvatarPictureData(Identity identity, Session session) {
+    if (identity == null) {
+      identity = new Identity();
+      identity.setId(UUID.randomUUID());
+      identity.setCitizenSinceTs(Instant.now());
+    }
+    identity.setCitizenId(session.getCitizenId());
+    identity.setAvatarName(session.getAvatarName());
+    identity.setMrz(session.getMrz());
+    identity.setConnectionId(session.getConnectionId());
+    identity.setProtection(protection);
+
     identity.setFirstName(session.getFirstName());
     identity.setLastName(session.getLastName());
     identity.setBirthDate(session.getBirthDate());
@@ -2421,6 +2417,8 @@ public class Service {
     identity.setAvatarPicCiphIv(session.getAvatarPicCiphIv());
     identity.setAvatarPicCiphKey(session.getAvatarPicCiphKey());
     identity.setAvatarMimeType(session.getAvatarMimeType());
+
+    session.setIdentity(identity);
     return identity;
   }
 
