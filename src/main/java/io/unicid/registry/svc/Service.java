@@ -878,26 +878,18 @@ public class Service {
     em.merge(session);
 
     // Send welcome message after
-    messageResource.sendMessage(
-        TextMessage.build(
-            profile.getConnectionId(),
-            profile.getThreadId(),
-            getMessage("WELCOME", profile.getConnectionId())));
+    this.sendWelcomeMessages(profile.getConnectionId(), profile.getThreadId());
+    messageResource.sendMessage(this.getRootMenu(profile.getConnectionId(), null, null));
+  }
+
+  private void sendWelcomeMessages(UUID connectionId, UUID threadId) {
+    messageResource.sendMessage(TextMessage.build(connectionId,threadId, getMessage("WELCOME", connectionId)));
     if (WELCOME2.isPresent()) {
-      messageResource.sendMessage(
-          TextMessage.build(
-              profile.getConnectionId(),
-              profile.getThreadId(),
-              getMessage("WELCOME2", profile.getConnectionId())));
+      messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WELCOME2", connectionId)));
     }
     if (WELCOME3.isPresent()) {
-      messageResource.sendMessage(
-          TextMessage.build(
-              profile.getConnectionId(),
-              profile.getThreadId(),
-              getMessage("WELCOME3", profile.getConnectionId())));
+      messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("WELCOME3", connectionId)));
     }
-    messageResource.sendMessage(this.getRootMenu(profile.getConnectionId(), null, null));
   }
 
   // ?token=TOKEN&d=D_DOMAIN&q=Q_DOMAIN
@@ -1938,13 +1930,6 @@ public class Service {
                             getMessage("FACE_CAPTURE_REQUIRED", connectionId)));
                     messageResource.sendMessage(
                         generateFaceCaptureMediaMessage(connectionId, threadId, token));
-                    /*
-                    messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_CAPTURE_REQUEST.replaceFirst("URL", faceCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
-                    		.replaceFirst("REDIRDOMAIN", redirDomain)
-                    		.replaceFirst("Q_DOMAIN", qRedirDomain)
-                    		.replaceFirst("D_DOMAIN", dRedirDomain)
-                    		)));
-                    */
                     break;
                   }
                 case FINGERPRINTS:
@@ -1958,10 +1943,6 @@ public class Service {
                             connectionId,
                             threadId,
                             getMessage("FINGERPRINT_CAPTURE_REQUIRED", connectionId)));
-                    /*	messageResource.sendMessage(TextMessage.build(connectionId, threadId, getMessage("FINGERPRINT_CAPTURE_REQUEST").replaceFirst("URL", fingerprintsCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
-                    .replaceFirst("REDIRDOMAIN", redirDomain)
-                    .replaceFirst("Q_DOMAIN", qRedirDomain)
-                    .replaceFirst("D_DOMAIN", dRedirDomain))));*/
 
                     break;
                   }
@@ -1992,29 +1973,22 @@ public class Service {
             if (content != null) {
               if (content.equals(IdentityClaim.CITIZEN_ID.toString())) {
                 session.setCreateStep(CreateStep.CHANGE_CITIZEN_ID);
-                session = em.merge(session);
               } else if (content.equals(IdentityClaim.FIRST_NAME.toString())) {
                 session.setCreateStep(CreateStep.CHANGE_FIRST_NAME);
-                session = em.merge(session);
               } else if (content.equals(IdentityClaim.LAST_NAME.toString())) {
                 session.setCreateStep(CreateStep.CHANGE_LAST_NAME);
-                session = em.merge(session);
               } else if (content.equals(IdentityClaim.AVATAR_NAME.toString())) {
                 session.setCreateStep(CreateStep.CHANGE_AVATAR_NAME);
-                session = em.merge(session);
               } else if (content.equals(IdentityClaim.AVATAR_PIC.toString())) {
                 session.setCreateStep(CreateStep.CHANGE_AVATAR_PIC);
-                session = em.merge(session);
               } else if (content.equals(IdentityClaim.BIRTH_DATE.toString())) {
                 session.setCreateStep(CreateStep.CHANGE_BIRTH_DATE);
-                session = em.merge(session);
               } else if (content.equals(IdentityClaim.PLACE_OF_BIRTH.toString())) {
                 session.setCreateStep(CreateStep.CHANGE_PLACE_OF_BIRTH);
-                session = em.merge(session);
               } else if (content.equals(IdentityClaim.MRZ.toString())) {
                 session.setCreateStep(CreateStep.CHANGE_MRZ);
-                session = em.merge(session);
               }
+              session = em.merge(session);
             }
             this.createSendMessage(connectionId, threadId, session);
 
@@ -2562,57 +2536,33 @@ public class Service {
     confirm.setPrompt(getMessage("CHANGE_CLAIM_TITLE", connectionId));
 
     if (enableCitizenIdClaim) {
-      MenuItem citizenId = new MenuItem();
-      citizenId.setId(IdentityClaim.CITIZEN_ID.toString());
-      citizenId.setText(IdentityClaim.CITIZEN_ID.getClaimLabel());
-      menuItems.add(citizenId);
+      this.setChangeMenuItem(IdentityClaim.CITIZEN_ID, menuItems);
     }
 
     if (enableFirstNameClaim) {
-      MenuItem firstName = new MenuItem();
-      firstName.setId(IdentityClaim.FIRST_NAME.toString());
-      firstName.setText(IdentityClaim.FIRST_NAME.getClaimLabel());
-      menuItems.add(firstName);
+      this.setChangeMenuItem(IdentityClaim.FIRST_NAME, menuItems);
     }
     if (enableLastNameClaim) {
-      MenuItem lastName = new MenuItem();
-      lastName.setId(IdentityClaim.LAST_NAME.toString());
-      lastName.setText(IdentityClaim.LAST_NAME.getClaimLabel());
-      menuItems.add(lastName);
+      this.setChangeMenuItem(IdentityClaim.LAST_NAME, menuItems);
     }
 
     if (enableAvatarNameClaim) {
-      MenuItem avatarName = new MenuItem();
-      avatarName.setId(IdentityClaim.AVATAR_NAME.toString());
-      avatarName.setText(IdentityClaim.AVATAR_NAME.getClaimLabel());
-      menuItems.add(avatarName);
+      this.setChangeMenuItem(IdentityClaim.AVATAR_NAME, menuItems);
     }
 
     if (enableAvatarPicClaim) {
-      MenuItem avatarName = new MenuItem();
-      avatarName.setId(IdentityClaim.AVATAR_PIC.toString());
-      avatarName.setText(IdentityClaim.AVATAR_PIC.getClaimLabel());
-      menuItems.add(avatarName);
+      this.setChangeMenuItem(IdentityClaim.AVATAR_PIC, menuItems);
     }
     if (enableBirthDateClaim) {
-      MenuItem birthDate = new MenuItem();
-      birthDate.setId(IdentityClaim.BIRTH_DATE.toString());
-      birthDate.setText(IdentityClaim.BIRTH_DATE.getClaimLabel());
-      menuItems.add(birthDate);
+      this.setChangeMenuItem(IdentityClaim.BIRTH_DATE, menuItems);
     }
 
     if (enableBirthplaceClaim) {
-      MenuItem placeOfBirth = new MenuItem();
-      placeOfBirth.setId(IdentityClaim.PLACE_OF_BIRTH.toString());
-      placeOfBirth.setText(IdentityClaim.PLACE_OF_BIRTH.getClaimLabel());
-      menuItems.add(placeOfBirth);
+      this.setChangeMenuItem(IdentityClaim.PLACE_OF_BIRTH, menuItems);
     }
 
     if (enableMrzClaim) {
-      MenuItem mrz = new MenuItem();
-      mrz.setId(IdentityClaim.MRZ.toString());
-      mrz.setText(IdentityClaim.MRZ.getClaimLabel());
-      menuItems.add(mrz);
+      this.setChangeMenuItem(IdentityClaim.MRZ, menuItems);
     }
 
     confirm.setConnectionId(connectionId);
@@ -2628,57 +2578,43 @@ public class Service {
     confirm.setPrompt(getMessage("CONFLICTIVE_CLAIM_TITLE", connectionId));
 
     if (restoreCitizenidClaim) {
-      MenuItem citizenId = new MenuItem();
-      citizenId.setId(IdentityClaim.CITIZEN_ID.toString());
-      citizenId.setText(IdentityClaim.CITIZEN_ID.getClaimLabel());
-      menuItems.add(citizenId);
+      this.setChangeMenuItem(IdentityClaim.CITIZEN_ID, menuItems);
     }
 
     if (restoreFirstNameClaim) {
-      MenuItem firstName = new MenuItem();
-      firstName.setId(IdentityClaim.FIRST_NAME.toString());
-      firstName.setText(IdentityClaim.FIRST_NAME.getClaimLabel());
-      menuItems.add(firstName);
+      this.setChangeMenuItem(IdentityClaim.FIRST_NAME, menuItems);
     }
     if (restoreLastNameClaim) {
-      MenuItem lastName = new MenuItem();
-      lastName.setId(IdentityClaim.LAST_NAME.toString());
-      lastName.setText(IdentityClaim.LAST_NAME.getClaimLabel());
-      menuItems.add(lastName);
+      this.setChangeMenuItem(IdentityClaim.LAST_NAME, menuItems);
     }
 
     if (restoreAvatarNameClaim) {
-      MenuItem avatarName = new MenuItem();
-      avatarName.setId(IdentityClaim.AVATAR_NAME.toString());
-      avatarName.setText(IdentityClaim.AVATAR_NAME.getClaimLabel());
-      menuItems.add(avatarName);
+      this.setChangeMenuItem(IdentityClaim.AVATAR_NAME, menuItems);
     }
 
     if (restoreBirthDateClaim) {
-      MenuItem birthDate = new MenuItem();
-      birthDate.setId(IdentityClaim.BIRTH_DATE.toString());
-      birthDate.setText(IdentityClaim.BIRTH_DATE.getClaimLabel());
-      menuItems.add(birthDate);
+      this.setChangeMenuItem(IdentityClaim.BIRTH_DATE, menuItems);
     }
 
     if (restoreBirthplaceClaim) {
-      MenuItem placeOfBirth = new MenuItem();
-      placeOfBirth.setId(IdentityClaim.PLACE_OF_BIRTH.toString());
-      placeOfBirth.setText(IdentityClaim.PLACE_OF_BIRTH.getClaimLabel());
-      menuItems.add(placeOfBirth);
+      this.setChangeMenuItem(IdentityClaim.PLACE_OF_BIRTH, menuItems);
     }
 
     if (restoreMrzClaim) {
-      MenuItem mrz = new MenuItem();
-      mrz.setId(IdentityClaim.MRZ.toString());
-      mrz.setText(IdentityClaim.MRZ.getClaimLabel());
-      menuItems.add(mrz);
+      this.setChangeMenuItem(IdentityClaim.MRZ, menuItems);
     }
 
     confirm.setConnectionId(connectionId);
     confirm.setThreadId(threadId);
     confirm.setMenuItems(menuItems);
     return confirm;
+  }
+
+  private void setChangeMenuItem(IdentityClaim claim, List<MenuItem> menuItems) {
+    MenuItem menu = new MenuItem();
+    menu.setId(claim.toString());
+    menu.setText(claim.getClaimLabel());
+    menuItems.add(menu);
   }
 
   private BaseMessage getConfirmData(UUID connectionId, UUID threadId) {
@@ -2710,16 +2646,8 @@ public class Service {
       throws Exception {
     CreateStep step = session.getCreateStep();
     if (session.getCreateStep() == null) {
-      messageResource.sendMessage(
-          TextMessage.build(connectionId, threadId, getMessage("WELCOME", connectionId)));
-      if (WELCOME2.isPresent()) {
-        messageResource.sendMessage(
-            TextMessage.build(connectionId, threadId, getMessage("WELCOME2", connectionId)));
-      }
-      if (WELCOME3.isPresent()) {
-        messageResource.sendMessage(
-            TextMessage.build(connectionId, threadId, getMessage("WELCOME3", connectionId)));
-      }
+      this.sendWelcomeMessages(connectionId, threadId);
+
       // should not occur never
       if (step == null) {
         step = this.getNextCreateStep(null);
