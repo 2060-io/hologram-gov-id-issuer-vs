@@ -3847,13 +3847,7 @@ public class Service {
     List<MediaItem> items = mm.getItems();
 
     if (items.size() == 0) {
-      logger.info("incomingAvatarPicture: no items");
-      messageResource.sendMessage(
-          TextMessage.build(
-              session.getConnectionId(),
-              null,
-              getMessage("MEDIA_NO_ATTACHMENT_ERROR", session.getConnectionId())));
-      this.resetPictureValues(session);
+      this.resetPictureValues(session, "MEDIA_NO_ATTACHMENT_ERROR", "incomingAvatarPicture: no items");
       return;
     }
 
@@ -3963,62 +3957,34 @@ public class Service {
               this.setAvatarPictureSession(session, mediaType, uuid, c, item.getUri(), true);
             } catch (Exception e) {
               logger.error("incomingAvatarPicture", e);
-              logger.info("incomingAvatarPicture: could not save avatar");
-              messageResource.sendMessage(
-                  TextMessage.build(
-                      session.getConnectionId(),
-                      null,
-                      getMessage("MEDIA_SAVE_ERROR", session.getConnectionId())));
-              this.resetPictureValues(session);
+              this.resetPictureValues(session, "MEDIA_SAVE_ERROR", "incomingAvatarPicture: could not save avatar");
               return;
             }
           } else {
 
-            logger.info("incomingAvatarPicture: no uri");
-            messageResource.sendMessage(
-                TextMessage.build(
-                    session.getConnectionId(),
-                    null,
-                    getMessage("MEDIA_URI_ERROR", session.getConnectionId())));
-            this.resetPictureValues(session);
+            this.resetPictureValues(session, "MEDIA_URI_ERROR", "incomingAvatarPicture: no uri");
             return;
           }
 
         } else {
-          logger.info("incomingAvatarPicture: invalid type: " + mediaType);
-          messageResource.sendMessage(
-              TextMessage.build(
-                  session.getConnectionId(),
-                  null,
-                  getMessage("MEDIA_TYPE_ERROR", session.getConnectionId())));
-          this.resetPictureValues(session);
+          this.resetPictureValues(session, "MEDIA_TYPE_ERROR", "incomingAvatarPicture: invalid type: " + mediaType);
           return;
         }
       } else {
-        logger.info("incomingAvatarPicture: invalid type: " + mediaType);
-        messageResource.sendMessage(
-            TextMessage.build(
-                session.getConnectionId(),
-                null,
-                getMessage("MEDIA_TYPE_ERROR", session.getConnectionId())));
-        this.resetPictureValues(session);
+        this.resetPictureValues(session, "MEDIA_TYPE_ERROR", "incomingAvatarPicture: invalid type: " + mediaType);
         return;
       }
 
     } else {
       // too big too big ;-)
-      logger.info("incomingAvatarPicture: no items");
-      messageResource.sendMessage(
-          TextMessage.build(
-              session.getConnectionId(),
-              null,
-              getMessage("MEDIA_SIZE_ERROR", session.getConnectionId())));
-      this.resetPictureValues(session);
+      this.resetPictureValues(session, "MEDIA_SIZE_ERROR", "incomingAvatarPicture: no items");
       return;
     }
   }
 
-  private void resetPictureValues(Session session) {
+  private void resetPictureValues(Session session, String messageError, String log) {
+    logger.info(log);
+    messageResource.sendMessage(TextMessage.build(session.getConnectionId(),null,getMessage(messageError, session.getConnectionId())));
     session.setAvatarPic(null);
     session.setIsAvatarPicCiphered(null);
     session.setAvatarPicCiphAlg(null);
