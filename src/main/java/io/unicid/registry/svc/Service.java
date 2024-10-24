@@ -1952,9 +1952,7 @@ public class Service {
                     session.setCreateStep(CreateStep.FINGERPRINT_CAPTURE);
                     session = em.merge(session);
 
-                    Token token =
-                        this.getToken(
-                            connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
+                    this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
                     messageResource.sendMessage(
                         TextMessage.build(
                             connectionId,
@@ -2301,7 +2299,10 @@ public class Service {
                 }
                 session.setCreateStep(CreateStep.NEED_TO_CHANGE);
               } else {
-                session.setCreateStep(CreateStep.PENDING_CONFIRM);
+                Identity identity = this.setAvatarPictureData(null, session);
+                em.persist(identity);
+                session.setCreateStep(CreateStep.CAPTURE);
+                this.createEntryPoint(connectionId, threadId, session, null, null);
               }
               session = em.merge(session);
             }
@@ -2916,9 +2917,7 @@ public class Service {
             session.setIssueStep(IssueStep.FINGERPRINT_AUTH);
             session = em.merge(session);
 
-            Token token =
-                this.getToken(
-                    connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
+            this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
 
             break;
           }
@@ -2992,9 +2991,7 @@ public class Service {
 
         case FINGERPRINT_AUTH:
           {
-            Token token =
-                this.getToken(
-                    connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
+            this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
 
             break;
           }
