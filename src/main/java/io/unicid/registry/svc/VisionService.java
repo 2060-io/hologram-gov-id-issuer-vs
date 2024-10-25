@@ -77,6 +77,13 @@ public class VisionService {
 
             return medias;
           }
+        case WEBRTC_VERIFICATION:
+          {
+            q.setParameter("type", MediaType.WEBRTC);
+            List<UUID> medias = q.getResultList();
+
+            return medias;
+          }
         default:
           {
             throw new TokenException();
