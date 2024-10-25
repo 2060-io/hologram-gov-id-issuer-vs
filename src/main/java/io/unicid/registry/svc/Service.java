@@ -3811,6 +3811,7 @@ public class Service {
     this.setAvatarPictureSession(session, item.getMimeType(), uuid, c, null, false);
     visionService.linkMedia(token.getId(), uuid);
     this.dataStoreLoad(uuid, new ByteArrayInputStream(dataBytes));
+    logger.info("saveJp2Picture: mimetype: " + item.getMimeType() + " UUID: "+ uuid);
   }
 
   private void saveAvatarPicture(MediaMessage mm, Session session) throws Exception {
