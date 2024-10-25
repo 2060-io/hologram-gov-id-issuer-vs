@@ -5,8 +5,6 @@ import io.unicid.registry.enums.PeerType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
@@ -29,8 +27,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 @DynamicInsert
 @NamedQueries({
   @NamedQuery(
-      name = "PeerRegistry.findForIdentity",
-      query = "SELECT u FROM PeerRegistry u WHERE u.identity=:identity ORDER by u.id ASC"),
+      name = "PeerRegistry.findForConnectionId",
+      query = "SELECT u FROM PeerRegistry u WHERE u.connectionId=:connectionId ORDER by u.id ASC"),
   @NamedQuery(
       name = "PeerRegistry.findForId",
       query = "SELECT u FROM PeerRegistry u WHERE u.id=:id"),
@@ -44,9 +42,7 @@ public class PeerRegistry implements Serializable {
 
   @Id private UUID id;
 
-  @ManyToOne
-  @JoinColumn(name = "identity_fk")
-  private Identity identity;
+  private UUID connectionId;
 
   private EventNotificationType event;
   private String roomId;

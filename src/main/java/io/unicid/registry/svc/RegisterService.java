@@ -1,7 +1,6 @@
 package io.unicid.registry.svc;
 
 import io.unicid.registry.enums.TokenType;
-import io.unicid.registry.model.Identity;
 import io.unicid.registry.model.PeerRegistry;
 import io.unicid.registry.model.Token;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -24,13 +23,13 @@ public class RegisterService {
   Boolean debug;
 
   @Transactional
-  public PeerRegistry getCallByIdentity(Identity identity) {
+  public PeerRegistry getCallByConnectionId(UUID connectionId) {
     TypedQuery<PeerRegistry> q =
-        em.createNamedQuery("PeerRegistry.findForIdentity", PeerRegistry.class);
-    q.setParameter("identity", identity);
+        em.createNamedQuery("PeerRegistry.findForConnectionId", PeerRegistry.class);
+    q.setParameter("connectionId", connectionId);
     PeerRegistry registry = q.getResultList().stream().findFirst().orElse(null);
     if (debug) {
-      logger.info("getCallByIdentity: " + registry.getId());
+      logger.info("getCallByConnectionId: " + registry.getId());
     }
     return registry;
   }

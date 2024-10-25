@@ -15,6 +15,7 @@ public class ServiceLabel {
   public static final String CMD_CONTINUE_SETUP = "/continue";
   public static final String CMD_DELETE = "/delete";
   public static final String CMD_REVOKE = "/revoke";
+  public static final String CMD_DEBUG = "/debug";
   public static final String COMPLETE_IDENTITY_CONFIRM_YES_VALUE = "CI_Yes";
   public static final String COMPLETE_IDENTITY_CONFIRM_NO_VALUE = "CI_No";
 }

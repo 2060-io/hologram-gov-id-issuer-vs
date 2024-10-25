@@ -18,9 +18,15 @@ public class JoinCallRequest implements Serializable {
   @JsonProperty("ws_url")
   private String wsUrl;
 
-  @JsonProperty("success_url")
-  private String successUrl;
+  @JsonProperty("datastore_base_url")
+  private String datastoreBaseUrl;
 
-  @JsonProperty("failure_url")
-  private String failureUrl;
+  @JsonProperty("callback_base_url")
+  private String callbackBaseUrl;
+
+  @JsonProperty("token")
+  private String token;
+
+  @JsonProperty("lang")
+  private String lang;
 }
