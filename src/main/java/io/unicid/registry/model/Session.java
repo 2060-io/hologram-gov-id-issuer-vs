@@ -97,7 +97,10 @@ public class Session implements Serializable {
   public void updateSessionWithData(Object data, Session session) {
     if (data instanceof MrzData) {
       MrzData mrz = (MrzData) data;
-      String format = mrz.getParsed().getFields().get(Mrz.FieldName.BIRTH_DATE).length() == 6 ? "yyMMdd": "yyyyMMdd";
+      String format =
+          mrz.getParsed().getFields().get(Mrz.FieldName.BIRTH_DATE).length() == 6
+              ? "yyMMdd"
+              : "yyyyMMdd";
       session.setFirstName(mrz.getParsed().getFields().get(Mrz.FieldName.FIRST_NAME));
       session.setLastName(mrz.getParsed().getFields().get(Mrz.FieldName.LAST_NAME));
       session.setBirthDate(
@@ -109,7 +112,7 @@ public class Session implements Serializable {
       session.setMrz(mrz.getRaw());
     } else if (data instanceof EMrtdData) {
       EMrtdData nfc = (EMrtdData) data;
-      String format = nfc.getProcessed().getDateOfBirth().length() == 6 ? "yyMMdd": "yyyyMMdd";
+      String format = nfc.getProcessed().getDateOfBirth().length() == 6 ? "yyMMdd" : "yyyyMMdd";
       if (nfc.getProcessed().getFirstName() != null)
         session.setFirstName(nfc.getProcessed().getFirstName());
       if (nfc.getProcessed().getLastName() != null)

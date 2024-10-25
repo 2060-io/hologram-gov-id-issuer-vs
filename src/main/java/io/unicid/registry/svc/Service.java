@@ -2873,10 +2873,6 @@ public class Service {
                 this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
             messageResource.sendMessage(
                 generateFaceVerificationMediaMessage(connectionId, threadId, token));
-            /*messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
-            .replaceFirst("REDIRDOMAIN", redirDomain)
-            .replaceFirst("Q_DOMAIN", qRedirDomain)
-            .replaceFirst("D_DOMAIN", dRedirDomain))));*/
 
             break;
           }
@@ -3394,11 +3390,8 @@ public class Service {
     Identity identity = token.getIdentity();
     Session session = getSession(token.getConnectionId());
 
-    try {
-      logger.info("userInput: session: " + JsonUtil.serialize(session, false));
-    } catch (JsonProcessingException e) {
-
-    }
+    loggerInfoSerializeObject("notifySuccess: session: ", session);
+    
     switch (token.getType()) {
       case FACE_CAPTURE:
         {
@@ -3600,11 +3593,9 @@ public class Service {
   public void notifyFailure(Token token) throws Exception {
     Identity identity = token.getIdentity();
     Session session = getSession(token.getConnectionId());
-    try {
-      logger.info("userInput: session: " + JsonUtil.serialize(session, false));
-    } catch (JsonProcessingException e) {
+    
+    loggerInfoSerializeObject("notifyFailure: session: ", session);
 
-    }
     switch (token.getType()) {
       case FACE_CAPTURE:
         {
@@ -3811,7 +3802,7 @@ public class Service {
     this.setAvatarPictureSession(session, item.getMimeType(), uuid, c, null, false);
     visionService.linkMedia(token.getId(), uuid);
     this.dataStoreLoad(uuid, new ByteArrayInputStream(dataBytes));
-    logger.info("saveJp2Picture: mimetype: " + item.getMimeType() + " UUID: "+ uuid);
+    logger.info("saveJp2Picture: mimetype: " + item.getMimeType() + " UUID: " + uuid);
   }
 
   private void saveAvatarPicture(MediaMessage mm, Session session) throws Exception {
@@ -3987,7 +3978,7 @@ public class Service {
     Resource r = new Resource();
     r.chunk = inputStream;
     mediaResource.uploadChunk(uuid, 0, null, r);
-    logger.info("dataStoreLoad: uuid: "+ uuid);
+    logger.info("dataStoreLoad: uuid: " + uuid);
   }
 
   private byte[] getMedia(String uri) throws IOException, ClientProtocolException {

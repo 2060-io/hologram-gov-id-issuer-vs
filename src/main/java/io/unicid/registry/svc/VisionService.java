@@ -65,7 +65,7 @@ public class VisionService {
       Query q = this.em.createNamedQuery("Media.find");
       q.setParameter("identity", identity);
 
-      logger.info("listMedias: token: "+ tokenId);
+      logger.info("listMedias: token: " + tokenId);
 
       switch (token.getType()) {
         case FACE_VERIFICATION:
@@ -149,7 +149,7 @@ public class VisionService {
             break;
           }
       }
-      logger.info("linkMedia: token: "+ media);
+      logger.info("linkMedia: token: " + media);
     } else {
       throw new TokenException();
     }
