@@ -1,13 +1,12 @@
 package io.unicid.registry.utils;
 
-import io.unicid.registry.svc.RegisterService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import org.jboss.logging.Logger;
 
 public class DateUtils {
-  private static final Logger logger = Logger.getLogger(RegisterService.class);
+  private static final Logger logger = Logger.getLogger(DateUtils.class);
 
   public static LocalDate parseDateString(String dateString, String formatterPattern) {
     try {
