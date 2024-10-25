@@ -783,7 +783,9 @@ public class Service {
               message.getConnectionId(),
               message.getThreadId(),
               getMessage("IDENTITY_ISSUANCE_ABORTED", message.getConnectionId())));
-
+    } else if (content.equals(ServiceLabel.CMD_DEBUG)) {
+      this.getToken(message.getConnectionId(), TokenType.WEBRTC_VERIFICATION, null);
+      this.sendWebRTCCapture(message.getConnectionId(), message.getThreadId());
     } else if (content.equals(ServiceLabel.CMD_DELETE)) {
       logger.info("userInput: CMD_DELETE : session before: " + session);
 
@@ -1102,7 +1104,7 @@ public class Service {
         case WEBRTC_VERIFICATION:
           {
             this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
-            this.sendWebRTCCapture(session, threadId);
+            this.sendWebRTCCapture(connectionId, threadId);
 
             break;
           }
@@ -1254,7 +1256,7 @@ public class Service {
               session.setRestoreStep(RestoreStep.WEBRTC_VERIFICATION);
 
               this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res);
-              this.sendWebRTCCapture(session, threadId);
+              this.sendWebRTCCapture(connectionId, threadId);
 
               break;
             }
@@ -2459,7 +2461,7 @@ public class Service {
     return token;
   }
 
-  private void sendWebRTCCapture(Session session, UUID threadId) {
+  private void sendWebRTCCapture(UUID connectionId, UUID threadId) {
 
     CreateRoomRequest request = new CreateRoomRequest(redirDomain.get() + "/call-event", 50);
     WebRtcCallData wsUrl = webRtcResource.createRoom(UUID.randomUUID(), request);
@@ -2478,7 +2480,7 @@ public class Service {
     if (cr == null) {
       cr = new PeerRegistry();
       cr.setId(peerId);
-      cr.setIdentity(session.getIdentity());
+      cr.setConnectionId(connectionId);
       cr.setRoomId(wsUrl.getRoomId());
       cr.setWsUrl(wsUrl.getWsUrl());
       cr.setType(PeerType.PEER_USER);
@@ -2486,12 +2488,8 @@ public class Service {
     }
 
     messageResource.sendMessage(
-        TextMessage.build(
-            session.getConnectionId(),
-            null,
-            getMessage("MRZ_FACE_VERIFICATION", session.getConnectionId())));
-    messageResource.sendMessage(
-        this.generateOfferMessage(session.getConnectionId(), threadId, wsUrlMap));
+        TextMessage.build(connectionId, null, getMessage("MRZ_FACE_VERIFICATION", connectionId)));
+    messageResource.sendMessage(this.generateOfferMessage(connectionId, threadId, wsUrlMap));
   }
 
   private BaseMessage getWhichToChangeUserRequested(UUID connectionId, UUID threadId) {
@@ -2821,7 +2819,7 @@ public class Service {
             session = em.merge(session);
 
             this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
-            this.sendWebRTCCapture(session, threadId);
+            this.sendWebRTCCapture(connectionId, threadId);
 
             break;
           }
@@ -2893,7 +2891,7 @@ public class Service {
         case WEBRTC_AUTH:
           {
             this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
-            this.sendWebRTCCapture(session, threadId);
+            this.sendWebRTCCapture(connectionId, threadId);
 
             break;
           }

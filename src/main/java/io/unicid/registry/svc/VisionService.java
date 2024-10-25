@@ -210,15 +210,14 @@ public class VisionService {
 
     if (cr.getType().equals(PeerType.PEER_USER)) {
       Token t =
-          registerService.getTokenByConnection(
-              cr.getIdentity().getConnectionId(), TokenType.WEBRTC_VERIFICATION);
+          registerService.getTokenByConnection(cr.getConnectionId(), TokenType.WEBRTC_VERIFICATION);
       String lang = service.getConnection(t.getConnectionId()).getLanguage();
 
       // Create registry vision
       PeerRegistry crv = new PeerRegistry();
       UUID peerId = UUID.randomUUID();
       crv.setId(peerId);
-      crv.setIdentity(null);
+      crv.setConnectionId(null);
       crv.setRoomId(cr.getRoomId());
       crv.setWsUrl(cr.getWsUrl());
       crv.setType(PeerType.PEER_VISION);
