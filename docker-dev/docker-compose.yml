@@ -25,7 +25,6 @@ services:
       - POSTGRES_PASSWORD=2060demo
       - AGENT_WALLET_KEY_DERIVATION_METHOD=ARGON2I_INT
       - AGENT_INVITATION_BASE_URL=https://hologram.zone/
-      - REDIS_HOST=redis
   
   redis:
     image: redis:alpine
@@ -57,7 +56,7 @@ services:
     image: io2060/2060-datastore:main
     user: root
     ports:
-       - "2804:2604"
+       - "2604:2604"
     restart: unless-stopped
     environment:
     - DEBUG=1
