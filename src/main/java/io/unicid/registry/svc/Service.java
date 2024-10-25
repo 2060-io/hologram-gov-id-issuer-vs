@@ -114,6 +114,8 @@ public class Service {
 
   @Inject RegisterService registerService;
 
+  @Inject VisionService visionService;
+
   @ConfigProperty(name = "io.unicid.debug")
   Boolean debug;
 
@@ -2304,7 +2306,7 @@ public class Service {
                 objectMapper.readValue(content, EMrtdDataSubmitMessage.class);
             session.updateSessionWithData(emrtd.getDataGroups(), session);
             this.saveJp2Picture(
-                emrtd.getDataGroups().getProcessed().getFaceImages().get(0), session);
+                emrtd.getDataGroups().getProcessed().getFaceImages().get(0), session, token);
             if (session != null && session.getAvatarPic() != null) {
               em.merge(this.setAvatarPictureData(session.getIdentity(), session));
               this.notifySuccess(token);
@@ -3333,7 +3335,7 @@ public class Service {
     }
   }
 
-  private Connection getConnection(UUID connectionId) {
+  public Connection getConnection(UUID connectionId) {
     Connection session = em.find(Connection.class, connectionId);
     if (session == null) {
       session = new Connection();
@@ -3787,7 +3789,7 @@ public class Service {
         && (identity.getProtectedTs() != null);
   }
 
-  private void saveJp2Picture(String imageDataUrl, Session session) throws Exception {
+  private void saveJp2Picture(String imageDataUrl, Session session, Token token) throws Exception {
 
     String[] parts = imageDataUrl.split(",", 2);
     String base64Data = parts[1];
@@ -3810,6 +3812,7 @@ public class Service {
 
     UUID uuid = UUID.randomUUID();
     this.setAvatarPictureSession(session, item.getMimeType(), uuid, c, item.getUri(), false);
+    visionService.linkMedia(token.getId(), uuid);
     this.dataStoreLoad(uuid, new ByteArrayInputStream(dataBytes));
   }
 

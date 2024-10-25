@@ -45,6 +45,9 @@ public class VisionService {
   @ConfigProperty(name = "io.unicid.vision.redirdomain")
   Optional<String> redirDomain;
 
+  @ConfigProperty(name = "io.unicid.vision.redirdomain.d")
+  Optional<String> dRedirDomain;
+
   public List<UUID> listMedias(UUID tokenId) throws Exception {
 
     Token token = this.getToken(tokenId);
@@ -202,6 +205,7 @@ public class VisionService {
       Token t =
           registerService.getTokenByConnection(
               cr.getIdentity().getConnectionId(), TokenType.WEBRTC_VERIFICATION);
+      String lang = service.getConnection(t.getConnectionId()).getLanguage();
 
       // Create registry vision
       PeerRegistry crv = new PeerRegistry();
@@ -215,8 +219,10 @@ public class VisionService {
 
       JoinCallRequest jc = new JoinCallRequest();
       jc.setWsUrl(cr.getWsUrl() + "/?roomId=" + cr.getRoomId() + "&peerId=" + peerId);
-      jc.setSuccessUrl(redirDomain.get() + "/success/" + t.getId());
-      jc.setFailureUrl(redirDomain.get() + "/failure/" + t.getId());
+      jc.setCallbackBaseUrl(redirDomain.get());
+      jc.setDatastoreBaseUrl(dRedirDomain.get());
+      jc.setToken(t.getId().toString());
+      jc.setLang(lang);
 
       vs.joinCall(jc);
     }
