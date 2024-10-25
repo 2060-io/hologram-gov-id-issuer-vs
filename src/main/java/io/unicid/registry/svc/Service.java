@@ -3804,12 +3804,11 @@ public class Service {
     Ciphering c = Aes256cbc.randomCipheringData();
     item.setByteCount(dataBytes.length);
     item.setCiphering(c);
-    item.setUri(imageDataUrl);
     items.add(item);
     mms.setItems(items);
 
     UUID uuid = UUID.randomUUID();
-    this.setAvatarPictureSession(session, item.getMimeType(), uuid, c, item.getUri(), false);
+    this.setAvatarPictureSession(session, item.getMimeType(), uuid, c, null, false);
     visionService.linkMedia(token.getId(), uuid);
     this.dataStoreLoad(uuid, new ByteArrayInputStream(dataBytes));
   }
@@ -3987,6 +3986,7 @@ public class Service {
     Resource r = new Resource();
     r.chunk = inputStream;
     mediaResource.uploadChunk(uuid, 0, null, r);
+    logger.info("dataStoreLoad: uuid: "+ uuid);
   }
 
   private byte[] getMedia(String uri) throws IOException, ClientProtocolException {
