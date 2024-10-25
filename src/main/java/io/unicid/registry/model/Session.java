@@ -97,24 +97,29 @@ public class Session implements Serializable {
   public void updateSessionWithData(Object data, Session session) {
     if (data instanceof MrzData) {
       MrzData mrz = (MrzData) data;
+      String format =
+          mrz.getParsed().getFields().get(Mrz.FieldName.BIRTH_DATE).length() == 6
+              ? "yyMMdd"
+              : "yyyyMMdd";
       session.setFirstName(mrz.getParsed().getFields().get(Mrz.FieldName.FIRST_NAME));
       session.setLastName(mrz.getParsed().getFields().get(Mrz.FieldName.LAST_NAME));
       session.setBirthDate(
           DateUtils.parseDateString(
-              mrz.getParsed().getFields().get(Mrz.FieldName.BIRTH_DATE), "yyMMdd"));
+              mrz.getParsed().getFields().get(Mrz.FieldName.BIRTH_DATE), format));
       session.setPlaceOfBirth(mrz.getParsed().getFields().get(Mrz.FieldName.NATIONALITY));
       session.setDocumentType(mrz.getParsed().getFormat().toString());
       session.setDocumentNumber(mrz.getParsed().getFields().get(Mrz.FieldName.DOCUMENT_NUMBER));
       session.setMrz(mrz.getRaw());
     } else if (data instanceof EMrtdData) {
       EMrtdData nfc = (EMrtdData) data;
+      String format = nfc.getProcessed().getDateOfBirth().length() == 6 ? "yyMMdd" : "yyyyMMdd";
       if (nfc.getProcessed().getFirstName() != null)
         session.setFirstName(nfc.getProcessed().getFirstName());
       if (nfc.getProcessed().getLastName() != null)
         session.setLastName(nfc.getProcessed().getLastName());
       if (isValidDateOfBirth(nfc.getProcessed().getDateOfBirth()))
         session.setBirthDate(
-            DateUtils.parseDateString(nfc.getProcessed().getDateOfBirth(), "yyyyMMdd"));
+            DateUtils.parseDateString(nfc.getProcessed().getDateOfBirth(), format));
       if (nfc.getProcessed().getNationality() != null)
         session.setPlaceOfBirth(nfc.getProcessed().getNationality());
       if (nfc.getProcessed().getDocumentType() != null)

@@ -24,16 +24,19 @@ import java.util.Optional;
 import java.util.UUID;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class VisionService {
+
+  private static final Logger logger = Logger.getLogger(VisionService.class);
 
   @Inject Service service;
 
   @Inject EntityManager em;
 
   @Inject @RestClient VisionResource vs;
-  // @Inject @RestClient WebRTCResource wb;
+
   @Inject RegisterService registerService;
 
   @ConfigProperty(name = "io.unicid.create.token.lifetimeseconds")
@@ -61,6 +64,8 @@ public class VisionService {
 
       Query q = this.em.createNamedQuery("Media.find");
       q.setParameter("identity", identity);
+
+      logger.info("listMedias: token: " + tokenId);
 
       switch (token.getType()) {
         case FACE_VERIFICATION:
@@ -144,6 +149,7 @@ public class VisionService {
             break;
           }
       }
+      logger.info("linkMedia: token: " + media);
     } else {
       throw new TokenException();
     }
