@@ -292,6 +292,11 @@ public class Service {
                 ServiceLabel.CMD_CREATE, getMessage("CMD_CREATE_LABEL", connectionId), null));
         options.add(
             ContextualMenuItem.build(
+                ServiceLabel.CMD_CREATE_OLD,
+                getMessage("CMD_CREATE_OLD_LABEL", connectionId),
+                null));
+        options.add(
+            ContextualMenuItem.build(
                 ServiceLabel.CMD_RESTORE, getMessage("CMD_RESTORE_LABEL", connectionId), null));
       }
 
@@ -649,6 +654,15 @@ public class Service {
       session = em.merge(session);
 
       this.createEntryPoint(message.getConnectionId(), message.getThreadId(), session, null, null);
+    } else if (content.equals(ServiceLabel.CMD_CREATE_OLD)) {
+      logger.info("userInput: CMD_CREATE_OLD : session before: " + session);
+
+      session = createSession(session, message.getConnectionId());
+      session.setType(SessionType.CREATE);
+      session.setLegacy(true);
+      session = em.merge(session);
+
+      this.createEntryPoint(message.getConnectionId(), message.getThreadId(), session, null, null);
 
     } else if (content.equals(ServiceLabel.CMD_RESTORE)) {
 
@@ -905,13 +919,13 @@ public class Service {
     Connection session = this.getConnection(connection);
 
     if (redirDomain.isPresent()) {
-      url = url + "&rd=" + redirDomain.get();
+      url = url + "&rd=" + redirDomain.get().replace("https://", "");
     }
     if (qRedirDomain.isPresent()) {
-      url = url + "&q=" + qRedirDomain.get();
+      url = url + "&q=" + qRedirDomain.get().replace("https://", "");
     }
     if (dRedirDomain.isPresent()) {
-      url = url + "&d=" + dRedirDomain.get();
+      url = url + "&d=" + dRedirDomain.get().replace("https://", "");
     }
     if (session.getLanguage() != null && !session.getLanguage().isEmpty()) {
       url = url + "&lang=" + session.getLanguage();
@@ -1086,12 +1100,6 @@ public class Service {
                 this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
             messageResource.sendMessage(
                 generateFaceVerificationMediaMessage(connectionId, threadId, token));
-            /*messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
-            		.replaceFirst("REDIRDOMAIN", redirDomain)
-            		.replaceFirst("Q_DOMAIN", qRedirDomain)
-            		.replaceFirst("D_DOMAIN", dRedirDomain)
-            		)));
-            */
             break;
           }
 
@@ -1103,8 +1111,14 @@ public class Service {
           }
         case WEBRTC_VERIFICATION:
           {
-            this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
-            this.sendWebRTCCapture(connectionId, threadId);
+            Token token =
+                this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+            if (session.getIdentity() != null && session.getIdentity().getLegacy()) {
+              messageResource.sendMessage(
+                  generateFaceVerificationMediaMessage(connectionId, threadId, token));
+            } else {
+              this.sendWebRTCCapture(connectionId, threadId);
+            }
 
             break;
           }
@@ -1113,10 +1127,6 @@ public class Service {
             if (content != null) {
               logger.info("restoreEntryPoint: password: " + content);
               String password = DigestUtils.sha256Hex(content);
-              // 	@NamedQuery(name="Identity.findForRestore", query="SELECT i FROM Identity i where
-              // i.connectionId<>:connectionId and (i.deletedTs IS NULL or i.deletedTs>:deletedTs)
-              // and i.firstName=:firstName and i.lastName=:lastName and i.birthDate=:birthDate
-              // ORDER by i.id ASC"),
 
               Identity identity = session.getIdentity();
 
@@ -1223,12 +1233,6 @@ public class Service {
 
               messageResource.sendMessage(
                   generateFaceVerificationMediaMessage(connectionId, threadId, token));
-              /*messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_VERIFICATION_REQUEST.replaceFirst("URL", faceVerificationUrl.replaceFirst("TOKEN", token.getId().toString())
-              .replaceFirst("REDIRDOMAIN", redirDomain)
-              .replaceFirst("Q_DOMAIN", qRedirDomain)
-              .replaceFirst("D_DOMAIN", dRedirDomain)
-
-              )));*/
 
               logger.info("restoreEntryPoint: session: " + JsonUtil.serialize(session, false));
 
@@ -1255,8 +1259,13 @@ public class Service {
 
               session.setRestoreStep(RestoreStep.WEBRTC_VERIFICATION);
 
-              this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res);
-              this.sendWebRTCCapture(connectionId, threadId);
+              Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res);
+              if (res.getLegacy()) {
+                messageResource.sendMessage(
+                    generateFaceVerificationMediaMessage(connectionId, threadId, token));
+              } else {
+                this.sendWebRTCCapture(connectionId, threadId);
+              }
 
               break;
             }
@@ -1363,6 +1372,10 @@ public class Service {
     Root<Identity> root = query.from(Identity.class);
 
     List<Predicate> allPredicates = new ArrayList<Predicate>();
+    Instant deletedTs = Instant.now().minusSeconds(identityRecoverableSeconds);
+    Predicate isDeletedNull = builder.isNull(root.get("deletedTs"));
+    Predicate isDeletedGreaterThan = builder.greaterThan(root.get("deletedTs"), deletedTs);
+    Predicate deletedPredicate = builder.or(isDeletedNull, isDeletedGreaterThan);
 
     if (restoreCitizenidClaim) {
       Predicate predicate = builder.equal(root.get("citizenId"), session.getCitizenId());
@@ -1404,6 +1417,7 @@ public class Service {
       loggerInfoSerializeObject("identityAlreadyExists: placeOfBirth: ", session.getPlaceOfBirth());
     }
 
+    allPredicates.add(deletedPredicate);
     query.where(builder.and(allPredicates.toArray(new Predicate[allPredicates.size()])));
 
     query.orderBy(builder.desc(root.get("id")));
@@ -2288,10 +2302,6 @@ public class Service {
             messageResource.sendMessage(
                 generateFaceCaptureMediaMessage(connectionId, threadId, token));
 
-            /*messageResource.sendMessage(TextMessage.build(connectionId, threadId, FACE_CAPTURE_REQUEST.replaceFirst("URL", faceCaptureUrl.replaceFirst("TOKEN", token.getId().toString())
-            .replaceFirst("REDIRDOMAIN", redirDomain)
-            .replaceFirst("Q_DOMAIN", qRedirDomain)
-            .replaceFirst("D_DOMAIN", dRedirDomain))));*/
             break;
           }
         case FINGERPRINT_CAPTURE:
@@ -2340,6 +2350,7 @@ public class Service {
     identity.setPlaceOfBirth(session.getPlaceOfBirth());
     identity.setDocumentType(session.getDocumentType());
     identity.setDocumentNumber(session.getDocumentNumber());
+    identity.setLegacy(session.getLegacy());
 
     identity.setAvatarPic(session.getAvatarPic());
     identity.setIsAvatarPicCiphered(session.getIsAvatarPicCiphered());
@@ -2463,7 +2474,7 @@ public class Service {
 
   private void sendWebRTCCapture(UUID connectionId, UUID threadId) {
 
-    CreateRoomRequest request = new CreateRoomRequest(redirDomain.get() + "/call-event", 50);
+    CreateRoomRequest request = new CreateRoomRequest(qRedirDomain.get() + "/call-event", 50);
     WebRtcCallData wsUrl = webRtcResource.createRoom(UUID.randomUUID(), request);
     UUID peerId = UUID.randomUUID();
     Map<String, Object> wsUrlMap = objectMapper.convertValue(wsUrl, Map.class);
@@ -2818,8 +2829,14 @@ public class Service {
             session.setIssueStep(IssueStep.WEBRTC_AUTH);
             session = em.merge(session);
 
-            this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
-            this.sendWebRTCCapture(connectionId, threadId);
+            Token token =
+                this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+            if (session.getIdentity() != null && session.getIdentity().getLegacy()) {
+              messageResource.sendMessage(
+                  generateFaceVerificationMediaMessage(connectionId, threadId, token));
+            } else {
+              this.sendWebRTCCapture(connectionId, threadId);
+            }
 
             break;
           }
@@ -2886,8 +2903,14 @@ public class Service {
 
         case WEBRTC_AUTH:
           {
-            this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
-            this.sendWebRTCCapture(connectionId, threadId);
+            Token token =
+                this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+            if (session.getIdentity() != null && session.getIdentity().getLegacy()) {
+              messageResource.sendMessage(
+                  generateFaceVerificationMediaMessage(connectionId, threadId, token));
+            } else {
+              this.sendWebRTCCapture(connectionId, threadId);
+            }
 
             break;
           }
@@ -3391,7 +3414,7 @@ public class Service {
     Session session = getSession(token.getConnectionId());
 
     loggerInfoSerializeObject("notifySuccess: session: ", session);
-    
+
     switch (token.getType()) {
       case FACE_CAPTURE:
         {
@@ -3593,7 +3616,7 @@ public class Service {
   public void notifyFailure(Token token) throws Exception {
     Identity identity = token.getIdentity();
     Session session = getSession(token.getConnectionId());
-    
+
     loggerInfoSerializeObject("notifyFailure: session: ", session);
 
     switch (token.getType()) {
