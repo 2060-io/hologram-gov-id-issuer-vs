@@ -71,6 +71,8 @@ public class Session implements Serializable {
 
   private UUID avatarPic;
 
+  private Boolean legacy = false;
+
   @Column(columnDefinition = "text")
   private String avatarURI;
 

@@ -1,5 +1,7 @@
 package io.unicid.registry.svc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.twentysixty.sa.client.util.JsonUtil;
 import io.unicid.registry.enums.MediaType;
 import io.unicid.registry.enums.PeerType;
 import io.unicid.registry.enums.TokenType;
@@ -45,8 +47,8 @@ public class VisionService {
   @ConfigProperty(name = "io.unicid.verify.token.lifetimeseconds")
   Long verifyTokenLifetimeSec;
 
-  @ConfigProperty(name = "io.unicid.vision.redirdomain")
-  Optional<String> redirDomain;
+  @ConfigProperty(name = "io.unicid.vision.redirdomain.q")
+  Optional<String> qRedirDomain;
 
   @ConfigProperty(name = "io.unicid.vision.redirdomain.d")
   Optional<String> dRedirDomain;
@@ -149,7 +151,7 @@ public class VisionService {
             break;
           }
       }
-      logger.info("linkMedia: token: " + media);
+      logger.info("linkMedia: token: " + JsonUtil.serialize(media, false));
     } else {
       throw new TokenException();
     }
@@ -231,10 +233,14 @@ public class VisionService {
 
       JoinCallRequest jc = new JoinCallRequest();
       jc.setWsUrl(cr.getWsUrl() + "/?roomId=" + cr.getRoomId() + "&peerId=" + peerId);
-      jc.setCallbackBaseUrl(redirDomain.get());
+      jc.setCallbackBaseUrl(qRedirDomain.get());
       jc.setDatastoreBaseUrl(dRedirDomain.get());
       jc.setToken(t.getId().toString());
       jc.setLang(lang);
+      try {
+        logger.info("joinCall: token: " + JsonUtil.serialize(jc, false));
+      } catch (JsonProcessingException e) {
+      }
 
       vs.joinCall(jc);
     }

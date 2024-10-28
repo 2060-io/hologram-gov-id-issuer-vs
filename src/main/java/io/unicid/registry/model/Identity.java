@@ -102,6 +102,8 @@ public class Identity implements Serializable {
 
   private UUID avatarPic;
 
+  private Boolean legacy = false;
+
   @Column(columnDefinition = "text")
   private String avatarMimeType;
 
