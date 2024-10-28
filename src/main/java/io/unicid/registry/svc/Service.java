@@ -542,7 +542,8 @@ public class Service {
           TextMessage.build(
               message.getConnectionId(),
               null,
-              getMessage("MRZ_SUCCESSFULL", message.getConnectionId())));
+              getMessage("MRZ_SUCCESSFULL", message.getConnectionId())
+                  .replace("DATA", mrz.getMrzData().getRaw())));
       content = JsonUtil.serialize(mrz, false);
     } else if ((message instanceof EMrtdDataSubmitMessage)) {
       EMrtdDataSubmitMessage emrtd = (EMrtdDataSubmitMessage) message;

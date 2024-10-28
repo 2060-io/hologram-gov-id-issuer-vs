@@ -1,5 +1,6 @@
 package io.unicid.registry.svc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.twentysixty.sa.client.util.JsonUtil;
 import io.unicid.registry.enums.MediaType;
 import io.unicid.registry.enums.PeerType;
@@ -26,8 +27,6 @@ import java.util.UUID;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 @ApplicationScoped
 public class VisionService {
