@@ -1922,11 +1922,11 @@ public class Service {
               this.getToken(
                   connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 
-                  Identity identity = this.setAvatarPictureData(null, session);
-                  em.persist(identity);
-                  session.setCreateStep(CreateStep.CAPTURE);
-                  this.createEntryPoint(connectionId, threadId, session, null, null);
-                  session = em.merge(session);
+              Identity identity = this.setAvatarPictureData(null, session);
+              em.persist(identity);
+              session.setCreateStep(CreateStep.CAPTURE);
+              this.createEntryPoint(connectionId, threadId, session, null, null);
+              session = em.merge(session);
             }
             this.createSendMessage(connectionId, threadId, session);
             break;
