@@ -1600,11 +1600,11 @@ public class Service {
         case MRZ:
           {
             if (content != null) {
-              session.updateSessionWithData(
-                  objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
+              MrzDataSubmitMessage mrz = objectMapper.readValue(content, MrzDataSubmitMessage.class);
+              session.updateSessionWithData(mrz.getMrzData(),
                   session);
               this.getToken(
-                  connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), threadId);
+                  connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 
               if (this.identityAlreadyExists(session)) {
                 messageResource.sendMessage(
@@ -1726,7 +1726,6 @@ public class Service {
                             connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), null);
                     messageResource.sendMessage(
                         EMrtdDataRequestMessage.build(connectionId, mrzToken.getThreadId()));
-                    if (mrzToken != null) em.remove(mrzToken);
                     break;
                   }
               }
@@ -2021,11 +2020,10 @@ public class Service {
         case CHANGE_MRZ:
           {
             if (content != null) {
-              session.updateSessionWithData(
-                  objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
-                  session);
+              MrzDataSubmitMessage mrz = objectMapper.readValue(content, MrzDataSubmitMessage.class);
+              session.updateSessionWithData(mrz.getMrzData(), session);
               this.getToken(
-                  connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), threadId);
+                  connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 
               if (this.identityAlreadyExists(session)) {
                 messageResource.sendMessage(
@@ -2227,6 +2225,7 @@ public class Service {
       token.setConnectionId(connectionId);
       token.setType(type);
       token.setIdentity(identity);
+      if (threadId != null) token.setThreadId(threadId);
       switch (type) {
         case FACE_CAPTURE:
         case FINGERPRINT_CAPTURE:
