@@ -467,7 +467,7 @@ public class Service {
                   message.getConnectionId(),
                   null,
                   getMessage("CREDENTIAL_REJECTED", message.getConnectionId())));
-          content = "/revoke";
+          content = ServiceLabel.CMD_EDIT_ABORT;
           break;
         default:
           break;
