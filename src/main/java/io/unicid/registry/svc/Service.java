@@ -53,7 +53,6 @@ import io.unicid.registry.res.c.Resource;
 import io.unicid.registry.res.c.WebRtcResource;
 import io.unicid.registry.utils.I18n;
 import io.unicid.registry.utils.ServiceLabel;
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -728,7 +727,7 @@ public class Service {
               message.getThreadId(),
               getMessage("IDENTITY_ISSUANCE_ABORTED", message.getConnectionId())));
     } else if (content.equals(ServiceLabel.CMD_DEBUG)) {
-      this.getToken(message.getConnectionId(), TokenType.WEBRTC_VERIFICATION, null);
+      this.getToken(message.getConnectionId(), TokenType.WEBRTC_VERIFICATION, null, null);
       this.sendWebRTCCapture(message.getConnectionId(), message.getThreadId());
     } else if (content.equals(ServiceLabel.CMD_DELETE)) {
       logger.info("userInput: CMD_DELETE : session before: " + session);
@@ -1027,7 +1026,8 @@ public class Service {
         case FACE_VERIFICATION:
           {
             Token token =
-                this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.FACE_VERIFICATION, session.getIdentity(), null);
             messageResource.sendMessage(
                 generateFaceVerificationMediaMessage(connectionId, threadId, token));
             break;
@@ -1035,14 +1035,16 @@ public class Service {
 
         case FINGERPRINT_VERIFICATION:
           {
-            this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
+            this.getToken(
+                connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity(), null);
 
             break;
           }
         case WEBRTC_VERIFICATION:
           {
             Token token =
-                this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity(), null);
             if (session.getIdentity() != null && session.getIdentity().getLegacy()) {
               messageResource.sendMessage(
                   generateFaceVerificationMediaMessage(connectionId, threadId, token));
@@ -1159,7 +1161,7 @@ public class Service {
 
               session.setRestoreStep(RestoreStep.FACE_VERIFICATION);
 
-              Token token = this.getToken(connectionId, TokenType.FACE_VERIFICATION, res);
+              Token token = this.getToken(connectionId, TokenType.FACE_VERIFICATION, res, null);
 
               messageResource.sendMessage(
                   generateFaceVerificationMediaMessage(connectionId, threadId, token));
@@ -1177,7 +1179,7 @@ public class Service {
 
               session.setRestoreStep(RestoreStep.FINGERPRINT_VERIFICATION);
 
-              this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, res);
+              this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, res, null);
 
               break;
             }
@@ -1189,7 +1191,7 @@ public class Service {
 
               session.setRestoreStep(RestoreStep.WEBRTC_VERIFICATION);
 
-              Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res);
+              Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res, null);
               if (res.getLegacy()) {
                 messageResource.sendMessage(
                     generateFaceVerificationMediaMessage(connectionId, threadId, token));
@@ -1601,7 +1603,8 @@ public class Service {
               session.updateSessionWithData(
                   objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
                   session);
-              this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, threadId);
+              this.getToken(
+                  connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), threadId);
 
               if (this.identityAlreadyExists(session)) {
                 messageResource.sendMessage(
@@ -1687,7 +1690,8 @@ public class Service {
                     session = em.merge(session);
 
                     Token token =
-                        this.getToken(connectionId, TokenType.FACE_CAPTURE, session.getIdentity());
+                        this.getToken(
+                            connectionId, TokenType.FACE_CAPTURE, session.getIdentity(), null);
                     messageResource.sendMessage(
                         TextMessage.build(
                             connectionId,
@@ -1703,7 +1707,7 @@ public class Service {
                     session = em.merge(session);
 
                     this.getToken(
-                        connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
+                        connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity(), null);
                     messageResource.sendMessage(
                         TextMessage.build(
                             connectionId,
@@ -1717,9 +1721,9 @@ public class Service {
                     session.setCreateStep(CreateStep.WEBRTC_CAPTURE);
                     session = em.merge(session);
 
-                    this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
                     Token mrzToken =
-                        this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, null);
+                        this.getToken(
+                            connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), null);
                     messageResource.sendMessage(
                         EMrtdDataRequestMessage.build(connectionId, mrzToken.getThreadId()));
                     if (mrzToken != null) em.remove(mrzToken);
@@ -2020,7 +2024,8 @@ public class Service {
               session.updateSessionWithData(
                   objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
                   session);
-              this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, threadId);
+              this.getToken(
+                  connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), threadId);
 
               if (this.identityAlreadyExists(session)) {
                 messageResource.sendMessage(
@@ -2082,7 +2087,7 @@ public class Service {
         case FACE_CAPTURE:
           {
             Token token =
-                this.getToken(connectionId, TokenType.FACE_CAPTURE, session.getIdentity());
+                this.getToken(connectionId, TokenType.FACE_CAPTURE, session.getIdentity(), null);
 
             messageResource.sendMessage(
                 generateFaceCaptureMediaMessage(connectionId, threadId, token));
@@ -2091,14 +2096,14 @@ public class Service {
           }
         case FINGERPRINT_CAPTURE:
           {
-            this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
+            this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity(), null);
 
             break;
           }
         case WEBRTC_CAPTURE:
           {
             Token token =
-                this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
+                this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), null);
             EMrtdDataSubmitMessage emrtd =
                 objectMapper.readValue(content, EMrtdDataSubmitMessage.class);
             session.updateSessionWithData(emrtd.getDataGroups(), session);
@@ -2187,13 +2192,7 @@ public class Service {
     return mms;
   }
 
-  private Token getTokenThreadId(UUID connectionId, TokenType type, UUID threadId) {
-    Token token = this.getToken(connectionId, type, null);
-    if (threadId != null) token.setThreadId(threadId);
-    return em.merge(token);
-  }
-
-  private Token getToken(UUID connectionId, TokenType type, Identity identity) {
+  private Token getToken(UUID connectionId, TokenType type, Identity identity, UUID threadId) {
 
     Query q = em.createNamedQuery("Token.findForConnection");
     q.setParameter("connectionId", connectionId);
@@ -2206,6 +2205,7 @@ public class Service {
       token.setId(UUID.randomUUID());
       token.setType(type);
       token.setIdentity(identity);
+      token.setThreadId(threadId);
       switch (type) {
         case FACE_CAPTURE:
         case FINGERPRINT_CAPTURE:
@@ -2219,10 +2219,6 @@ public class Service {
         case WEBRTC_VERIFICATION:
           {
             token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
-            break;
-          }
-        case MRZ_VERIFICATION:
-          {
             break;
           }
       }
@@ -2244,10 +2240,6 @@ public class Service {
         case WEBRTC_VERIFICATION:
           {
             token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
-            break;
-          }
-        case MRZ_VERIFICATION:
-          {
             break;
           }
       }
@@ -2537,7 +2529,8 @@ public class Service {
             session = em.merge(session);
 
             Token token =
-                this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.FACE_VERIFICATION, session.getIdentity(), null);
             messageResource.sendMessage(
                 generateFaceVerificationMediaMessage(connectionId, threadId, token));
 
@@ -2548,7 +2541,8 @@ public class Service {
             session.setIssueStep(IssueStep.FINGERPRINT_AUTH);
             session = em.merge(session);
 
-            this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
+            this.getToken(
+                connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity(), null);
 
             break;
           }
@@ -2558,7 +2552,8 @@ public class Service {
             session = em.merge(session);
 
             Token token =
-                this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity(), null);
             if (session.getIdentity() != null && session.getIdentity().getLegacy()) {
               messageResource.sendMessage(
                   generateFaceVerificationMediaMessage(connectionId, threadId, token));
@@ -2615,7 +2610,8 @@ public class Service {
         case FACE_AUTH:
           {
             Token token =
-                this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.FACE_VERIFICATION, session.getIdentity(), null);
             messageResource.sendMessage(
                 generateFaceVerificationMediaMessage(connectionId, threadId, token));
 
@@ -2624,7 +2620,8 @@ public class Service {
 
         case FINGERPRINT_AUTH:
           {
-            this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
+            this.getToken(
+                connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity(), null);
 
             break;
           }
@@ -2632,7 +2629,8 @@ public class Service {
         case WEBRTC_AUTH:
           {
             Token token =
-                this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity(), null);
             if (session.getIdentity() != null && session.getIdentity().getLegacy()) {
               messageResource.sendMessage(
                   generateFaceVerificationMediaMessage(connectionId, threadId, token));
