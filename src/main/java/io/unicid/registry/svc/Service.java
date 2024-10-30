@@ -1600,9 +1600,9 @@ public class Service {
         case MRZ:
           {
             if (content != null) {
-              MrzDataSubmitMessage mrz = objectMapper.readValue(content, MrzDataSubmitMessage.class);
-              session.updateSessionWithData(mrz.getMrzData(),
-                  session);
+              MrzDataSubmitMessage mrz =
+                  objectMapper.readValue(content, MrzDataSubmitMessage.class);
+              session.updateSessionWithData(mrz.getMrzData(), session);
               this.getToken(
                   connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 
@@ -2020,7 +2020,8 @@ public class Service {
         case CHANGE_MRZ:
           {
             if (content != null) {
-              MrzDataSubmitMessage mrz = objectMapper.readValue(content, MrzDataSubmitMessage.class);
+              MrzDataSubmitMessage mrz =
+                  objectMapper.readValue(content, MrzDataSubmitMessage.class);
               session.updateSessionWithData(mrz.getMrzData(), session);
               this.getToken(
                   connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
