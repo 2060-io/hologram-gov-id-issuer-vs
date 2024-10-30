@@ -2,12 +2,9 @@ package io.unicid.registry.utils;
 
 public class ServiceLabel {
 
-  public static final String CMD_SELECT_ID = "/select@";
   public static final String CMD_CREATE = "/create";
   public static final String CMD_CREATE_OLD = "/legacy";
-  public static final String CMD_RESTORE = "/restore";
   public static final String CMD_CREATE_ABORT = "/create_abort";
-  public static final String CMD_RESTORE_ABORT = "/restore_abort";
   public static final String CMD_EDIT_ABORT = "/edit_abort";
   public static final String CMD_VIEW_ID = "/view";
   public static final String CMD_UNDELETE = "/undelete";

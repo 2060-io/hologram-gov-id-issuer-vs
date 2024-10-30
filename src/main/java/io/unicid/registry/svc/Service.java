@@ -200,19 +200,7 @@ public class Service {
       // main menu
 
       menu.setDescription(getMessage("ROOT_MENU_NO_SELECTED_ID_DESCRIPTION", connectionId));
-      List<Identity> myIdentities = this.getMyIdentities(connectionId);
       int i = 0;
-
-      if (myIdentities.size() != 0) {
-
-        for (Identity currentIdentity : myIdentities) {
-          i++;
-          String label = this.getIdentityLabel(currentIdentity);
-          String id = ServiceLabel.CMD_SELECT_ID + currentIdentity.getId();
-
-          options.add(ContextualMenuItem.build(id, label, null));
-        }
-      }
 
       if (i < 5) {
         // max 5 identities
@@ -224,9 +212,6 @@ public class Service {
                 ServiceLabel.CMD_CREATE_OLD,
                 getMessage("CMD_CREATE_OLD_LABEL", connectionId),
                 null));
-        options.add(
-            ContextualMenuItem.build(
-                ServiceLabel.CMD_RESTORE, getMessage("CMD_RESTORE_LABEL", connectionId), null));
       }
 
     } else
@@ -246,13 +231,6 @@ public class Service {
 
         case RESTORE:
           {
-            // restore menu
-            // abort and return to main menu
-            options.add(
-                ContextualMenuItem.build(
-                    ServiceLabel.CMD_RESTORE_ABORT,
-                    getMessage("CMD_RESTORE_ABORT_LABEL", connectionId),
-                    null));
             break;
           }
         case EDIT:
@@ -431,14 +409,6 @@ public class Service {
   }
 
   @Transactional
-  public List<Identity> getMyIdentities(UUID connectionId) {
-    Query q = em.createNamedQuery("Identity.findForConnection");
-    q.setParameter("connectionId", connectionId);
-    q.setParameter("deletedTs", Instant.now().minusSeconds(identityRecoverableSeconds));
-    return q.getResultList();
-  }
-
-  @Transactional
   public void userInput(BaseMessage message) throws Exception {
 
     String content = null;
@@ -497,6 +467,7 @@ public class Service {
                   message.getConnectionId(),
                   null,
                   getMessage("CREDENTIAL_REJECTED", message.getConnectionId())));
+          content = "/revoke";
           break;
         default:
           break;
@@ -532,50 +503,7 @@ public class Service {
       }
     }
 
-    UUID identityId = null;
-
-    if (content.startsWith(ServiceLabel.CMD_SELECT_ID)) {
-
-      logger.info("userInput: CMD_SELECT_ID : session before: " + session);
-
-      String[] ids = content.split("@");
-      boolean found = false;
-      if ((ids != null) && (ids.length > 1)) {
-        if (ids[1] != null) {
-          try {
-            identityId = UUID.fromString(ids[1]);
-          } catch (Exception e) {
-          }
-          if (identityId != null) {
-            identity = em.find(Identity.class, identityId);
-            if (identity != null) {
-              session = createSession(session, message.getConnectionId());
-              session.setConnectionId(message.getConnectionId());
-              session.setType(SessionType.EDIT);
-              session.setIdentity(identity);
-              session = em.merge(session);
-              messageResource.sendMessage(
-                  TextMessage.build(
-                      message.getConnectionId(),
-                      message.getThreadId(),
-                      getMessage("IDENTITY_SELECTED", message.getConnectionId())
-                          .replace("IDENTITY", this.getIdentityLabel(identity))));
-              found = true;
-            }
-          }
-        }
-      }
-      if (!found) {
-        messageResource.sendMessage(
-            TextMessage.build(
-                message.getConnectionId(),
-                message.getThreadId(),
-                getMessage("IDENTITY_NOT_FOUND", message.getConnectionId())));
-        em.remove(session);
-        session = null;
-      }
-
-    } else if (content.equals(ServiceLabel.CMD_CREATE)) {
+    if (content.equals(ServiceLabel.CMD_CREATE)) {
       logger.info("userInput: CMD_CREATE : session before: " + session);
 
       session = createSession(session, message.getConnectionId());
@@ -592,15 +520,6 @@ public class Service {
       session = em.merge(session);
 
       this.createEntryPoint(message.getConnectionId(), message.getThreadId(), session, null, null);
-
-    } else if (content.equals(ServiceLabel.CMD_RESTORE)) {
-
-      logger.info("userInput: CMD_RESTORE : session before: " + session);
-
-      session = createSession(session, message.getConnectionId());
-      session.setType(SessionType.RESTORE);
-      session = em.merge(session);
-      this.restoreEntryPoint(message.getConnectionId(), message.getThreadId(), session, null);
 
     } else if (content.equals(ServiceLabel.CMD_CONTINUE_SETUP)) {
       logger.info("userInput: CMD_CONTINUE_SETUP : session before: " + session);
@@ -630,17 +549,6 @@ public class Service {
               getMessage("IDENTITY_CREATE_ABORTED", message.getConnectionId())));
 
       logger.info("userInput: CMD_CREATE_ABORT : session after: " + session);
-    } else if (content.equals(ServiceLabel.CMD_RESTORE_ABORT)) {
-      logger.info("userInput: CMD_RESTORE_ABORT : session before: " + session);
-      if (session != null) {
-        em.remove(session);
-        session = null;
-      }
-      messageResource.sendMessage(
-          TextMessage.build(
-              message.getConnectionId(),
-              message.getThreadId(),
-              getMessage("IDENTITY_RESTORE_ABORTED", message.getConnectionId())));
 
     } else if (content.equals(ServiceLabel.CMD_VIEW_ID)) {
       logger.info("userInput: CMD_VIEW_ID : session before: " + session);
@@ -1606,18 +1514,14 @@ public class Service {
               this.getToken(
                   connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 
+              Identity identity = null;
               if (this.identityAlreadyExists(session)) {
-                messageResource.sendMessage(
-                    TextMessage.build(
-                        connectionId,
-                        threadId,
-                        getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
-                messageResource.sendMessage(
-                    TextMessage.build(connectionId, threadId, this.getSessionDataString(session)));
-
-                session.setCreateStep(CreateStep.NEED_TO_CHANGE);
+                session.setConnectionId(connectionId);
+                identity = session.getIdentity();
+                identity.setConnectionId(connectionId);
+                em.merge(identity);
               } else {
-                Identity identity = this.setAvatarPictureData(null, session);
+                identity = this.setAvatarPictureData(null, session);
                 em.persist(identity);
                 session.setCreateStep(CreateStep.CAPTURE);
                 this.createEntryPoint(connectionId, threadId, session, null, null);
@@ -2026,24 +1930,14 @@ public class Service {
               this.getToken(
                   connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 
+              Identity identity = null;
               if (this.identityAlreadyExists(session)) {
-                messageResource.sendMessage(
-                    TextMessage.build(
-                        connectionId,
-                        threadId,
-                        getMessage("IDENTITY_CREATE_ERROR_DUPLICATE_IDENTITY", connectionId)));
-                if (session.getAvatarPic() == null) {
-                  messageResource.sendMessage(
-                      TextMessage.build(
-                          connectionId, threadId, this.getSessionDataString(session)));
-                } else {
-                  MediaMessage mms =
-                      this.buildSessionIdentityMediaMessage(connectionId, threadId, session);
-                  messageResource.sendMessage(mms);
-                }
-                session.setCreateStep(CreateStep.NEED_TO_CHANGE);
+                session.setConnectionId(connectionId);
+                identity = session.getIdentity();
+                identity.setConnectionId(connectionId);
+                em.merge(identity);
               } else {
-                Identity identity = this.setAvatarPictureData(null, session);
+                identity = this.setAvatarPictureData(null, session);
                 em.persist(identity);
                 session.setCreateStep(CreateStep.CAPTURE);
                 this.createEntryPoint(connectionId, threadId, session, null, null);
