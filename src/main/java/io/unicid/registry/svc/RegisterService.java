@@ -29,7 +29,7 @@ public class RegisterService {
     q.setParameter("connectionId", connectionId);
     PeerRegistry registry = q.getResultList().stream().findFirst().orElse(null);
     if (debug) {
-      logger.info("getCallByConnectionId: " + registry.getId());
+      logger.info("getCallByConnectionId: " + registry);
     }
     return registry;
   }
@@ -40,7 +40,7 @@ public class RegisterService {
     q.setParameter("id", peerId);
     PeerRegistry registry = q.getResultList().stream().findFirst().orElse(null);
     if (debug) {
-      logger.info("getCallByPeer: " + registry.getId());
+      logger.info("getCallByPeer: " + registry);
     }
     return registry;
   }
@@ -52,7 +52,7 @@ public class RegisterService {
     q.setParameter("type", token);
     Token registry = q.getResultList().stream().findFirst().orElse(null);
     if (debug) {
-      logger.info("getTokenByConnection: " + registry.getId());
+      logger.info("getTokenByConnection: " + registry);
     }
     return registry;
   }

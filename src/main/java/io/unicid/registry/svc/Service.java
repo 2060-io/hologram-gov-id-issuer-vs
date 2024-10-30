@@ -1514,18 +1514,10 @@ public class Service {
               this.getToken(
                   connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 
-              Identity identity = null;
-              if (this.identityAlreadyExists(session)) {
-                session.setConnectionId(connectionId);
-                identity = session.getIdentity();
-                identity.setConnectionId(connectionId);
-                em.merge(identity);
-              } else {
-                identity = this.setAvatarPictureData(null, session);
-                em.persist(identity);
-                session.setCreateStep(CreateStep.CAPTURE);
-                this.createEntryPoint(connectionId, threadId, session, null, null);
-              }
+              Identity identity = this.setAvatarPictureData(null, session);
+              em.persist(identity);
+              session.setCreateStep(CreateStep.CAPTURE);
+              this.createEntryPoint(connectionId, threadId, session, null, null);
               session = em.merge(session);
             }
             this.createSendMessage(connectionId, threadId, session);
@@ -1930,18 +1922,10 @@ public class Service {
               this.getToken(
                   connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 
-              Identity identity = null;
-              if (this.identityAlreadyExists(session)) {
-                session.setConnectionId(connectionId);
-                identity = session.getIdentity();
-                identity.setConnectionId(connectionId);
-                em.merge(identity);
-              } else {
-                identity = this.setAvatarPictureData(null, session);
-                em.persist(identity);
-                session.setCreateStep(CreateStep.CAPTURE);
-                this.createEntryPoint(connectionId, threadId, session, null, null);
-              }
+              Identity identity = this.setAvatarPictureData(null, session);
+              em.persist(identity);
+              session.setCreateStep(CreateStep.CAPTURE);
+              this.createEntryPoint(connectionId, threadId, session, null, null);
               session = em.merge(session);
             }
             this.createSendMessage(connectionId, threadId, session);
