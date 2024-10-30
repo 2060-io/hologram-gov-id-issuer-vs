@@ -53,7 +53,6 @@ import io.unicid.registry.res.c.Resource;
 import io.unicid.registry.res.c.WebRtcResource;
 import io.unicid.registry.utils.I18n;
 import io.unicid.registry.utils.ServiceLabel;
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -150,54 +149,6 @@ public class Service {
   @ConfigProperty(name = "io.unicid.identity.def.name")
   String defName;
 
-  @ConfigProperty(name = "io.unicid.identity.def.claim.citizenid")
-  Boolean enableCitizenIdClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.def.claim.firstName")
-  Boolean enableFirstNameClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.def.claim.lastName")
-  Boolean enableLastNameClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.def.claim.avatarName")
-  Boolean enableAvatarNameClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.def.claim.avatarPic")
-  Boolean enableAvatarPicClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.def.claim.birthDate")
-  Boolean enableBirthDateClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.def.claim.birthplace")
-  Boolean enableBirthplaceClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.def.claim.mrz")
-  Boolean enableMrzClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.def.claim.photo")
-  Boolean enablePhotoClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.restore.claim.citizenid")
-  Boolean restoreCitizenidClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.restore.claim.firstName")
-  Boolean restoreFirstNameClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.restore.claim.lastName")
-  Boolean restoreLastNameClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.restore.claim.avatarName")
-  Boolean restoreAvatarNameClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.restore.claim.birthDate")
-  Boolean restoreBirthDateClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.restore.claim.birthplace")
-  Boolean restoreBirthplaceClaim;
-
-  @ConfigProperty(name = "io.unicid.identity.restore.claim.mrz")
-  Boolean restoreMrzClaim;
-
   @ConfigProperty(name = "io.unicid.identity.def.claim.avatarPic.maxdimension")
   Integer avatarMaxDim;
 
@@ -224,28 +175,6 @@ public class Service {
   private static Object lockObj = new Object();
   private static DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
   ObjectMapper objectMapper = new ObjectMapper();
-
-  @PostConstruct
-  void init() {
-    if (Boolean.TRUE.equals(enableMrzClaim)) {
-      enableCitizenIdClaim = false;
-      enableFirstNameClaim = false;
-      enableLastNameClaim = false;
-      enableAvatarNameClaim = false;
-      enableAvatarPicClaim = false;
-      enableBirthDateClaim = false;
-      enableBirthplaceClaim = false;
-      enablePhotoClaim = false;
-    }
-    if (Boolean.TRUE.equals(restoreMrzClaim)) {
-      restoreCitizenidClaim = false;
-      restoreFirstNameClaim = false;
-      restoreLastNameClaim = false;
-      restoreAvatarNameClaim = false;
-      restoreBirthDateClaim = false;
-      restoreBirthplaceClaim = false;
-    }
-  }
 
   private String getMessage(String messageName, UUID connection) {
     Connection session = this.getConnection(connection);
@@ -798,7 +727,7 @@ public class Service {
               message.getThreadId(),
               getMessage("IDENTITY_ISSUANCE_ABORTED", message.getConnectionId())));
     } else if (content.equals(ServiceLabel.CMD_DEBUG)) {
-      this.getToken(message.getConnectionId(), TokenType.WEBRTC_VERIFICATION, null);
+      this.getToken(message.getConnectionId(), TokenType.WEBRTC_VERIFICATION, null, null);
       this.sendWebRTCCapture(message.getConnectionId(), message.getThreadId());
     } else if (content.equals(ServiceLabel.CMD_DELETE)) {
       logger.info("userInput: CMD_DELETE : session before: " + session);
@@ -1097,7 +1026,8 @@ public class Service {
         case FACE_VERIFICATION:
           {
             Token token =
-                this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.FACE_VERIFICATION, session.getIdentity(), null);
             messageResource.sendMessage(
                 generateFaceVerificationMediaMessage(connectionId, threadId, token));
             break;
@@ -1105,14 +1035,16 @@ public class Service {
 
         case FINGERPRINT_VERIFICATION:
           {
-            this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
+            this.getToken(
+                connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity(), null);
 
             break;
           }
         case WEBRTC_VERIFICATION:
           {
             Token token =
-                this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity(), null);
             if (session.getIdentity() != null && session.getIdentity().getLegacy()) {
               messageResource.sendMessage(
                   generateFaceVerificationMediaMessage(connectionId, threadId, token));
@@ -1229,7 +1161,7 @@ public class Service {
 
               session.setRestoreStep(RestoreStep.FACE_VERIFICATION);
 
-              Token token = this.getToken(connectionId, TokenType.FACE_VERIFICATION, res);
+              Token token = this.getToken(connectionId, TokenType.FACE_VERIFICATION, res, null);
 
               messageResource.sendMessage(
                   generateFaceVerificationMediaMessage(connectionId, threadId, token));
@@ -1247,7 +1179,7 @@ public class Service {
 
               session.setRestoreStep(RestoreStep.FINGERPRINT_VERIFICATION);
 
-              this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, res);
+              this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, res, null);
 
               break;
             }
@@ -1259,7 +1191,7 @@ public class Service {
 
               session.setRestoreStep(RestoreStep.WEBRTC_VERIFICATION);
 
-              Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res);
+              Token token = this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, res, null);
               if (res.getLegacy()) {
                 messageResource.sendMessage(
                     generateFaceVerificationMediaMessage(connectionId, threadId, token));
@@ -1377,45 +1309,9 @@ public class Service {
     Predicate isDeletedGreaterThan = builder.greaterThan(root.get("deletedTs"), deletedTs);
     Predicate deletedPredicate = builder.or(isDeletedNull, isDeletedGreaterThan);
 
-    if (restoreCitizenidClaim) {
-      Predicate predicate = builder.equal(root.get("citizenId"), session.getCitizenId());
-      allPredicates.add(predicate);
-      loggerInfoSerializeObject("identityAlreadyExists: citizenId: ", session.getCitizenId());
-    }
-
-    if (restoreFirstNameClaim) {
-      Predicate predicate = builder.equal(root.get("firstName"), session.getFirstName());
-      allPredicates.add(predicate);
-
-      loggerInfoSerializeObject("identityAlreadyExists: firstName: ", session.getFirstName());
-    }
-    if (restoreLastNameClaim) {
-      Predicate predicate = builder.equal(root.get("lastName"), session.getLastName());
-      allPredicates.add(predicate);
-      loggerInfoSerializeObject("identityAlreadyExists: lastName: ", session.getLastName());
-    }
-    if (restoreAvatarNameClaim) {
-      Predicate predicate = builder.equal(root.get("avatarName"), session.getAvatarName());
-      allPredicates.add(predicate);
-      loggerInfoSerializeObject("identityAlreadyExists: avatarName: ", session.getAvatarName());
-    }
-
-    if (restoreBirthDateClaim) {
-      Predicate predicate = builder.equal(root.get("birthDate"), session.getBirthDate());
-      allPredicates.add(predicate);
-      loggerInfoSerializeObject("identityAlreadyExists: birthDate: ", session.getBirthDate());
-    }
-
-    if (restoreMrzClaim) {
-      Predicate predicate = builder.equal(root.get("mrz"), session.getMrz());
-      allPredicates.add(predicate);
-      loggerInfoSerializeObject("identityAlreadyExists: mrz: ", session.getMrz());
-    }
-    if (restoreBirthplaceClaim) {
-      Predicate predicate = builder.equal(root.get("placeOfBirth"), session.getPlaceOfBirth());
-      allPredicates.add(predicate);
-      loggerInfoSerializeObject("identityAlreadyExists: placeOfBirth: ", session.getPlaceOfBirth());
-    }
+    Predicate predicate = builder.equal(root.get("mrz"), session.getMrz());
+    allPredicates.add(predicate);
+    loggerInfoSerializeObject("identityAlreadyExists: mrz: ", session.getMrz());
 
     allPredicates.add(deletedPredicate);
     query.where(builder.and(allPredicates.toArray(new Predicate[allPredicates.size()])));
@@ -1426,124 +1322,15 @@ public class Service {
 
   private CreateStep getNextCreateStep(CreateStep current) throws Exception {
 
-    if (current == null) {
-      if (enableMrzClaim) return CreateStep.MRZ;
-      if (enableCitizenIdClaim) return CreateStep.CITIZEN_ID;
-      if (enableFirstNameClaim) return CreateStep.FIRST_NAME;
-      if (enableLastNameClaim) return CreateStep.LAST_NAME;
-      if (enableAvatarNameClaim) return CreateStep.AVATAR_NAME;
-      if (enableAvatarPicClaim) return CreateStep.AVATAR_PIC;
-      if (enableBirthDateClaim) return CreateStep.BIRTH_DATE;
-      if (enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
-
-      throw new Exception("no claim has been enabled");
-    } else {
-      switch (current) {
-        case CITIZEN_ID:
-          {
-            if (enableFirstNameClaim) return CreateStep.FIRST_NAME;
-            if (enableLastNameClaim) return CreateStep.LAST_NAME;
-            if (enableAvatarNameClaim) return CreateStep.AVATAR_NAME;
-            if (enableAvatarPicClaim) return CreateStep.AVATAR_PIC;
-            if (enableBirthDateClaim) return CreateStep.BIRTH_DATE;
-            if (enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
-            return CreateStep.PENDING_CONFIRM;
-          }
-        case FIRST_NAME:
-          {
-            if (enableLastNameClaim) return CreateStep.LAST_NAME;
-            if (enableAvatarNameClaim) return CreateStep.AVATAR_NAME;
-            if (enableAvatarPicClaim) return CreateStep.AVATAR_PIC;
-            if (enableBirthDateClaim) return CreateStep.BIRTH_DATE;
-            if (enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
-            return CreateStep.PENDING_CONFIRM;
-          }
-        case LAST_NAME:
-          {
-            if (enableAvatarNameClaim) return CreateStep.AVATAR_NAME;
-            if (enableAvatarPicClaim) return CreateStep.AVATAR_PIC;
-            if (enableBirthDateClaim) return CreateStep.BIRTH_DATE;
-            if (enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
-            return CreateStep.PENDING_CONFIRM;
-          }
-        case AVATAR_NAME:
-          {
-            if (enableAvatarPicClaim) return CreateStep.AVATAR_PIC;
-            if (enableBirthDateClaim) return CreateStep.BIRTH_DATE;
-            if (enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
-            return CreateStep.PENDING_CONFIRM;
-          }
-        case AVATAR_PIC:
-          {
-            if (enableBirthDateClaim) return CreateStep.BIRTH_DATE;
-            if (enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
-            return CreateStep.PENDING_CONFIRM;
-          }
-        case BIRTH_DATE:
-          {
-            if (enableBirthplaceClaim) return CreateStep.PLACE_OF_BIRTH;
-            return CreateStep.PENDING_CONFIRM;
-          }
-        case PLACE_OF_BIRTH:
-        default:
-          {
-            return CreateStep.PENDING_CONFIRM;
-          }
-      }
-    }
+    if (current == null) return CreateStep.MRZ;
+    throw new Exception("no claim has been enabled");
   }
 
   private RestoreStep getNextRestoreStep(RestoreStep current) throws Exception {
 
-    if (current == null) {
-      if (restoreMrzClaim) return RestoreStep.MRZ;
-      if (restoreCitizenidClaim) return RestoreStep.CITIZEN_ID;
-      if (restoreFirstNameClaim) return RestoreStep.FIRST_NAME;
-      if (restoreLastNameClaim) return RestoreStep.LAST_NAME;
-      if (restoreAvatarNameClaim) return RestoreStep.AVATAR_NAME;
-      if (restoreBirthDateClaim) return RestoreStep.BIRTH_DATE;
-      if (restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
-
-      throw new Exception("no claim has been enabled");
-    } else {
+    if (current == null) return RestoreStep.MRZ;
+    else {
       switch (current) {
-        case CITIZEN_ID:
-          {
-            if (restoreFirstNameClaim) return RestoreStep.FIRST_NAME;
-            if (restoreLastNameClaim) return RestoreStep.LAST_NAME;
-            if (restoreAvatarNameClaim) return RestoreStep.AVATAR_NAME;
-            if (restoreBirthDateClaim) return RestoreStep.BIRTH_DATE;
-            if (restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
-            return RestoreStep.DONE;
-          }
-        case FIRST_NAME:
-          {
-            if (restoreLastNameClaim) return RestoreStep.LAST_NAME;
-            if (restoreAvatarNameClaim) return RestoreStep.AVATAR_NAME;
-            if (restoreBirthDateClaim) return RestoreStep.BIRTH_DATE;
-            if (restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
-            return RestoreStep.DONE;
-          }
-        case LAST_NAME:
-          {
-            if (restoreAvatarNameClaim) return RestoreStep.AVATAR_NAME;
-            if (restoreBirthDateClaim) return RestoreStep.BIRTH_DATE;
-            if (restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
-            return RestoreStep.DONE;
-          }
-        case AVATAR_NAME:
-          {
-            if (restoreBirthDateClaim) return RestoreStep.BIRTH_DATE;
-            if (restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
-            return RestoreStep.DONE;
-          }
-
-        case BIRTH_DATE:
-          {
-            if (restoreBirthplaceClaim) return RestoreStep.PLACE_OF_BIRTH;
-            return RestoreStep.DONE;
-          }
-        case PLACE_OF_BIRTH:
         case MRZ:
         default:
           {
@@ -1813,10 +1600,11 @@ public class Service {
         case MRZ:
           {
             if (content != null) {
-              session.updateSessionWithData(
-                  objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
-                  session);
-              this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, threadId);
+              MrzDataSubmitMessage mrz =
+                  objectMapper.readValue(content, MrzDataSubmitMessage.class);
+              session.updateSessionWithData(mrz.getMrzData(), session);
+              this.getToken(
+                  connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 
               if (this.identityAlreadyExists(session)) {
                 messageResource.sendMessage(
@@ -1902,7 +1690,8 @@ public class Service {
                     session = em.merge(session);
 
                     Token token =
-                        this.getToken(connectionId, TokenType.FACE_CAPTURE, session.getIdentity());
+                        this.getToken(
+                            connectionId, TokenType.FACE_CAPTURE, session.getIdentity(), null);
                     messageResource.sendMessage(
                         TextMessage.build(
                             connectionId,
@@ -1918,7 +1707,7 @@ public class Service {
                     session = em.merge(session);
 
                     this.getToken(
-                        connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
+                        connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity(), null);
                     messageResource.sendMessage(
                         TextMessage.build(
                             connectionId,
@@ -1932,12 +1721,11 @@ public class Service {
                     session.setCreateStep(CreateStep.WEBRTC_CAPTURE);
                     session = em.merge(session);
 
-                    this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
                     Token mrzToken =
-                        this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, null);
+                        this.getToken(
+                            connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), null);
                     messageResource.sendMessage(
                         EMrtdDataRequestMessage.build(connectionId, mrzToken.getThreadId()));
-                    if (mrzToken != null) em.remove(mrzToken);
                     break;
                   }
               }
@@ -2232,10 +2020,11 @@ public class Service {
         case CHANGE_MRZ:
           {
             if (content != null) {
-              session.updateSessionWithData(
-                  objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
-                  session);
-              this.getTokenThreadId(connectionId, TokenType.MRZ_VERIFICATION, threadId);
+              MrzDataSubmitMessage mrz =
+                  objectMapper.readValue(content, MrzDataSubmitMessage.class);
+              session.updateSessionWithData(mrz.getMrzData(), session);
+              this.getToken(
+                  connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 
               if (this.identityAlreadyExists(session)) {
                 messageResource.sendMessage(
@@ -2297,7 +2086,7 @@ public class Service {
         case FACE_CAPTURE:
           {
             Token token =
-                this.getToken(connectionId, TokenType.FACE_CAPTURE, session.getIdentity());
+                this.getToken(connectionId, TokenType.FACE_CAPTURE, session.getIdentity(), null);
 
             messageResource.sendMessage(
                 generateFaceCaptureMediaMessage(connectionId, threadId, token));
@@ -2306,14 +2095,14 @@ public class Service {
           }
         case FINGERPRINT_CAPTURE:
           {
-            this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity());
+            this.getToken(connectionId, TokenType.FINGERPRINT_CAPTURE, session.getIdentity(), null);
 
             break;
           }
         case WEBRTC_CAPTURE:
           {
             Token token =
-                this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity());
+                this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), null);
             EMrtdDataSubmitMessage emrtd =
                 objectMapper.readValue(content, EMrtdDataSubmitMessage.class);
             session.updateSessionWithData(emrtd.getDataGroups(), session);
@@ -2402,13 +2191,7 @@ public class Service {
     return mms;
   }
 
-  private Token getTokenThreadId(UUID connectionId, TokenType type, UUID threadId) {
-    Token token = this.getToken(connectionId, type, null);
-    if (threadId != null) token.setThreadId(threadId);
-    return em.merge(token);
-  }
-
-  private Token getToken(UUID connectionId, TokenType type, Identity identity) {
+  private Token getToken(UUID connectionId, TokenType type, Identity identity, UUID threadId) {
 
     Query q = em.createNamedQuery("Token.findForConnection");
     q.setParameter("connectionId", connectionId);
@@ -2421,6 +2204,7 @@ public class Service {
       token.setId(UUID.randomUUID());
       token.setType(type);
       token.setIdentity(identity);
+      token.setThreadId(threadId);
       switch (type) {
         case FACE_CAPTURE:
         case FINGERPRINT_CAPTURE:
@@ -2434,10 +2218,6 @@ public class Service {
         case WEBRTC_VERIFICATION:
           {
             token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
-            break;
-          }
-        case MRZ_VERIFICATION:
-          {
             break;
           }
       }
@@ -2446,6 +2226,7 @@ public class Service {
       token.setConnectionId(connectionId);
       token.setType(type);
       token.setIdentity(identity);
+      if (threadId != null) token.setThreadId(threadId);
       switch (type) {
         case FACE_CAPTURE:
         case FINGERPRINT_CAPTURE:
@@ -2459,10 +2240,6 @@ public class Service {
         case WEBRTC_VERIFICATION:
           {
             token.setExpireTs(Instant.now().plus(Duration.ofSeconds(verifyTokenLifetimeSec)));
-            break;
-          }
-        case MRZ_VERIFICATION:
-          {
             break;
           }
       }
@@ -2509,35 +2286,7 @@ public class Service {
     MenuDisplayMessage confirm = new MenuDisplayMessage();
     confirm.setPrompt(getMessage("CHANGE_CLAIM_TITLE", connectionId));
 
-    if (enableCitizenIdClaim) {
-      this.setChangeMenuItem(IdentityClaim.CITIZEN_ID, menuItems);
-    }
-
-    if (enableFirstNameClaim) {
-      this.setChangeMenuItem(IdentityClaim.FIRST_NAME, menuItems);
-    }
-    if (enableLastNameClaim) {
-      this.setChangeMenuItem(IdentityClaim.LAST_NAME, menuItems);
-    }
-
-    if (enableAvatarNameClaim) {
-      this.setChangeMenuItem(IdentityClaim.AVATAR_NAME, menuItems);
-    }
-
-    if (enableAvatarPicClaim) {
-      this.setChangeMenuItem(IdentityClaim.AVATAR_PIC, menuItems);
-    }
-    if (enableBirthDateClaim) {
-      this.setChangeMenuItem(IdentityClaim.BIRTH_DATE, menuItems);
-    }
-
-    if (enableBirthplaceClaim) {
-      this.setChangeMenuItem(IdentityClaim.PLACE_OF_BIRTH, menuItems);
-    }
-
-    if (enableMrzClaim) {
-      this.setChangeMenuItem(IdentityClaim.MRZ, menuItems);
-    }
+    this.setChangeMenuItem(IdentityClaim.MRZ, menuItems);
 
     confirm.setConnectionId(connectionId);
     confirm.setThreadId(threadId);
@@ -2551,32 +2300,7 @@ public class Service {
     MenuDisplayMessage confirm = new MenuDisplayMessage();
     confirm.setPrompt(getMessage("CONFLICTIVE_CLAIM_TITLE", connectionId));
 
-    if (restoreCitizenidClaim) {
-      this.setChangeMenuItem(IdentityClaim.CITIZEN_ID, menuItems);
-    }
-
-    if (restoreFirstNameClaim) {
-      this.setChangeMenuItem(IdentityClaim.FIRST_NAME, menuItems);
-    }
-    if (restoreLastNameClaim) {
-      this.setChangeMenuItem(IdentityClaim.LAST_NAME, menuItems);
-    }
-
-    if (restoreAvatarNameClaim) {
-      this.setChangeMenuItem(IdentityClaim.AVATAR_NAME, menuItems);
-    }
-
-    if (restoreBirthDateClaim) {
-      this.setChangeMenuItem(IdentityClaim.BIRTH_DATE, menuItems);
-    }
-
-    if (restoreBirthplaceClaim) {
-      this.setChangeMenuItem(IdentityClaim.PLACE_OF_BIRTH, menuItems);
-    }
-
-    if (restoreMrzClaim) {
-      this.setChangeMenuItem(IdentityClaim.MRZ, menuItems);
-    }
+    this.setChangeMenuItem(IdentityClaim.MRZ, menuItems);
 
     confirm.setConnectionId(connectionId);
     confirm.setThreadId(threadId);
@@ -2786,10 +2510,6 @@ public class Service {
 
     if ((session.getIssueStep() == null)) {
 
-      if (!enableMrzClaim)
-        messageResource.sendMessage(
-            TextMessage.build(connectionId, threadId, getMessage("IDENTITY_LOCKED", connectionId)));
-
       switch (identity.getProtection()) {
         case PASSWORD:
           {
@@ -2809,7 +2529,8 @@ public class Service {
             session = em.merge(session);
 
             Token token =
-                this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.FACE_VERIFICATION, session.getIdentity(), null);
             messageResource.sendMessage(
                 generateFaceVerificationMediaMessage(connectionId, threadId, token));
 
@@ -2820,7 +2541,8 @@ public class Service {
             session.setIssueStep(IssueStep.FINGERPRINT_AUTH);
             session = em.merge(session);
 
-            this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
+            this.getToken(
+                connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity(), null);
 
             break;
           }
@@ -2830,7 +2552,8 @@ public class Service {
             session = em.merge(session);
 
             Token token =
-                this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity(), null);
             if (session.getIdentity() != null && session.getIdentity().getLegacy()) {
               messageResource.sendMessage(
                   generateFaceVerificationMediaMessage(connectionId, threadId, token));
@@ -2887,7 +2610,8 @@ public class Service {
         case FACE_AUTH:
           {
             Token token =
-                this.getToken(connectionId, TokenType.FACE_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.FACE_VERIFICATION, session.getIdentity(), null);
             messageResource.sendMessage(
                 generateFaceVerificationMediaMessage(connectionId, threadId, token));
 
@@ -2896,7 +2620,8 @@ public class Service {
 
         case FINGERPRINT_AUTH:
           {
-            this.getToken(connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity());
+            this.getToken(
+                connectionId, TokenType.FINGERPRINT_VERIFICATION, session.getIdentity(), null);
 
             break;
           }
@@ -2904,7 +2629,8 @@ public class Service {
         case WEBRTC_AUTH:
           {
             Token token =
-                this.getToken(connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity());
+                this.getToken(
+                    connectionId, TokenType.WEBRTC_VERIFICATION, session.getIdentity(), null);
             if (session.getIdentity() != null && session.getIdentity().getLegacy()) {
               messageResource.sendMessage(
                   generateFaceVerificationMediaMessage(connectionId, threadId, token));
@@ -2921,78 +2647,11 @@ public class Service {
     StringBuffer data = new StringBuffer(1024);
     data.append(getMessage("IDENTITY_DATA_STR_HEADER", identity.getConnectionId())).append("\n");
 
-    if (enableCitizenIdClaim) {
-      data.append(IdentityClaim.CITIZEN_ID.getClaimLabel()).append(": ");
-
-      if (identity.getCitizenId() != null) {
-        data.append(identity.getCitizenId()).append("\n");
-      } else {
-        data.append("<unset citizenId>").append("\n");
-      }
-    }
-
-    if (enableFirstNameClaim) {
-      data.append(IdentityClaim.FIRST_NAME.getClaimLabel()).append(": ");
-
-      if (identity.getFirstName() != null) {
-        data.append(identity.getFirstName()).append("\n");
-      } else {
-        data.append("<unset firstName>").append("\n");
-      }
-    }
-    if (enableLastNameClaim) {
-      data.append(IdentityClaim.LAST_NAME.getClaimLabel()).append(": ");
-
-      if (identity.getLastName() != null) {
-        data.append(identity.getLastName()).append("\n");
-      } else {
-        data.append("<unset lastName>").append("\n");
-      }
-    }
-
-    if (enableAvatarNameClaim) {
-      data.append(IdentityClaim.AVATAR_NAME.getClaimLabel()).append(": ");
-
-      if (identity.getAvatarName() != null) {
-        data.append(identity.getAvatarName()).append("\n");
-      } else {
-        data.append("<unset avatarName>").append("\n");
-      }
-    }
-    if (enableAvatarPicClaim) {
-      data.append(IdentityClaim.AVATAR_PIC.getClaimLabel()).append(": ");
-
-      if (identity.getAvatarPic() != null) {
-        data.append(identity.getAvatarPic()).append("\n");
-      } else {
-        data.append("<unset avatarPic>").append("\n");
-      }
-    }
-    if (enableBirthDateClaim) {
-      data.append(IdentityClaim.BIRTH_DATE.getClaimLabel()).append(": ");
-      if (identity.getBirthDate() != null) {
-        data.append(identity.getBirthDate()).append("\n");
-      } else {
-        data.append("<unset birthDate>").append("\n");
-      }
-    }
-
-    if (enableBirthplaceClaim) {
-      data.append(IdentityClaim.PLACE_OF_BIRTH.getClaimLabel()).append(": ");
-      if (identity.getPlaceOfBirth() != null) {
-        data.append(identity.getPlaceOfBirth()).append("\n");
-      } else {
-        data.append("<unset placeOfBirth>").append("\n");
-      }
-    }
-
-    if (enableMrzClaim) {
-      data.append(IdentityClaim.MRZ.getClaimLabel()).append(": ");
-      if (identity.getMrz() != null) {
-        data.append(identity.getMrz()).append("\n");
-      } else {
-        data.append("<unset mrz>").append("\n");
-      }
+    data.append(IdentityClaim.MRZ.getClaimLabel()).append(": ");
+    if (identity.getMrz() != null) {
+      data.append(identity.getMrz()).append("\n");
+    } else {
+      data.append("<unset mrz>").append("\n");
     }
 
     return data.toString();
@@ -3002,77 +2661,11 @@ public class Service {
     StringBuffer data = new StringBuffer(1024);
     data.append(getMessage("IDENTITY_DATA_STR_HEADER", session.getConnectionId())).append("\n");
 
-    if (enableCitizenIdClaim) {
-      data.append(IdentityClaim.CITIZEN_ID.getClaimLabel()).append(": ");
-
-      if (session.getCitizenId() != null) {
-        data.append(session.getCitizenId()).append("\n");
-      } else {
-        data.append("<unset citizenId>").append("\n");
-      }
-    }
-
-    if (enableFirstNameClaim) {
-      data.append(IdentityClaim.FIRST_NAME.getClaimLabel()).append(": ");
-
-      if (session.getFirstName() != null) {
-        data.append(session.getFirstName()).append("\n");
-      } else {
-        data.append("<unset firstName>").append("\n");
-      }
-    }
-    if (enableLastNameClaim) {
-      data.append(IdentityClaim.LAST_NAME.getClaimLabel()).append(": ");
-
-      if (session.getLastName() != null) {
-        data.append(session.getLastName()).append("\n");
-      } else {
-        data.append("<unset lastName>").append("\n");
-      }
-    }
-
-    if (enableAvatarNameClaim) {
-      data.append(IdentityClaim.AVATAR_NAME.getClaimLabel()).append(": ");
-
-      if (session.getAvatarName() != null) {
-        data.append(session.getAvatarName()).append("\n");
-      } else {
-        data.append("<unset avatarName>").append("\n");
-      }
-    }
-    if (enableAvatarPicClaim) {
-      data.append(IdentityClaim.AVATAR_PIC.getClaimLabel()).append(": ");
-
-      if (session.getAvatarPic() != null) {
-        data.append(session.getAvatarPic()).append("\n");
-      } else {
-        data.append("<unset avatarPic>").append("\n");
-      }
-    }
-    if (enableBirthDateClaim) {
-      data.append(IdentityClaim.BIRTH_DATE.getClaimLabel()).append(": ");
-      if (session.getBirthDate() != null) {
-        data.append(session.getBirthDate()).append("\n");
-      } else {
-        data.append("<unset birthDate>").append("\n");
-      }
-    }
-
-    if (enableBirthplaceClaim) {
-      data.append(IdentityClaim.PLACE_OF_BIRTH.getClaimLabel()).append(": ");
-      if (session.getPlaceOfBirth() != null) {
-        data.append(session.getPlaceOfBirth()).append("\n");
-      } else {
-        data.append("<unset placeOfBirth>").append("\n");
-      }
-    }
-    if (enableMrzClaim) {
-      data.append(IdentityClaim.MRZ.getClaimLabel()).append(": ");
-      if (session.getMrz() != null) {
-        data.append(session.getMrz()).append("\n");
-      } else {
-        data.append("<unset mrz>").append("\n");
-      }
+    data.append(IdentityClaim.MRZ.getClaimLabel()).append(": ");
+    if (session.getMrz() != null) {
+      data.append(session.getMrz()).append("\n");
+    } else {
+      data.append("<unset mrz>").append("\n");
     }
 
     return data.toString();
@@ -3091,23 +2684,14 @@ public class Service {
 
           List<String> attributes = new ArrayList<String>();
           attributes.add("id");
-          if (enableCitizenIdClaim) attributes.add("citizenId");
-          if (enableFirstNameClaim) attributes.add("firstName");
-          if (enableLastNameClaim) attributes.add("lastName");
-          if (enableAvatarNameClaim) attributes.add("avatarName");
-          if (enableAvatarPicClaim) attributes.add("avatarPic");
-          if (enableBirthDateClaim) attributes.add("birthDate");
-          if (enableBirthplaceClaim) attributes.add("placeOfBirth");
-          if (enablePhotoClaim) attributes.add("photo");
-          if (enableMrzClaim) {
-            attributes.add("documentType");
-            attributes.add("country");
-            attributes.add("firstName");
-            attributes.add("lastName");
-            attributes.add("birthDate");
-            attributes.add("documentNumber");
-            attributes.add("photo");
-          }
+          attributes.add("documentType");
+          attributes.add("country");
+          attributes.add("firstName");
+          attributes.add("lastName");
+          attributes.add("birthDate");
+          attributes.add("documentNumber");
+          attributes.add("photo");
+
           attributes.add("citizenSince");
           attributes.add("issued");
 
@@ -3143,101 +2727,36 @@ public class Service {
         "id",
         Optional.ofNullable(id.getId().toString()).map(Object::toString).orElse("null"));
 
-    if (enableCitizenIdClaim) {
-      this.addClaim(
-          claims,
-          "citizenId",
-          Optional.ofNullable(id.getCitizenId().toString()).map(Object::toString).orElse("null"));
-    }
-    if (enableFirstNameClaim) {
-      this.addClaim(
-          claims,
-          "firstName",
-          Optional.ofNullable(id.getFirstName()).map(Object::toString).orElse("null"));
-    }
-    if (enableLastNameClaim) {
-      this.addClaim(
-          claims,
-          "lastName",
-          Optional.ofNullable(id.getLastName()).map(Object::toString).orElse("null"));
-    }
-    if (enableAvatarNameClaim) {
-      Claim avatarName = new Claim();
-      avatarName.setName("avatarName");
-      avatarName.setValue(id.getAvatarName());
-      claims.add(avatarName);
-    }
-    if (enableAvatarPicClaim) {
-
-      String encPhoto = this.getDataStorePic(id);
-      this.addClaim(
-          claims, "avatarPic", Optional.ofNullable(encPhoto).map(Object::toString).orElse("null"));
-      if (debug) {
-        logger.info("sendCredential: avatarPic: " + encPhoto);
-        logger.info(
-            "sendCredential: avatarPic: "
-                + JsonUtil.serialize(claims.get(claims.size() - 1), false));
-        logger.info("sendCredential: avatarPic: encPhoto.length: " + encPhoto.length());
-      }
-    }
-    if (enableBirthDateClaim) {
-      this.addClaim(
-          claims,
-          "birthDate",
-          Optional.ofNullable(id.getBirthDate() != null ? id.getBirthDate().toString() : null)
-              .map(Object::toString)
-              .orElse("null"));
-    }
-    if (enableBirthplaceClaim) {
-      this.addClaim(
-          claims,
-          "placeOfBirth",
-          Optional.ofNullable(id.getPlaceOfBirth()).map(Object::toString).orElse("null"));
-    }
-    if (enableMrzClaim) {
-      this.addClaim(
-          claims,
-          "documentType",
-          Optional.ofNullable(id.getDocumentType()).map(Object::toString).orElse("null"));
-      this.addClaim(
-          claims,
-          "country",
-          Optional.ofNullable(id.getPlaceOfBirth()).map(Object::toString).orElse("null"));
-      this.addClaim(
-          claims,
-          "firstName",
-          Optional.ofNullable(id.getFirstName()).map(Object::toString).orElse("null"));
-      this.addClaim(
-          claims,
-          "lastName",
-          Optional.ofNullable(id.getLastName()).map(Object::toString).orElse("null"));
-      this.addClaim(
-          claims,
-          "birthDate",
-          Optional.ofNullable(id.getBirthDate() != null ? id.getBirthDate().toString() : null)
-              .map(Object::toString)
-              .orElse("null"));
-      this.addClaim(
-          claims,
-          "documentNumber",
-          Optional.ofNullable(id.getDocumentNumber()).map(Object::toString).orElse("null"));
-      this.addClaim(
-          claims,
-          "photo",
-          Optional.ofNullable(this.getDataStorePic(id)).map(Object::toString).orElse("null"));
-    }
-
-    if (enablePhotoClaim) {
-      String encPhoto = this.getEncryptedPhoto(id, MediaType.FACE);
-      this.addClaim(
-          claims, "photo", Optional.ofNullable(encPhoto).map(Object::toString).orElse("null"));
-
-      if (debug) {
-        logger.info("sendCredential: photo: " + encPhoto);
-        logger.info(
-            "sendCredential: photo: " + JsonUtil.serialize(claims.get(claims.size() - 1), false));
-      }
-    }
+    this.addClaim(
+        claims,
+        "documentType",
+        Optional.ofNullable(id.getDocumentType()).map(Object::toString).orElse("null"));
+    this.addClaim(
+        claims,
+        "country",
+        Optional.ofNullable(id.getPlaceOfBirth()).map(Object::toString).orElse("null"));
+    this.addClaim(
+        claims,
+        "firstName",
+        Optional.ofNullable(id.getFirstName()).map(Object::toString).orElse("null"));
+    this.addClaim(
+        claims,
+        "lastName",
+        Optional.ofNullable(id.getLastName()).map(Object::toString).orElse("null"));
+    this.addClaim(
+        claims,
+        "birthDate",
+        Optional.ofNullable(id.getBirthDate() != null ? id.getBirthDate().toString() : null)
+            .map(Object::toString)
+            .orElse("null"));
+    this.addClaim(
+        claims,
+        "documentNumber",
+        Optional.ofNullable(id.getDocumentNumber()).map(Object::toString).orElse("null"));
+    this.addClaim(
+        claims,
+        "photo",
+        Optional.ofNullable(this.getDataStorePic(id)).map(Object::toString).orElse("null"));
 
     Claim citizenSince = new Claim();
     citizenSince.setName("citizenSince");

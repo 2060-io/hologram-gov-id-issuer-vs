@@ -24,7 +24,7 @@ import org.hibernate.annotations.DynamicUpdate;
   @NamedQuery(
       name = "Media.find",
       query =
-          "SELECT m.id FROM Media m where m.identity=:identity and m.type=:type ORDER by m.ts ASC"),
+          "SELECT m.id FROM Media m where m.identity=:identity and m.type=:type ORDER by m.ts DESC"),
   @NamedQuery(
       name = "Media.delete",
       query = "DELETE FROM Media m where m.identity=:identity and m.type=:type"),

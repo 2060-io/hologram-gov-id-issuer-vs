@@ -25,6 +25,7 @@ services:
       - POSTGRES_PASSWORD=2060demo
       - AGENT_WALLET_KEY_DERIVATION_METHOD=ARGON2I_INT
       - AGENT_INVITATION_BASE_URL=https://hologram.zone/
+      - REDIS_HOST=redis
   
   redis:
     image: redis:alpine

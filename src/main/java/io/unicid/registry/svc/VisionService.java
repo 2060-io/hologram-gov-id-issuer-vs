@@ -87,7 +87,7 @@ public class VisionService {
         case WEBRTC_VERIFICATION:
           {
             q.setParameter("type", MediaType.WEBRTC);
-            List<UUID> medias = q.getResultList();
+            List<UUID> medias = q.setMaxResults(1).getResultList();
 
             return medias;
           }
