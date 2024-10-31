@@ -217,12 +217,13 @@ public class Service {
 
             // abort and return to main menu
             String legacy = "off";
-            if(session!=null && session.getLegacy()) legacy ="on";
-            options.add(
-              ContextualMenuItem.build(
-                  ServiceLabel.CMD_CREATE_OLD,
-                  getMessage("CMD_CREATE_OLD_LABEL", connectionId).replace("VALUE", legacy),
-                  null));
+            if (session != null && session.getLegacy()) legacy = "on";
+            if (session != null && session.getCreateStep().equals(CreateStep.WEBRTC_CAPTURE))
+              options.add(
+                  ContextualMenuItem.build(
+                      ServiceLabel.CMD_CREATE_OLD,
+                      getMessage("CMD_CREATE_OLD_LABEL", connectionId).replace("VALUE", legacy),
+                      null));
             options.add(
                 ContextualMenuItem.build(
                     ServiceLabel.CMD_CREATE_ABORT,
@@ -517,7 +518,7 @@ public class Service {
     } else if (content.equals(ServiceLabel.CMD_CREATE_OLD)) {
       logger.info("userInput: CMD_CREATE_OLD : session before: " + session);
 
-      if(session==null) session = createSession(session, message.getConnectionId());
+      if (session == null) session = createSession(session, message.getConnectionId());
       session.setType(SessionType.CREATE);
       session.setCreateStep(CreateStep.CAPTURE);
       session.setLegacy(!session.getLegacy());
@@ -925,9 +926,6 @@ public class Service {
         case MRZ:
           {
             if (content != null) {
-              session.updateSessionWithData(
-                  objectMapper.readValue(content, MrzDataSubmitMessage.class).getMrzData(),
-                  session);
               session.setRestoreStep(getNextRestoreStep(session.getRestoreStep()));
               session = em.merge(session);
             }
@@ -1514,7 +1512,6 @@ public class Service {
             if (content != null) {
               MrzDataSubmitMessage mrz =
                   objectMapper.readValue(content, MrzDataSubmitMessage.class);
-              session.updateSessionWithData(mrz.getMrzData(), session);
               this.getToken(
                   connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 
@@ -1922,7 +1919,6 @@ public class Service {
             if (content != null) {
               MrzDataSubmitMessage mrz =
                   objectMapper.readValue(content, MrzDataSubmitMessage.class);
-              session.updateSessionWithData(mrz.getMrzData(), session);
               this.getToken(
                   connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), mrz.getThreadId());
 

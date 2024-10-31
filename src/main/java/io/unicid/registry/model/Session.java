@@ -1,8 +1,6 @@
 package io.unicid.registry.model;
 
-import io.twentysixty.sa.client.enums.Mrz;
 import io.twentysixty.sa.client.model.message.mrtd.EMrtdData;
-import io.twentysixty.sa.client.model.message.mrtd.MrzData;
 import io.unicid.registry.enums.CreateStep;
 import io.unicid.registry.enums.IssueStep;
 import io.unicid.registry.enums.RestoreStep;
@@ -96,39 +94,20 @@ public class Session implements Serializable {
   @Column(columnDefinition = "text")
   private String placeOfBirth;
 
-  public void updateSessionWithData(Object data, Session session) {
-    if (data instanceof MrzData) {
-      MrzData mrz = (MrzData) data;
-      String format =
-          mrz.getParsed().getFields().get(Mrz.FieldName.BIRTH_DATE).length() == 6
-              ? "yyMMdd"
-              : "yyyyMMdd";
-      session.setFirstName(mrz.getParsed().getFields().get(Mrz.FieldName.FIRST_NAME));
-      session.setLastName(mrz.getParsed().getFields().get(Mrz.FieldName.LAST_NAME));
-      session.setBirthDate(
-          DateUtils.parseDateString(
-              mrz.getParsed().getFields().get(Mrz.FieldName.BIRTH_DATE), format));
-      session.setPlaceOfBirth(mrz.getParsed().getFields().get(Mrz.FieldName.NATIONALITY));
-      session.setDocumentType(mrz.getParsed().getFormat().toString());
-      session.setDocumentNumber(mrz.getParsed().getFields().get(Mrz.FieldName.DOCUMENT_NUMBER));
-      session.setMrz(mrz.getRaw());
-    } else if (data instanceof EMrtdData) {
-      EMrtdData nfc = (EMrtdData) data;
-      String format = nfc.getProcessed().getDateOfBirth().length() == 6 ? "yyMMdd" : "yyyyMMdd";
-      if (nfc.getProcessed().getFirstName() != null)
-        session.setFirstName(nfc.getProcessed().getFirstName());
-      if (nfc.getProcessed().getLastName() != null)
-        session.setLastName(nfc.getProcessed().getLastName());
-      if (isValidDateOfBirth(nfc.getProcessed().getDateOfBirth()))
-        session.setBirthDate(
-            DateUtils.parseDateString(nfc.getProcessed().getDateOfBirth(), format));
-      if (nfc.getProcessed().getNationality() != null)
-        session.setPlaceOfBirth(nfc.getProcessed().getNationality());
-      if (nfc.getProcessed().getDocumentType() != null)
-        session.setDocumentType(nfc.getProcessed().getDocumentType());
-      if (nfc.getProcessed().getDocumentNumber() != null)
-        session.setDocumentNumber(nfc.getProcessed().getDocumentNumber());
-    }
+  public void updateSessionWithData(EMrtdData nfc, Session session) {
+    String format = nfc.getProcessed().getDateOfBirth().length() == 6 ? "yyMMdd" : "yyyyMMdd";
+    if (nfc.getProcessed().getFirstName() != null)
+      session.setFirstName(nfc.getProcessed().getFirstName());
+    if (nfc.getProcessed().getLastName() != null)
+      session.setLastName(nfc.getProcessed().getLastName());
+    if (isValidDateOfBirth(nfc.getProcessed().getDateOfBirth()))
+      session.setBirthDate(DateUtils.parseDateString(nfc.getProcessed().getDateOfBirth(), format));
+    if (nfc.getProcessed().getNationality() != null)
+      session.setPlaceOfBirth(nfc.getProcessed().getNationality());
+    if (nfc.getProcessed().getDocumentType() != null)
+      session.setDocumentType(nfc.getProcessed().getDocumentType());
+    if (nfc.getProcessed().getDocumentNumber() != null)
+      session.setDocumentNumber(nfc.getProcessed().getDocumentNumber());
   }
 
   public static boolean isValidDateOfBirth(String dateOfBirth) {
