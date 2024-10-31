@@ -207,11 +207,6 @@ public class Service {
         options.add(
             ContextualMenuItem.build(
                 ServiceLabel.CMD_CREATE, getMessage("CMD_CREATE_LABEL", connectionId), null));
-        options.add(
-            ContextualMenuItem.build(
-                ServiceLabel.CMD_CREATE_OLD,
-                getMessage("CMD_CREATE_OLD_LABEL", connectionId),
-                null));
       }
 
     } else
@@ -221,6 +216,13 @@ public class Service {
             /* create menu */
 
             // abort and return to main menu
+            String legacy = "off";
+            if(session!=null && session.getLegacy()) legacy ="on";
+            options.add(
+              ContextualMenuItem.build(
+                  ServiceLabel.CMD_CREATE_OLD,
+                  getMessage("CMD_CREATE_OLD_LABEL", connectionId).replace("VALUE", legacy),
+                  null));
             options.add(
                 ContextualMenuItem.build(
                     ServiceLabel.CMD_CREATE_ABORT,
@@ -514,9 +516,10 @@ public class Service {
     } else if (content.equals(ServiceLabel.CMD_CREATE_OLD)) {
       logger.info("userInput: CMD_CREATE_OLD : session before: " + session);
 
-      session = createSession(session, message.getConnectionId());
+      if(session==null) session = createSession(session, message.getConnectionId());
       session.setType(SessionType.CREATE);
-      session.setLegacy(true);
+      session.setCreateStep(CreateStep.CAPTURE);
+      session.setLegacy(!session.getLegacy());
       session = em.merge(session);
 
       this.createEntryPoint(message.getConnectionId(), message.getThreadId(), session, null, null);
