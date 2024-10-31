@@ -437,6 +437,7 @@ public class Service {
     } else if ((message instanceof ProfileMessage)) {
       ProfileMessage profile = (ProfileMessage) message;
       this.updatePreferLanguage(profile);
+      content = ServiceLabel.CMD_CREATE;
     } else if ((message instanceof MrzDataSubmitMessage)) {
       MrzDataSubmitMessage mrz = (MrzDataSubmitMessage) message;
       messageResource.sendMessage(
@@ -737,7 +738,7 @@ public class Service {
     em.merge(session);
 
     // Send welcome message after
-    this.sendWelcomeMessages(profile.getConnectionId(), profile.getThreadId());
+    // this.sendWelcomeMessages(profile.getConnectionId(), profile.getThreadId());
     messageResource.sendMessage(this.getRootMenu(profile.getConnectionId(), null, null));
   }
 
