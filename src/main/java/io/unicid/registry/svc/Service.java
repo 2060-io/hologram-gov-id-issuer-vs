@@ -211,6 +211,8 @@ public class Service {
 
     } else
       switch (session.getType()) {
+        case EDIT:
+        case ISSUE:
         case CREATE:
           {
             /* create menu */
@@ -218,7 +220,9 @@ public class Service {
             // abort and return to main menu
             String legacy = "off";
             if (session != null && session.getLegacy()) legacy = "on";
-            if (session != null && session.getCreateStep().equals(CreateStep.WEBRTC_CAPTURE))
+            if (session != null
+                && session.getCreateStep() != null
+                && !session.getCreateStep().equals(CreateStep.MRZ))
               options.add(
                   ContextualMenuItem.build(
                       ServiceLabel.CMD_CREATE_OLD,
@@ -230,120 +234,6 @@ public class Service {
                     getMessage("CMD_CREATE_ABORT_LABEL", connectionId),
                     null));
             break;
-          }
-
-        case RESTORE:
-          {
-            break;
-          }
-        case EDIT:
-          {
-            // edit menu
-            // show identity in menu
-
-            String idStr = getIdentityLabel(identity);
-            menu.setDescription(idStr.toString());
-
-            if (identity.getDeletedTs() != null) {
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_VIEW_ID,
-                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
-                      null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_UNDELETE,
-                      getMessage("CMD_UNDELETE_LABEL", connectionId),
-                      null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT,
-                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
-                      null));
-            } else if (identity.getRevokedTs() != null) {
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_VIEW_ID,
-                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
-                      null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT,
-                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
-                      null));
-            } else if (identity.getIssuedTs() != null) {
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_VIEW_ID,
-                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
-                      null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_REVOKE, getMessage("CMD_REVOKE_LABEL", connectionId), null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT,
-                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
-                      null));
-            } else if (identity.getProtectedTs() == null) {
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_CONTINUE_SETUP,
-                      getMessage("CMD_CONTINUE_SETUP_LABEL", connectionId),
-                      null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT,
-                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
-                      null));
-            } else if (identity.getIssuedTs() == null) {
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_VIEW_ID,
-                      getMessage("CMD_VIEW_ID_LABEL", connectionId),
-                      null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_ISSUE, getMessage("CMD_ISSUE_LABEL", connectionId), null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_DELETE, getMessage("CMD_DELETE_LABEL", connectionId), null));
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT,
-                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
-                      null));
-            } else {
-              options.add(
-                  ContextualMenuItem.build(
-                      ServiceLabel.CMD_EDIT_ABORT,
-                      getMessage("CMD_EDIT_ABORT_LABEL", connectionId),
-                      null));
-            }
-            break;
-          }
-
-        case ISSUE:
-          {
-            // edit menu
-            // show identity in menu
-
-            String idStr = getIdentityLabel(identity);
-            menu.setDescription(idStr.toString());
-            options.add(
-                ContextualMenuItem.build(
-                    ServiceLabel.CMD_ISSUE_ABORT,
-                    getMessage("CMD_ISSUE_ABORT_LABEL", connectionId),
-                    null));
           }
         default:
           {
@@ -459,11 +349,7 @@ public class Service {
                   message.getConnectionId(),
                   null,
                   getMessage("CREDENTIAL_ACCEPTED", message.getConnectionId())));
-          messageResource.sendMessage(
-              TextMessage.build(
-                  message.getConnectionId(),
-                  null,
-                  getMessage("NEW_CREDENTIAL", message.getConnectionId())));
+          content = ServiceLabel.CMD_DELETE;
           break;
         case DECLINED:
           messageResource.sendMessage(
@@ -543,17 +429,10 @@ public class Service {
     } else if (content.equals(ServiceLabel.CMD_CREATE_ABORT)) {
       logger.info("userInput: CMD_CREATE_ABORT : session before: " + session);
 
-      if (session != null) {
-        em.remove(session);
-        session = null;
-      }
-      messageResource.sendMessage(
-          TextMessage.build(
-              message.getConnectionId(),
-              message.getThreadId(),
-              getMessage("IDENTITY_CREATE_ABORTED", message.getConnectionId())));
-
+      this.deleteData(message.getConnectionId(), message.getThreadId(), session);
       logger.info("userInput: CMD_CREATE_ABORT : session after: " + session);
+      messageResource.sendMessage(
+          this.getConfirmData(message.getConnectionId(), message.getThreadId()));
 
     } else if (content.equals(ServiceLabel.CMD_VIEW_ID)) {
       logger.info("userInput: CMD_VIEW_ID : session before: " + session);
@@ -645,26 +524,8 @@ public class Service {
     } else if (content.equals(ServiceLabel.CMD_DELETE)) {
       logger.info("userInput: CMD_DELETE : session before: " + session);
 
-      if (this.isEditSession(session, identity)) {
-        if ((identity.getIssuedTs() == null) || (identity.getRevokedTs() != null)) {
-
-          identity.setDeletedTs(Instant.now());
-          em.merge(identity);
-          messageResource.sendMessage(
-              TextMessage.build(
-                  message.getConnectionId(),
-                  message.getThreadId(),
-                  getMessage("IDENTITY_DELETED", message.getConnectionId())
-                      .replace("IDENTITY", this.getIdentityLabel(identity))));
-        }
-
-      } else {
-        messageResource.sendMessage(
-            TextMessage.build(
-                message.getConnectionId(),
-                message.getThreadId(),
-                getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
-      }
+      identity = this.deleteData(message.getConnectionId(), message.getThreadId(), session);
+      session = null;
 
     } else if (content.equals(ServiceLabel.CMD_REVOKE)) {
       logger.info("userInput: CMD_REVOKE : session before: " + session);
@@ -687,6 +548,11 @@ public class Service {
                 getMessage("ERROR_SELECT_IDENTITY_FIRST", message.getConnectionId())));
       }
 
+    } else if (content.equals(ServiceLabel.COMPLETE_IDENTITY_CONFIRM_YES_VALUE)) {
+      this.userInput(
+          TextMessage.build(
+              message.getConnectionId(), message.getThreadId(), ServiceLabel.CMD_CREATE));
+    } else if (content.equals(ServiceLabel.COMPLETE_IDENTITY_CONFIRM_NO_VALUE)) {
     } else if (this.isSessionType(session, SessionType.CREATE)) {
       logger.info("userInput: CREATE entryPoint session before: " + session);
 
@@ -720,6 +586,30 @@ public class Service {
             message.getConnectionId(),
             session,
             ((session != null) ? session.getIdentity() : identity)));
+  }
+
+  private Identity deleteData(UUID connectionId, UUID threadId, Session session) {
+    Identity identity = null;
+    if (session != null) {
+      if (session.getIdentity() != null) {
+        try {
+          Token token =
+              this.getToken(connectionId, TokenType.WEBRTC_CAPTURE, session.getIdentity(), null);
+          mediaResource.delete(session.getIdentity().getAvatarPic(), token.getId().toString());
+          logger.info("deleteData: picture: " + session.getIdentity().getAvatarPic());
+        } catch (Exception e) {
+          logger.info("deleteData: No picture deleted");
+        }
+        session.getIdentity().clearFields();
+        identity = em.merge(session.getIdentity());
+      }
+      em.remove(session);
+      session = null;
+    }
+    messageResource.sendMessage(
+        TextMessage.build(
+            connectionId, threadId, getMessage("IDENTITY_CREATE_ABORTED", connectionId)));
+    return identity;
   }
 
   private boolean isSessionType(Session session, SessionType issue) {

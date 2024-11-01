@@ -131,4 +131,36 @@ public class Identity implements Serializable {
 
   @Column(columnDefinition = "text")
   private String password;
+
+  public void clearFields() {
+    this.startedTs = null;
+    this.completedTs = null;
+    this.confirmedTs = null;
+    this.protectedTs = null;
+    this.issuedTs = null;
+    this.revokedTs = null;
+    this.deletedTs = null;
+    this.authenticatedTs = null;
+    this.creationStep = null;
+    this.changeStep = null;
+    this.citizenId = null;
+    this.firstName = null;
+    this.lastName = null;
+    this.avatarName = null;
+    this.mrz = null;
+    this.documentType = null;
+    this.documentNumber = null;
+    this.avatarPic = null;
+    this.legacy = null;
+    this.avatarMimeType = null;
+    this.isAvatarPicCiphered = null;
+    this.avatarPicCiphKey = null;
+    this.avatarPicCiphIv = null;
+    this.avatarPicCiphAlg = null;
+    this.birthDate = null;
+    this.placeOfBirth = null;
+    this.citizenSinceTs = null;
+    this.protection = null;
+    this.password = null;
+  }
 }
