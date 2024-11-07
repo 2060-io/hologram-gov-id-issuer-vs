@@ -3,7 +3,7 @@ package io.unicid.registry.utils;
 public class ServiceLabel {
 
   public static final String CMD_CREATE = "/create";
-  public static final String CMD_CREATE_OLD = "/legacy";
+  public static final String CMD_CREATE_OLD = "/legacy_on_off";
   public static final String CMD_CREATE_ABORT = "/create_abort";
   public static final String CMD_EDIT_ABORT = "/edit_abort";
   public static final String CMD_VIEW_ID = "/view";
