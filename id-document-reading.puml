@@ -1,0 +1,33 @@
+@startuml ID Card reading
+
+title ID Card reading
+actor User
+participant Hologram
+participant ServiceAgent
+participant Backend as "UnicID Issuer backend"
+
+Backend -> ServiceAgent: Read MRZ
+ServiceAgent -> Hologram: DIDComm mrz-request
+Hologram -> User: Chat Entry \n"MRZ Request"
+User -> Hologram: Accept
+Hologram -> Hologram: Scan MRZ
+Hologram -> ServiceAgent: DIDComm mrz
+ServiceAgent -> Backend: Parsed MRZ
+Backend -> Backend: Check if document \nis supported
+...
+alt Supported document
+Backend -> ServiceAgent: Read NFC MRTD
+ServiceAgent -> Hologram: mrtd-data-request
+Hologram -> User: Chat Entry\n "NFC scan request"
+User -> Hologram: Accept
+Hologram -> Hologram: Scan NFC Document
+Hologram -> ServiceAgent: DIDComm mrtd-data
+Backend -> Backend: Verify data authenticity
+end
+alt Unsupported document
+Backend -> ServiceAgent: Text("Unsupported document")
+ServiceAgent -> Hologram: DIDComm Basic Message "Unsupported document"
+Hologram -> User: Chat Entry "Text" "Unsupported document!"
+end 
+@enduml
+

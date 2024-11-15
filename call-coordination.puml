@@ -1,0 +1,45 @@
+@startuml Call Coordination
+
+title Call coordination
+actor User
+participant Hologram
+participant ServiceAgent
+participant Backend as "UnicID Issuer backend"
+participant WebRTCServer
+participant Vision
+
+Backend -> WebRTCServer: createRoom (/notificationUri)
+Backend <-- WebRTCServer: data (wsUrl, iceserver, roomId)
+Backend -> Backend: userPeerId = generate PeerId for User
+Backend -> ServiceAgent: CallOffer(wsUrl+roomId+peerId, iceserver)
+ServiceAgent -> Hologram: DIDComm call-offer(data)
+Hologram -> User: Chat Entry \n"Call Offer"
+User -> Hologram: Open Call
+Hologram -> WebRTCServer: Join Room (wss:/xx/?roomId=xxx?userPeerId)
+WebRTCServer -> Backend: /notificationUri (peer-joined, roomId, peerId) 
+Backend -> Backend: visionPeerId = generate PeerId for Vision
+Backend -> Vision: /connectToRoom (wss://xxx/?roomId) - lang, token
+Vision -> WebRTCServer: Join Room (wss:/xx/?roomId=xxx?peerId)
+...
+alt Success
+Vision -> Backend: /success/:token
+Backend -> ServiceAgent: Text("Success")
+ServiceAgent -> Hologram: DIDComm Basic Message "Success"
+Hologram -> User: Chat Entry "Text" "Success!"
+end
+alt Failure
+Vision -> Backend: /failure/:token
+Backend -> ServiceAgent: Text("Failure")
+ServiceAgent -> Hologram: DIDComm Basic Message "Success"
+Hologram -> User: Chat Entry "Text" "Failure!"
+
+@enduml
+
+
+From backend:
+- Call Offer
+
+From Hologram:
+- Call Accept
+- Call Reject
+- Call End
