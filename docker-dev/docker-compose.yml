@@ -28,8 +28,8 @@ services:
 
   unic-id-dts:
     build: 
-      context: ../../
-      dockerfile: ./examples/demo-dts/Dockerfile
+      context: ../
+      dockerfile: ./Dockerfile
     image: 2060-unic-id-dts
     container_name: unic-id-dts
     restart: always
