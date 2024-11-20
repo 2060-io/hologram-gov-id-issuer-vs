@@ -109,6 +109,12 @@ export class CoreService implements EventHandler {
   private async handleContextualAction(selectionId: string, session: SessionEntity) {
     switch (session.state) {
       case StateStep.START:
+        if(selectionId===Cmd.CREATE){
+          this.sessionRepository.update(session.id, {
+            state: StateStep.MRZ
+          })
+          await this.sendMrzRequest(session)
+        }
         break
       case StateStep.MRZ:
         if(selectionId===Cmd.ABORT){

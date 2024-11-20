@@ -1,3 +1,11 @@
 {
-  "WELCOME":"Bienvenido test"
+  "WELCOME":"Bienvenido a nuestro chatbot Demo",
+  "HELP":"Acceder al menu contextual para ver las opciones disponibles.",
+  "MRZ_SUCCESSFULL":"Documento de identidad leído con éxito. Felicitaciones, tu documento es compatible con UnicID.",
+  "MRZ_REQUEST":"Solo necesitamos unos pocos pasos para verificar tu documento de identificación.",
+  "ROOT_TITTLE": "Menú Contextual",
+  "CMD": {
+    "CREATE":"Nueva Verificación de Identidad",
+    "ABORT":"Abortar verificación"
+  }
 }

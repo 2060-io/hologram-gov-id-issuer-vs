@@ -1,3 +1,11 @@
 {
-  "WELCOME":"WELCOME"
+  "WELCOME":"Welcome to our demo chatbot",
+  "HELP":"Check the contextual menu for available actions.",
+  "MRZ_REQUEST":"We only need a few steps to verify your ID Document.",
+  "MRZ_SUCCESSFULL": "ID Document successfully read. Congratulations, your document is compatible with UnicID.",
+  "ROOT_TITTLE": "Context Menu",
+  "CMD": {
+    "CREATE":"New ID Document verification",
+    "ABORT":"Abort Verification"
+  }
 }
