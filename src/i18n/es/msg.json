@@ -1,11 +1,23 @@
 {
-  "WELCOME":"Bienvenido a nuestro chatbot Demo",
+  "WELCOME":"Bienvenido a UnicID!",
   "HELP":"Acceder al menu contextual para ver las opciones disponibles.",
-  "MRZ_SUCCESSFULL":"Documento de identidad leído con éxito. Felicitaciones, tu documento es compatible con UnicID.",
   "MRZ_REQUEST":"Solo necesitamos unos pocos pasos para verificar tu documento de identificación.",
+  "EMRTD_REQUEST":"Por favor, ten listo tu Documento de Identidad o Pasaporte.\nAsegúrate de que sea compatible con la tecnología NFC.",
+  "FACE_REQUEST":"Ahora verificaremos tu rostro.",
+  "MRZ_SUCCESSFULL":"Documento de identidad leído con éxito. Felicitaciones, tu documento es compatible con UnicID.",
+  "EMRTD_SUCCESSFULL":"Documento de identidad leído con éxito.",
   "ROOT_TITTLE": "Menú Contextual",
+  "MENU_SELECT": {
+    "PROMPT": {
+      "VERIFICATION":"Reintentar?"
+    },
+    "OPTIONS": {
+      "YES":"Si",
+      "NO":"No"
+    }
+  },
   "CMD": {
     "CREATE":"Nueva Verificación de Identidad",
-    "ABORT":"Abortar verificación"
+    "ABORT":"Abortar verificación de Identidad"
   }
 }

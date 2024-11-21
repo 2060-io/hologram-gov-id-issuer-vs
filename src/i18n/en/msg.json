@@ -1,11 +1,23 @@
 {
-  "WELCOME":"Welcome to our demo chatbot",
+  "WELCOME":"welcome to UnicID!",
   "HELP":"Check the contextual menu for available actions.",
   "MRZ_REQUEST":"We only need a few steps to verify your ID Document.",
+  "EMRTD_REQUEST":"Please have your ID Document or Passport ready.\nMake sure it is compatible with the NFC technology.",
+  "FACE_REQUEST":"We will now verify your face.",
   "MRZ_SUCCESSFULL": "ID Document successfully read. Congratulations, your document is compatible with UnicID.",
+  "EMRTD_SUCCESSFULL":"ID Document successfully read.",
   "ROOT_TITTLE": "Context Menu",
+  "MENU_SELECT": {
+    "PROMPT": {
+      "VERIFICATION":"Retry?"
+    },
+    "OPTIONS": {
+      "YES":"Yes",
+      "NO":"No"
+    }
+  },
   "CMD": {
     "CREATE":"New ID Document verification",
-    "ABORT":"Abort Verification"
+    "ABORT":"Abort ID Verification"
   }
 }

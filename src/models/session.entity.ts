@@ -19,6 +19,18 @@ export class SessionEntity {
   })
   state?: StateStep
 
+  @Column({ name: 'user_agent', type: 'varchar', nullable: true })
+  userAgent: string
+
+  @Column({ name: 'tracking_parameter', type: 'varchar', nullable: true })
+  tp: string
+
+  @Column({ name: 'nfc_support', type: 'boolean', nullable: true })
+  nfcSupport: boolean
+
+  @Column('jsonb', { nullable: true })
+  credential_metadata?: Record<string, any>
+
   @CreateDateColumn()
   createdTs?: Date
 
