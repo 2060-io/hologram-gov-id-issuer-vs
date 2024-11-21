@@ -313,7 +313,7 @@ export class CoreService implements EventHandler {
   }
 
   private async startVideoCall(session: SessionEntity): Promise<SessionEntity> {
-    const createRoom = new CreateRoomRequest(process.env.PUBLIC_BASE_URL, 50)
+    const createRoom = new CreateRoomRequest(`${process.env.PUBLIC_BASE_URL}+/call-event`, 50)
     const response = await fetch(`${process.env.WEBRTC_URL}/rooms/${utils.uuid()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

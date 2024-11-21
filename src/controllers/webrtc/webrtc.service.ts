@@ -37,8 +37,8 @@ export class WebrtcService {
 
       const joinCallRequest = new JoinCallRequest()
       joinCallRequest.wsUrl = `${peer.wsUrl}/?roomId=${peer.roomId}&peerId=${peerId}`
-      joinCallRequest.callbackBaseUrl = process.env.Q_REDIR_DOMAIN
-      joinCallRequest.datastoreBaseUrl = process.env.D_REDIR_DOMAIN
+      joinCallRequest.callbackBaseUrl = process.env.PUBLIC_BASE_URL
+      joinCallRequest.datastoreBaseUrl = process.env.PUBLIC_BASE_URL
       joinCallRequest.token = session.id // TODO: validate token
       joinCallRequest.lang = session.lang
 
