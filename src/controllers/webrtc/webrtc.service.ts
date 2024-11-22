@@ -44,7 +44,7 @@ export class WebrtcService {
 
       this.logger.log(`joinCall: token: ${JSON.stringify(joinCallRequest)}`)
 
-      await fetch(process.env.VISION_URL, {
+      await fetch(`${process.env.VISION_URL}/join-call`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(joinCallRequest),
