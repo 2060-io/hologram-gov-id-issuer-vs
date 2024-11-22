@@ -116,6 +116,48 @@ export class CoreService implements EventHandler {
     await this.sendCredentialType()
   }
 
+  private async welcomeMessage(connectionId: string) {
+    const lang = (await this.handleSession(connectionId)).lang
+    await this.sendText(connectionId, 'WELCOME', lang)
+  }
+
+  private async startVideoCall(session: SessionEntity): Promise<SessionEntity> {
+    const createRoom = new CreateRoomRequest(`${process.env.PUBLIC_BASE_URL}/call-event`, 50)
+    const response = await fetch(`${process.env.WEBRTC_URL}/rooms/${utils.uuid()}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(createRoom),
+    })
+    const wsUrl: WebRtcCallDataV1 = JsonTransformer.fromJSON(await response.json(), WebRtcCallDataV1)
+
+    this.logger.log(`Create new room ${wsUrl.roomId} on: ${wsUrl.wsUrl}`)
+
+    const peer = this.peerRepository.create({
+      id: utils.uuid(),
+      connectionId: session.connectionId,
+      roomId: wsUrl.roomId,
+      wsUrl: wsUrl.wsUrl,
+      type: PeerType.PEER_USER,
+    })
+
+    await this.peerRepository.save(peer)
+    this.logger.log('New peer: ' + JSON.stringify(peer))
+
+    await this.sendText(session.connectionId, 'FACE_REQUEST', session.lang)
+
+    await this.apiClient.messages.send(
+      new CallOfferRequestMessage({
+        connectionId: session.connectionId,
+        parameters: {
+          ...wsUrl,
+          peerId: peer.id,
+        },
+      }),
+    )
+
+    return session
+  }
+
   private async handleContextualAction(selectionId: string, session: SessionEntity): Promise<SessionEntity> {
     switch (session.state) {
       case StateStep.START:
@@ -165,6 +207,7 @@ export class CoreService implements EventHandler {
             expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
             facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
           }
+          session = await this.sendDataStore() 
           session = await this.startVideoCall(session)
         }
         break
@@ -186,6 +229,24 @@ export class CoreService implements EventHandler {
         break
     }
     return await this.sessionRepository.save(session)
+  }
+
+  private async handleSession(connectionId: string): Promise<SessionEntity> {
+    let session = await this.sessionRepository.findOneBy({
+      connectionId: connectionId,
+    })
+    this.logger.log('inputMessage session: ' + JSON.stringify(session))
+
+    if (!session) {
+      session = this.sessionRepository.create({
+        connectionId: connectionId,
+        state: StateStep.START,
+      })
+
+      await this.sessionRepository.save(session)
+      this.logger.log('New session: ' + JSON.stringify(session))
+    }
+    return session
   }
 
   async sendMenuSelection(session: SessionEntity): Promise<SessionEntity> {
@@ -220,27 +281,17 @@ export class CoreService implements EventHandler {
     return session
   }
 
-  private async welcomeMessage(connectionId: string) {
-    const lang = (await this.handleSession(connectionId)).lang
-    await this.sendText(connectionId, 'WELCOME', lang)
+  private async sendText(connectionId: string, text: string, lang: string) {
+    await this.apiClient.messages.send(
+      new TextMessage({
+        connectionId: connectionId,
+        content: this.getText(text, lang),
+      }),
+    )
   }
 
-  private async handleSession(connectionId: string): Promise<SessionEntity> {
-    let session = await this.sessionRepository.findOneBy({
-      connectionId: connectionId,
-    })
-    this.logger.log('inputMessage session: ' + JSON.stringify(session))
-
-    if (!session) {
-      session = this.sessionRepository.create({
-        connectionId: connectionId,
-        state: StateStep.START,
-      })
-
-      await this.sessionRepository.save(session)
-      this.logger.log('New session: ' + JSON.stringify(session))
-    }
-    return session
+  private getText(text: string, lang: string): string {
+    return this.i18n.t(`msg.${text}`, { lang: lang })
   }
 
   private async sendMrzRequest(session: SessionEntity): Promise<SessionEntity> {
@@ -268,19 +319,6 @@ export class CoreService implements EventHandler {
       )
     }
     return await this.sessionRepository.save(session)
-  }
-
-  private async sendText(connectionId: string, text: string, lang: string) {
-    await this.apiClient.messages.send(
-      new TextMessage({
-        connectionId: connectionId,
-        content: this.getText(text, lang),
-      }),
-    )
-  }
-
-  private getText(text: string, lang: string): string {
-    return this.i18n.t(`msg.${text}`, { lang: lang })
   }
 
   private async sendContextualMenu(session: SessionEntity) {
@@ -316,43 +354,6 @@ export class CoreService implements EventHandler {
         timestamp: new Date(),
       }),
     )
-  }
-
-  private async startVideoCall(session: SessionEntity): Promise<SessionEntity> {
-    const createRoom = new CreateRoomRequest(`${process.env.PUBLIC_BASE_URL}/call-event`, 50)
-    const response = await fetch(`${process.env.WEBRTC_URL}/rooms/${utils.uuid()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(createRoom),
-    })
-    const wsUrl: WebRtcCallDataV1 = JsonTransformer.fromJSON(await response.json(), WebRtcCallDataV1)
-
-    this.logger.log(`Create new room ${wsUrl.roomId} on: ${wsUrl.wsUrl}`)
-
-    const peer = this.peerRepository.create({
-      id: utils.uuid(),
-      connectionId: session.connectionId,
-      roomId: wsUrl.roomId,
-      wsUrl: wsUrl.wsUrl,
-      type: PeerType.PEER_USER,
-    })
-
-    await this.peerRepository.save(peer)
-    this.logger.log('New peer: ' + JSON.stringify(peer))
-
-    await this.sendText(session.connectionId, 'FACE_REQUEST', session.lang)
-
-    await this.apiClient.messages.send(
-      new CallOfferRequestMessage({
-        connectionId: session.connectionId,
-        parameters: {
-          ...wsUrl,
-          peerId: peer.id,
-        },
-      }),
-    )
-
-    return session
   }
 
   async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
@@ -412,5 +413,9 @@ export class CoreService implements EventHandler {
         ],
       })
     }
+  }
+
+  private async sendDataStore(): Promise<SessionEntity> {
+    throw new Error('Method not implemented.')
   }
 }
