@@ -207,7 +207,7 @@ export class CoreService implements EventHandler {
             expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
             facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
           }
-          session = await this.sendDataStore() 
+          session = await this.sendDataStore(session) 
           session = await this.startVideoCall(session)
         }
         break
@@ -415,7 +415,38 @@ export class CoreService implements EventHandler {
     }
   }
 
-  private async sendDataStore(): Promise<SessionEntity> {
-    throw new Error('Method not implemented.')
+  private async sendDataStore(session: SessionEntity): Promise<SessionEntity> {
+    try {
+      // Create registry on data store
+      const createResponse = await fetch(`${process.env.DATASTORE_URL}/c/${session.id}/1?token=null`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!createResponse.ok) {
+        throw new Error(`Create registry failed with status ${createResponse.status}: ${createResponse.statusText}`);
+      }  
+
+      // Upload registry on data store
+      const formData = new FormData()
+      const base64Data = session.credential_metadata.facePhoto.split(',')[1]
+      formData.append('file', new Blob([Buffer.from(base64Data, 'base64')]), 'chunk.bin')
+      const uploadResponse = await fetch(`${process.env.DATASTORE_URL}/u/${session.id}/0?token=null`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: formData
+      })
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload registry failed with status ${uploadResponse.status}: ${uploadResponse.statusText}`);
+      }
+  
+      this.logger.debug("sendDataStore: Data uploaded")
+    } catch (error) {
+      this.logger.error("sendDataStore: Canon't save data")
+    }
+    return session
   }
 }
