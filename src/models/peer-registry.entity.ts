@@ -12,7 +12,7 @@ export class PeerRegistry {
   @Column({
     type: 'enum',
     enum: EventNotificationType,
-    nullable: true
+    nullable: true,
   })
   event?: EventNotificationType
 

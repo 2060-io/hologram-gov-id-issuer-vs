@@ -19,7 +19,7 @@ import {
   MrzDataSubmitMessage,
   ProfileMessage,
   TextMessage,
-} from '@2060.io/model'
+} from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 import { EventHandler } from '@2060.io/nestjs-client'
 import { Injectable, Logger } from '@nestjs/common'
@@ -287,6 +287,12 @@ export class CoreService implements EventHandler {
     const item: ContextualMenuItem[] = []
     switch (session.state) {
       case StateStep.START:
+        item.push(
+          new ContextualMenuItem({
+            id: Cmd.CREATE,
+            title: this.getText('CMD.CREATE', session.lang),
+          }),
+        )
         break
       case StateStep.MRZ:
       case StateStep.EMRTD:
@@ -341,9 +347,9 @@ export class CoreService implements EventHandler {
         connectionId: session.connectionId,
         parameters: {
           ...wsUrl,
-          peerId: peer.id
-        }
-      })
+          peerId: peer.id,
+        },
+      }),
     )
 
     return session
