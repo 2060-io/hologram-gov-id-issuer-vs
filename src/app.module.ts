@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { CoreService } from './app.service'
+import { CoreService } from './core.service'
 import { ConfigModule } from '@nestjs/config'
 import appConfig from './config/app.config'
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n'
