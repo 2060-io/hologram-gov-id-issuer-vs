@@ -445,7 +445,7 @@ export class CoreService implements EventHandler {
   
       this.logger.debug("sendDataStore: Data uploaded")
     } catch (error) {
-      this.logger.error("sendDataStore: Canon't save data")
+      this.logger.error(`sendDataStore: Canon't save data - ${error}`)
     }
     return session
   }

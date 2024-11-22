@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { JoinCallRequest, NotificationRequest } from '../../dto'
 import { Repository } from 'typeorm'
 import { utils } from '@credo-ts/core'
+import { instanceToPlain } from 'class-transformer'
 
 @Injectable()
 export class WebrtcService {
@@ -38,16 +39,16 @@ export class WebrtcService {
       const joinCallRequest = new JoinCallRequest()
       joinCallRequest.wsUrl = `${peer.wsUrl}/?roomId=${peer.roomId}&peerId=${peerId}`
       joinCallRequest.callbackBaseUrl = process.env.PUBLIC_BASE_URL
-      joinCallRequest.datastoreBaseUrl = process.env.PUBLIC_BASE_URL
+      joinCallRequest.datastoreBaseUrl = process.env.DATASTORE_URL
       joinCallRequest.token = session.id // TODO: validate token
       joinCallRequest.lang = session.lang
 
-      this.logger.log(`joinCall: token: ${JSON.stringify(joinCallRequest)}`)
+      this.logger.log(`joinCall: token: ${JSON.stringify(instanceToPlain(joinCallRequest))}`)
 
       await fetch(`${process.env.VISION_URL}/join-call`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(joinCallRequest),
+        body: JSON.stringify(instanceToPlain(joinCallRequest)),
       })
     }
   }

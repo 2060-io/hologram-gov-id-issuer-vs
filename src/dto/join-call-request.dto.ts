@@ -21,9 +21,11 @@ export class JoinCallRequest {
 
   @IsOptional()
   @IsString()
+  @Expose()
   token?: string
 
   @IsOptional()
   @IsString()
+  @Expose()
   lang?: string
 }
