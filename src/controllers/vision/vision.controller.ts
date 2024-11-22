@@ -3,7 +3,7 @@ import { Controller, Get, Put, Param, HttpStatus, HttpException, Logger } from '
 import { VisionService } from './vision.service'
 import { ApiOperation, ApiResponse } from '@nestjs/swagger'
 
-@Controller('vision')
+@Controller()
 export class VisionController {
   private readonly logger = new Logger(VisionController.name)
 

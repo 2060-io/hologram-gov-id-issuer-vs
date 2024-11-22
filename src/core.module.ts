@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common'
 import { PeerRegistry, SessionEntity } from './models'
 import { CoreService } from './app.service'
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm'
-import { ConnectionEntity } from '@2060.io/nestjs-client'
+import { ConnectionEntity } from '@2060.io/service-agent-nestjs-client'
 
 const defaultOptions = {
   type: 'postgres',
