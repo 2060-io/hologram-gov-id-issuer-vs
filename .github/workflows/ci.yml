@@ -1,32 +1,38 @@
-## A basic GitHub Actions workflow for your Quarkus application.
-
-name: CI
+name: Continuous Integration
 
 on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
-   
-env:
-  QUARKUS_CONTAINER_IMAGE_USERNAME: ${{ secrets.DOCKER_HUB_LOGIN }}
-  QUARKUS_CONTAINER_IMAGE_PASSWORD: ${{ secrets.DOCKER_HUB_PWD }}
-
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout gh-repo
-        uses: actions/checkout@v3
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
+    steps:
+      - name: Checkout unic-id
+        uses: actions/checkout@v4
+
+      - name: Setup node v20
+        uses: actions/setup-node@v4
         with:
-          java-version: 17
-          distribution: temurin
-          cache: maven
-        
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          yarn install --frozen-lockfile
+
       - name: Build
         run: |
-          ./mvnw package -B -Dquarkus.container-image.tag=${GITHUB_REF##*/}
-          docker image ls
+          yarn build
+
+      - name: Check Format
+        run: |
+          yarn check-format
+
+      - name: Check Types
+        run: |
+          yarn check-types
