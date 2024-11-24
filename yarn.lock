@@ -14,7 +14,7 @@
     mrz "^4.2.0"
     tsyringe "^4.8.0"
 
-"@2060.io/service-agent-client@*", "@2060.io/service-agent-client@^1.1.0-dev.21":
+"@2060.io/service-agent-client@^1.1.0-dev.21":
   version "1.1.0-dev.21"
   resolved "https://registry.yarnpkg.com/@2060.io/service-agent-client/-/service-agent-client-1.1.0-dev.21.tgz#64dc12217c43e097c85b367f3c5a0d30d27267e0"
   integrity sha512-7n7IQJBXYhuEMNjE+U+9+tpArG/iLq3GnMcT8sN6UFkCvQ+PAyjiZR2YIEfQx7K9XoyUvaZYsF3LK3aPm/1wLg==
