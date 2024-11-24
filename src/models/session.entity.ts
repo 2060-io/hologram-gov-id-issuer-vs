@@ -1,6 +1,6 @@
 // session.entity.ts
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
-import { StateStep } from '../common'
+import { StateStep } from '@/common'
 
 @Entity('session')
 export class SessionEntity {

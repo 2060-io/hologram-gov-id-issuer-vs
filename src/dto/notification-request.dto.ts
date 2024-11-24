@@ -1,6 +1,6 @@
 // notification-request.dto.ts
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator'
-import { EventNotificationType } from '../common'
+import { EventNotificationType } from '@/common'
 import { Expose } from 'class-transformer'
 
 export class NotificationRequest {

@@ -1,7 +1,7 @@
 import { Body, Controller, HttpException, HttpStatus, Inject, Logger, Post } from '@nestjs/common'
 import { WebrtcService } from './webrtc.service'
-import { EventNotificationType } from '../../common'
-import { NotificationRequest } from '../../dto'
+import { EventNotificationType } from '@/common'
+import { NotificationRequest } from '@/dto'
 
 @Controller()
 export class WebrtcController {

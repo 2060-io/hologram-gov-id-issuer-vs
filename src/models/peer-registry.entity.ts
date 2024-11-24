@@ -1,4 +1,4 @@
-import { EventNotificationType, PeerType } from '../common'
+import { EventNotificationType, PeerType } from '@/common'
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('peer_registry')

@@ -23,13 +23,13 @@ import {
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 import { EventHandler } from '@2060.io/service-agent-nestjs-client'
 import { Injectable, Logger } from '@nestjs/common'
-import { PeerRegistry, SessionEntity } from './models'
+import { PeerRegistry, SessionEntity } from '@/models'
 import { CredentialState, JsonTransformer, utils } from '@credo-ts/core'
-import { Cmd, MenuSelectEnum, PeerType, StateStep } from './common'
+import { Cmd, MenuSelectEnum, PeerType, StateStep } from '@/common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { I18nService } from 'nestjs-i18n'
-import { CreateRoomRequest, WebRtcCallDataV1 } from './dto'
+import { CreateRoomRequest, WebRtcCallDataV1 } from '@/dto'
 
 @Injectable()
 export class CoreService implements EventHandler {

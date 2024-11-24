@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common'
-import { CoreService } from './core.service'
+import { CoreService } from '@/core.service'
 import { ConfigModule } from '@nestjs/config'
-import appConfig from './config/app.config'
+import appConfig from '@/config/app.config'
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n'
 import * as path from 'path'
 import { ConnectionsEventModule, MessageEventModule } from '@2060.io/service-agent-nestjs-client'
 import { ApiVersion } from '@2060.io/service-agent-client'
-import { VisionModule, WebrtcModule } from './controllers'
-import { CoreModule } from './core.module'
+import { VisionModule, WebrtcModule } from '@/controllers'
+import { CoreModule } from '@/core.module'
 
 @Module({
   imports: [

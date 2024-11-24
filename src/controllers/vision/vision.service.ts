@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { SessionEntity } from '../../models'
+import { SessionEntity } from '@/models'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { CoreService } from '../../core.service'
+import { CoreService } from '@/core.service'
 
 @Injectable()
 export class VisionService {

@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core'
-import { AppModule } from './app.module'
+import { AppModule } from '@/app.module'
 import { ConfigService } from '@nestjs/config'
 import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n'
-import { getLogLevels } from './config/logger.config'
+import { getLogLevels } from '@/config'
 import { Logger } from '@nestjs/common'
 
 async function bootstrap() {
