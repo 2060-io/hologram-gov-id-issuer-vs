@@ -65,12 +65,6 @@ This section defines the type of event notifications related to the call events,
 ### Vision Service
 The RESTful API includes the following options:
 
-#### Link Media
-Link multimedia content to a specific `token`: In this case, both the `token` generated during the process and the `mediaId` from the image in the data store must be sent.
-```url
-https://<baseUrl>/link/{token}/{mediaId}
-```
-
 #### List Media
 List multimedia content associated with the `token`: In this case, the `token` generated during the process must be sent.
 ```url
