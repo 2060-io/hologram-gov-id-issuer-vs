@@ -31,7 +31,7 @@ export class VisionService {
     })
     if (!session) throw new Error('Unrecognized token.')
 
-    await this.coreService.sendCredentialData(session)
+    await this.coreService.handleStateInput("success", session)
   }
 
   async failure(sessionId: string): Promise<void> {
@@ -41,6 +41,6 @@ export class VisionService {
     if (!session) throw new Error('Unrecognized token.')
 
     this.logger.debug(`vision failure with id: ${sessionId}, sending retry...`)
-    await this.coreService.sendMenuSelection(session)
+    await this.coreService.handleStateInput("failure", session)
   }
 }

@@ -7,6 +7,7 @@
   "MRZ_SUCCESSFULL":"Documento de identidad leído con éxito. Felicitaciones, tu documento es compatible con UnicID.",
   "EMRTD_SUCCESSFULL":"Documento de identidad leído con éxito.",
   "ROOT_TITTLE": "Menú Contextual",
+  "ABORT_PROCESS": "Verificación de identidad cancelada. Revisa el menú superior para iniciar una nueva verificación de identidad.",
   "MENU_SELECT": {
     "PROMPT": {
       "VERIFICATION":"Reintentar?"

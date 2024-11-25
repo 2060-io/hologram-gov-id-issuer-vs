@@ -171,6 +171,7 @@ export class CoreService implements EventHandler {
       case StateStep.VERIFICATION:
         if (selectionId === Cmd.ABORT) {
           session.state = StateStep.START
+          await this.sendText(session.connectionId, 'ABORT_PROCESS', session.lang)
         }
         break
       default:
@@ -179,7 +180,7 @@ export class CoreService implements EventHandler {
     return await this.sessionRepository.save(session)
   }
 
-  private async handleStateInput(content: any, session: SessionEntity): Promise<SessionEntity> {
+  async handleStateInput(content: any, session: SessionEntity): Promise<SessionEntity> {
     switch (session.state) {
       case StateStep.START:
         await this.sendText(session.connectionId, 'HELP', session.lang)
@@ -211,6 +212,13 @@ export class CoreService implements EventHandler {
           session = await this.sendDataStore(session)
           session = await this.startVideoCall(session)
         }
+        break
+      case StateStep.VERIFICATION:
+        if (content === "success") {
+          session.state = StateStep.ISSUE
+          await this.sendCredentialData(session)
+        }
+        if (content === "failure") await this.sendMenuSelection(session)
         break
       default:
         break
@@ -250,7 +258,7 @@ export class CoreService implements EventHandler {
     return await this.sessionRepository.save(session)
   }
 
-  async sendMenuSelection(session: SessionEntity): Promise<SessionEntity> {
+  private async sendMenuSelection(session: SessionEntity): Promise<SessionEntity> {
     let prompt = ''
     const menuitems: MenuItem[] = []
     switch (session.state) {
@@ -357,7 +365,7 @@ export class CoreService implements EventHandler {
     )
   }
 
-  async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
+  private async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
     const claims: Claim[] = []
 
     if (session.credential_metadata) {
