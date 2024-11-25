@@ -30,6 +30,7 @@ import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { I18nService } from 'nestjs-i18n'
 import { CreateRoomRequest, WebRtcCallDataV1 } from '@/dto'
+import { fetch, FormData } from 'undici'
 
 @Injectable()
 export class CoreService implements EventHandler {
@@ -433,16 +434,20 @@ export class CoreService implements EventHandler {
       // Upload registry on data store
       const base64Data = session.credential_metadata.facePhoto.split(',')[1]
       const binaryData = Buffer.from(base64Data, 'base64')
+      const formData = new FormData()
+      const blob = new Blob([binaryData], {type: 'application/octet-stream'});
+      formData.append('chunk', blob);
+
       const uploadResponse = await fetch(`${process.env.DATASTORE_URL}/u/${session.id}/0?token=null`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/octet-stream',
         },
-        body: new Blob([binaryData], { type: 'application/octet-stream' }),
+        body: formData,
       })
       if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text()
         throw new Error(
-          `Upload registry failed with status ${uploadResponse.status}: ${uploadResponse.statusText}`,
+          `Upload registry failed with status ${uploadResponse.status}: ${uploadResponse.statusText}. Response body: ${errorText}`,
         )
       }
 
