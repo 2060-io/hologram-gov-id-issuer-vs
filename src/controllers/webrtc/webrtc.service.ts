@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { PeerType } from '@/common'
-import { PeerRegistry, SessionEntity } from '@/models'
+import { PeerEntity, SessionEntity } from '@/models'
 import { InjectRepository } from '@nestjs/typeorm'
 import { JoinCallRequest, NotificationRequest } from '@/dto'
 import { Repository } from 'typeorm'
@@ -12,21 +12,21 @@ export class WebrtcService {
   private readonly logger = new Logger(WebrtcService.name)
 
   constructor(
-    @InjectRepository(PeerRegistry)
-    private readonly peerRepository: Repository<PeerRegistry>,
+    @InjectRepository(PeerEntity)
+    private readonly peerRepository: Repository<PeerEntity>,
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
   ) {}
 
   async joinCall(notificationRequest: NotificationRequest): Promise<void> {
-    const peer = await this.updatePeerRegistry(notificationRequest)
+    const peer = await this.updatePeerEntity(notificationRequest)
 
     if (peer.type === PeerType.PEER_USER) {
       const session = await this.sessionRepository.findOneBy({
         connectionId: peer.connectionId,
       })
 
-      const crv = new PeerRegistry()
+      const crv = new PeerEntity()
       const peerId = utils.uuid()
       crv.id = peerId
       crv.connectionId = null
@@ -40,7 +40,7 @@ export class WebrtcService {
       joinCallRequest.wsUrl = `${peer.wsUrl}/?roomId=${peer.roomId}&peerId=${peerId}`
       joinCallRequest.callbackBaseUrl = process.env.PUBLIC_BASE_URL
       joinCallRequest.datastoreBaseUrl = process.env.DATASTORE_URL
-      joinCallRequest.token = session.id // TODO: validate token
+      joinCallRequest.token = session.id
       joinCallRequest.lang = session.lang
 
       this.logger.log(`joinCall: token: ${JSON.stringify(instanceToPlain(joinCallRequest))}`)
@@ -54,10 +54,10 @@ export class WebrtcService {
   }
 
   async leaveCall(notificationRequest: NotificationRequest): Promise<void> {
-    await this.updatePeerRegistry(notificationRequest)
+    await this.updatePeerEntity(notificationRequest)
   }
 
-  async updatePeerRegistry(notificationRequest: NotificationRequest): Promise<PeerRegistry> {
+  async updatePeerEntity(notificationRequest: NotificationRequest): Promise<PeerEntity> {
     const peer = await this.peerRepository.findOneBy({ id: notificationRequest.peerId })
     if (!peer) {
       throw new Error(`No call found for peerId: ${notificationRequest.peerId}`)

@@ -2,11 +2,11 @@ import { EventNotificationType, PeerType } from '@/common'
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('peer_registry')
-export class PeerRegistry {
+export class PeerEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ name: 'connection_id', type: 'varchar', nullable: true })
   connectionId: string
 
   @Column({
@@ -28,9 +28,9 @@ export class PeerRegistry {
   })
   type: PeerType
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_ts' })
   createdTs?: Date
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_ts' })
   updatedTs?: Date
 }

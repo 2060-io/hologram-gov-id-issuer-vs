@@ -7,7 +7,7 @@ export class SessionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ name: 'connection_id', type: 'varchar', nullable: false })
   connectionId: string
 
   @Column({ type: 'varchar', length: 10, nullable: true })
@@ -28,13 +28,13 @@ export class SessionEntity {
   @Column({ name: 'nfc_support', type: 'boolean', nullable: true })
   nfcSupport: boolean
 
-  @Column('jsonb', { nullable: true })
-  credential_metadata?: Record<string, any>
+  @Column('jsonb', { name: 'credential_metadata', nullable: true })
+  credentialMetadata?: Record<string, any>
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_ts' })
   createdTs?: Date
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_ts' })
   updatedTs?: Date
 
   /**
