@@ -492,14 +492,14 @@ export class CoreService implements EventHandler {
     return await this.purgeUserData(session)
   }
 
-  private async timeoutSession(session: SessionEntity): Promise<SessionEntity> {    
+  private async timeoutSession(session: SessionEntity): Promise<SessionEntity> {
     const timeoutEnv = Number(process.env.TIMEOUT_SESSION)
     if (!session.updatedTs) {
-      throw new Error('The session entity does not have a valid updatedTs value');
+      throw new Error('The session entity does not have a valid updatedTs value')
     }
-    const now = new Date();
-    const updatedTime = new Date(session.updatedTs);
-    const timeDifferenceInSeconds = Math.floor((now.getTime() - updatedTime.getTime()) / 1000);
+    const now = new Date()
+    const updatedTime = new Date(session.updatedTs)
+    const timeDifferenceInSeconds = Math.floor((now.getTime() - updatedTime.getTime()) / 1000)
 
     if (timeoutEnv && timeDifferenceInSeconds > timeoutEnv) {
       session.state = StateStep.START
