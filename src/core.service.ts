@@ -162,7 +162,7 @@ export class CoreService implements EventHandler {
       case StateStep.EMRTD:
       case StateStep.VERIFICATION:
         if (selectionId === Cmd.ABORT) {
-          session = await this.abortFlow(session)
+          session = await this.abortVerification(session)
         }
         break
       default:
@@ -221,7 +221,7 @@ export class CoreService implements EventHandler {
               await this.sendContextualMenu(session)
             case CredentialState.Declined:
               await this.sendText(session.connectionId, 'CREDENTIAL_REJECTED', session.lang)
-              session = await this.abortFlow(session)
+              session = await this.abortVerification(session)
               break
             default:
               break
@@ -240,7 +240,7 @@ export class CoreService implements EventHandler {
         if (id === MenuSelectEnum.CONFIRM_YES_VALUE) session = await this.startVideoCall(session)
         if (id === MenuSelectEnum.CONFIRM_NO_VALUE) {
           session.state = StateStep.START
-          session = await this.abortFlow(session)
+          session = await this.abortVerification(session)
         }
         break
       default:
@@ -485,10 +485,29 @@ export class CoreService implements EventHandler {
     return await this.sessionRepository.save(session)
   }
 
-  private async abortFlow(session: SessionEntity): Promise<SessionEntity> {
+  private async abortVerification(session: SessionEntity): Promise<SessionEntity> {
     session.state = StateStep.START
     await this.sendText(session.connectionId, 'ABORT_PROCESS', session.lang)
     await this.sendContextualMenu(session)
     return await this.purgeUserData(session)
+  }
+
+  private async timeoutSession(session: SessionEntity): Promise<SessionEntity> {    
+    const timeoutEnv = Number(process.env.TIMEOUT_SESSION)
+    if (!session.updatedTs) {
+      throw new Error('The session entity does not have a valid updatedTs value');
+    }
+    const now = new Date();
+    const updatedTime = new Date(session.updatedTs);
+    const timeDifferenceInSeconds = Math.floor((now.getTime() - updatedTime.getTime()) / 1000);
+
+    if (timeoutEnv && timeDifferenceInSeconds > timeoutEnv) {
+      session.state = StateStep.START
+      await this.sendText(session.connectionId, 'TIMEOUT_PROCESS', session.lang)
+      this.logger.debug(`Session with ID ${session.id} has expired`)
+      await this.sendContextualMenu(session)
+      return await this.purgeUserData(session)
+    }
+    return session
   }
 }

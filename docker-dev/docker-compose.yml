@@ -47,6 +47,7 @@ services:
       - PUBLIC_BASE_URL=https://p2802.ovpndev.2060.io
       - DATASTORE_URL=https://p2804.ovpndev.2060.io
       - CREDENTIAL_NAME=Unic Id
+      - TIMEOUT_SESSION=20
       - LOG_LEVEL=3
 
   redis:
