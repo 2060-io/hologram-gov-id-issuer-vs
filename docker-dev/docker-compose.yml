@@ -2,9 +2,7 @@ version: '3'
 
 services:
   service-agent:
-    build: ../..
-    image: 2060-service-agent
-    container_name: chatbot-service-agent
+    image: io2060/2060-service-agent:dev
     restart: always
     networks:
       - chatbot
@@ -33,8 +31,6 @@ services:
     image: 2060-unic-id-dts
     container_name: unic-id-dts
     restart: always
-    depends_on:
-      - service-agent
     networks:
       - chatbot
     ports:
@@ -49,8 +45,9 @@ services:
       - VISION_URL=https://vision.dev.2060.io
       - WEBRTC_URL=https://dts-webrtc.dev.2060.io
       - PUBLIC_BASE_URL=https://p2802.ovpndev.2060.io
-      - DATASTORE_URL=
+      - DATASTORE_URL=https://p2804.ovpndev.2060.io
       - CREDENTIAL_NAME=Unic Id
+      - LOG_LEVEL=3
 
   redis:
     image: redis:alpine
@@ -71,5 +68,25 @@ services:
     environment:
       - POSTGRES_PASSWORD=2060demo
       - POSTGRES_USER=gaia
+
+  datastore:
+    image: io2060/2060-datastore:main
+    user: root
+    ports:
+       - "2804:2604"
+    restart: unless-stopped
+    networks:
+      - chatbot
+    environment:
+    - DEBUG=1
+    - QUARKUS_HTTP_PORT=2604
+    - IO_TWENTYSIXTY_DATASTORE_TMP_DIR=/tmp/data/tmp
+    - IO_TWENTYSIXTY_DATASTORE_TMP_LIFETIMEDAYS=5
+    - IO_TWENTYSIXTY_DATASTORE_REPO_LIFETIMEDAYS=43800
+    - IO_TWENTYSIXTY_DATASTORE_REPO_FS_DIR=/tmp/data/repo
+    - IO_TWENTYSIXTY_DATASTORE_MEDIA_MAXCHUNKS=128
+    volumes:
+       - /tmp/data:/tmp/data
+  
 networks:
   chatbot:
