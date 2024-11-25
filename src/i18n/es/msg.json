@@ -8,6 +8,10 @@
   "EMRTD_SUCCESSFULL":"Documento de identidad leído con éxito.",
   "ROOT_TITTLE": "Menú Contextual",
   "ABORT_PROCESS": "Verificación de identidad cancelada. Revisa el menú superior para iniciar una nueva verificación de identidad.",
+  "CREDENTIAL_OFFER": "Felicidades! Aquí está tu credencial de UnicID.",
+  "CREDENTIAL_ACCEPTED": "Guarda tu credencial en tu Billetera para que puedas presentarla a terceros.",
+  "NEW_CREDENTIAL": "En cualquier momento, revisa el menú de arriba para iniciar una nueva verificación de identidad.",
+  "CREDENTIAL_REJECTED": "Lamentamos que no quieras recibir tu credencial de UnicID.",
   "MENU_SELECT": {
     "PROMPT": {
       "VERIFICATION":"Reintentar?"

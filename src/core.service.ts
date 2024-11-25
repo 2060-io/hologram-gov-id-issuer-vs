@@ -85,15 +85,7 @@ export class CoreService implements EventHandler {
         content = JsonTransformer.fromJSON(message, EMrtdDataSubmitMessage)
         break
       case CredentialReceptionMessage.type:
-        inMsg = JsonTransformer.fromJSON(message, CredentialReceptionMessage)
-        switch (inMsg.state) {
-          case CredentialState.Done:
-            break
-          case CredentialState.Declined:
-            break
-          default:
-            break
-        }
+        content = JsonTransformer.fromJSON(message, CredentialReceptionMessage)
         break
       default:
         break
@@ -170,8 +162,7 @@ export class CoreService implements EventHandler {
       case StateStep.EMRTD:
       case StateStep.VERIFICATION:
         if (selectionId === Cmd.ABORT) {
-          session.state = StateStep.START
-          await this.sendText(session.connectionId, 'ABORT_PROCESS', session.lang)
+          session = await this.abortFlow(session)
         }
         break
       default:
@@ -214,11 +205,28 @@ export class CoreService implements EventHandler {
         }
         break
       case StateStep.VERIFICATION:
-        if (content === "success") {
+        if (content === 'success') {
           session.state = StateStep.ISSUE
           await this.sendCredentialData(session)
         }
-        if (content === "failure") await this.sendMenuSelection(session)
+        if (content === 'failure') await this.sendMenuSelection(session)
+        break
+      case StateStep.ISSUE:
+        if (content instanceof CredentialReceptionMessage) {
+          switch (content.state) {
+            case CredentialState.Done:
+              await this.sendText(session.connectionId, 'CREDENTIAL_ACCEPTED', session.lang)
+              session = await this.purgeUserData(session)
+              await this.sendText(session.connectionId, 'NEW_CREDENTIAL', session.lang)
+              await this.sendContextualMenu(session)
+            case CredentialState.Declined:
+              await this.sendText(session.connectionId, 'CREDENTIAL_REJECTED', session.lang)
+              session = await this.abortFlow(session)
+              break
+            default:
+              break
+          }
+        }
         break
       default:
         break
@@ -232,6 +240,7 @@ export class CoreService implements EventHandler {
         if (id === MenuSelectEnum.CONFIRM_YES_VALUE) session = await this.startVideoCall(session)
         if (id === MenuSelectEnum.CONFIRM_NO_VALUE) {
           session.state = StateStep.START
+          session = await this.abortFlow(session)
         }
         break
       default:
@@ -385,6 +394,7 @@ export class CoreService implements EventHandler {
       )
     }
 
+    await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
     const credentialId = (await this.apiClient.credentialTypes.getAll())[0].id
     await this.apiClient.messages.send(
       new CredentialIssuanceMessage({
@@ -443,13 +453,12 @@ export class CoreService implements EventHandler {
       const base64Data = session.credential_metadata.facePhoto.split(',')[1]
       const binaryData = Buffer.from(base64Data, 'base64')
       const formData = new FormData()
-      const blob = new Blob([binaryData], {type: 'application/octet-stream'});
-      formData.append('chunk', blob);
+      const blob = new Blob([binaryData], { type: 'application/octet-stream' })
+      formData.append('chunk', blob)
 
       const uploadResponse = await fetch(`${process.env.DATASTORE_URL}/u/${session.id}/0?token=null`, {
         method: 'PUT',
-        headers: {
-        },
+        headers: {},
         body: formData,
       })
       if (!uploadResponse.ok) {
@@ -464,5 +473,22 @@ export class CoreService implements EventHandler {
       this.logger.error(`sendDataStore: Canon't save data - ${error}`)
     }
     return session
+  }
+
+  // Special flows
+  private async purgeUserData(session): Promise<SessionEntity> {
+    session.state = StateStep.START
+    session.userAgent = null
+    session.tp = null
+    session.nfcSupport = null
+    session.credential_metadata = null
+    return await this.sessionRepository.save(session)
+  }
+
+  private async abortFlow(session: SessionEntity): Promise<SessionEntity> {
+    session.state = StateStep.START
+    await this.sendText(session.connectionId, 'ABORT_PROCESS', session.lang)
+    await this.sendContextualMenu(session)
+    return await this.purgeUserData(session)
   }
 }

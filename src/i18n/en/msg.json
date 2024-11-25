@@ -8,6 +8,10 @@
   "EMRTD_SUCCESSFULL":"ID Document successfully read.",
   "ROOT_TITTLE": "Context Menu",
   "ABORT_PROCESS": "ID Verification Aborted. Check menu above to start a new ID Verification.",
+  "CREDENTIAL_OFFER": "Congratulations! Here is your UnicID Credential.",
+  "CREDENTIAL_ACCEPTED": "Save your credential to your Wallet so that you can present it to third parties!",
+  "NEW_CREDENTIAL": "At any time, check the menu above to start a new ID Verification.",
+  "CREDENTIAL_REJECTED": "Sad to see you do not want to receive your UnicID credential.",
   "MENU_SELECT": {
     "PROMPT": {
       "VERIFICATION":"Retry?"
