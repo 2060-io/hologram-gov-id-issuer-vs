@@ -20,8 +20,8 @@ export class VisionService {
     })
     if (!session) throw new Error('Unrecognized token.')
 
-    const medias: string[] = []
-    this.logger.log(`listMedias: token: ${sessionId}`)
+    const medias: string[] = [sessionId]
+    this.logger.log(`listMedias: token: ${medias}`)
     return medias
   }
 
@@ -40,6 +40,7 @@ export class VisionService {
     })
     if (!session) throw new Error('Unrecognized token.')
 
+    this.logger.debug(`vision failure with id: ${sessionId}, sending retry...`)
     await this.coreService.sendMenuSelection(session)
   }
 }

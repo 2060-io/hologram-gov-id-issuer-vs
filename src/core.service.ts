@@ -215,7 +215,7 @@ export class CoreService implements EventHandler {
       default:
         break
     }
-    return session
+    return await this.sessionRepository.save(session)
   }
 
   async handleMenuselection(id: string, session: SessionEntity): Promise<SessionEntity> {
@@ -247,7 +247,7 @@ export class CoreService implements EventHandler {
       await this.sessionRepository.save(session)
       this.logger.log('New session: ' + JSON.stringify(session))
     }
-    return session
+    return await this.sessionRepository.save(session)
   }
 
   async sendMenuSelection(session: SessionEntity): Promise<SessionEntity> {
@@ -279,7 +279,7 @@ export class CoreService implements EventHandler {
         menuItems: updatedMenuItems,
       }),
     )
-    return session
+    return await this.sessionRepository.save(session)
   }
 
   private async sendText(connectionId: string, text: string, lang: string) {

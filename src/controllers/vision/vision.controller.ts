@@ -25,7 +25,7 @@ export class VisionController {
 
     try {
       const medias = await this.service.listMedias(token)
-      return { statusCode: HttpStatus.OK, data: medias }
+      return medias
     } catch (e) {
       this.logger.error(e.message, e.stack)
       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
