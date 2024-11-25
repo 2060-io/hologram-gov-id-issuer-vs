@@ -4,4 +4,5 @@ export enum StateStep {
   EMRTD,
   VERIFICATION,
   ISSUE,
+  TIMEOUT,
 }

@@ -172,6 +172,7 @@ export class CoreService implements EventHandler {
   }
 
   async handleStateInput(content: any, session: SessionEntity): Promise<SessionEntity> {
+    session = await this.timeoutSession(session)
     switch (session.state) {
       case StateStep.START:
         await this.sendText(session.connectionId, 'HELP', session.lang)
@@ -493,7 +494,7 @@ export class CoreService implements EventHandler {
   }
 
   private async timeoutSession(session: SessionEntity): Promise<SessionEntity> {
-    const timeoutEnv = Number(process.env.TIMEOUT_SESSION)
+    const timeoutEnv = Number(process.env.ID_VERIFICATION_TIMEOUT_SECONDS) || 900
     if (!session.updatedTs) {
       throw new Error('The session entity does not have a valid updatedTs value')
     }
@@ -502,7 +503,7 @@ export class CoreService implements EventHandler {
     const timeDifferenceInSeconds = Math.floor((now.getTime() - updatedTime.getTime()) / 1000)
 
     if (timeoutEnv && timeDifferenceInSeconds > timeoutEnv) {
-      session.state = StateStep.START
+      session.state = StateStep.TIMEOUT
       await this.sendText(session.connectionId, 'TIMEOUT_PROCESS', session.lang)
       this.logger.debug(`Session with ID ${session.id} has expired`)
       await this.sendContextualMenu(session)
