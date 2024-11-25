@@ -23,9 +23,9 @@ import {
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 import { EventHandler } from '@2060.io/service-agent-nestjs-client'
 import { Injectable, Logger } from '@nestjs/common'
-import { PeerRegistry, SessionEntity } from '@/models'
-import { CredentialState, JsonTransformer, utils } from '@credo-ts/core'
-import { Cmd, MenuSelectEnum, PeerType, StateStep } from '@/common'
+import { CredentialEntity, PeerEntity, SessionEntity } from '@/models'
+import { CredentialState, JsonTransformer, Sha256, utils } from '@credo-ts/core'
+import { Cmd, formatBirthDate, MenuSelectEnum, PeerType, StateStep } from '@/common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { I18nService } from 'nestjs-i18n'
@@ -40,8 +40,10 @@ export class CoreService implements EventHandler {
   constructor(
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
-    @InjectRepository(PeerRegistry)
-    private readonly peerRepository: Repository<PeerRegistry>,
+    @InjectRepository(PeerEntity)
+    private readonly peerRepository: Repository<PeerEntity>,
+    @InjectRepository(CredentialEntity)
+    private readonly credentialRepository: Repository<CredentialEntity>,
     private readonly i18n: I18nService,
   ) {
     const baseUrl = process.env.SERVICE_AGENT_ADMIN_BASE_URL || ''
@@ -54,6 +56,8 @@ export class CoreService implements EventHandler {
     let inMsg = null
     let session: SessionEntity = null
 
+    this.logger.debug('inputMessage: ' + JSON.stringify(message))
+
     session = await this.handleSession(message.connectionId)
 
     switch (message.type) {
@@ -65,8 +69,8 @@ export class CoreService implements EventHandler {
         await this.handleContextualAction(inMsg.selectionId, session)
         break
       case MenuSelectMessage.type:
-        inMsg = JsonTransformer.fromJSON(message, MenuSelectMessage)
-        session = await this.handleMenuselection(inMsg.menuItems[0].id, session)
+        inMsg = message as MenuSelectMessage
+        session = await this.handleMenuselection(inMsg.menuItems?.[0]?.id, session)
         break
       case MediaMessage.type:
         inMsg = JsonTransformer.fromJSON(message, MediaMessage)
@@ -91,14 +95,10 @@ export class CoreService implements EventHandler {
         break
     }
 
-    // Contextual menu updated
-    await this.sendContextualMenu(session)
-
     if (content != null) {
       if (typeof content === 'string') content = content.trim()
       if (content.length === 0) content = null
     }
-    if (content == null) return
 
     await this.handleStateInput(content, session)
   }
@@ -107,6 +107,11 @@ export class CoreService implements EventHandler {
     const session = await this.handleSession(event.connectionId)
     await this.sendContextualMenu(session)
     await this.sendCredentialType()
+  }
+
+  async closeConnection(event: ConnectionStateUpdated): Promise<void> {
+    const session = await this.handleSession(event.connectionId)
+    await this.purgeUserData(session)
   }
 
   private async welcomeMessage(connectionId: string) {
@@ -175,7 +180,7 @@ export class CoreService implements EventHandler {
     session = await this.timeoutSession(session)
     switch (session.state) {
       case StateStep.START:
-        await this.sendText(session.connectionId, 'HELP', session.lang)
+        if (content !== null) await this.sendText(session.connectionId, 'HELP', session.lang)
         break
       case StateStep.MRZ:
         if (content instanceof MrzDataSubmitMessage) {
@@ -188,7 +193,7 @@ export class CoreService implements EventHandler {
         if (content instanceof EMrtdDataSubmitMessage) {
           await this.sendText(session.connectionId, 'EMRTD_SUCCESSFULL', session.lang)
           session.state = StateStep.VERIFICATION
-          session.credential_metadata = {
+          session.credentialMetadata = {
             documentType: content.dataGroups.processed.documentType ?? null,
             documentNumber: content.dataGroups.processed.documentNumber ?? null,
             issuingState: content.dataGroups.processed.issuingState ?? null,
@@ -196,7 +201,7 @@ export class CoreService implements EventHandler {
             lastName: content.dataGroups.processed.lastName ?? null,
             sex: content.dataGroups.processed.sex ?? null,
             nationality: content.dataGroups.processed.nationality ?? null,
-            birthDate: content.dataGroups.processed.dateOfBirth ?? null,
+            birthDate: formatBirthDate(content.dataGroups.processed.dateOfBirth) ?? null,
             issuanceDate: content.dataGroups.processed.issuingState ?? null, // TODO: review
             expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
             facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
@@ -209,8 +214,7 @@ export class CoreService implements EventHandler {
         if (content === 'success') {
           session.state = StateStep.ISSUE
           await this.sendCredentialData(session)
-        }
-        if (content === 'failure') await this.sendMenuSelection(session)
+        } else if (content === 'failure') await this.sendMenuSelection(session)
         break
       case StateStep.ISSUE:
         if (content instanceof CredentialReceptionMessage) {
@@ -219,7 +223,7 @@ export class CoreService implements EventHandler {
               await this.sendText(session.connectionId, 'CREDENTIAL_ACCEPTED', session.lang)
               session = await this.purgeUserData(session)
               await this.sendText(session.connectionId, 'NEW_CREDENTIAL', session.lang)
-              await this.sendContextualMenu(session)
+              break
             case CredentialState.Declined:
               await this.sendText(session.connectionId, 'CREDENTIAL_REJECTED', session.lang)
               session = await this.abortVerification(session)
@@ -232,7 +236,7 @@ export class CoreService implements EventHandler {
       default:
         break
     }
-    return await this.sessionRepository.save(session)
+    return await this.sendContextualMenu(session)
   }
 
   async handleMenuselection(id: string, session: SessionEntity): Promise<SessionEntity> {
@@ -254,7 +258,7 @@ export class CoreService implements EventHandler {
     let session = await this.sessionRepository.findOneBy({
       connectionId: connectionId,
     })
-    this.logger.log('inputMessage session: ' + JSON.stringify(session))
+    this.logger.debug('handleSession session: ' + JSON.stringify(session))
 
     if (!session) {
       session = this.sessionRepository.create({
@@ -263,9 +267,39 @@ export class CoreService implements EventHandler {
       })
 
       await this.sessionRepository.save(session)
-      this.logger.log('New session: ' + JSON.stringify(session))
+      this.logger.debug('New session: ' + JSON.stringify(session))
     }
     return await this.sessionRepository.save(session)
+  }
+
+  private async handleCredential(session: SessionEntity) {
+    // encrypt credential
+    const hashString =
+      session.credentialMetadata.birthDate +
+      session.credentialMetadata.nationality +
+      session.credentialMetadata.documentNumber
+    const encrypt = new Sha256().hash(hashString)
+
+    let credential = await this.credentialRepository.findOneBy({
+      hash: Buffer.from(encrypt),
+    })
+    this.logger.debug('handleCredential session: ' + JSON.stringify(credential))
+
+    if (credential) {
+      await this.credentialRepository.remove(credential)
+      this.logger.debug('Existing credential removed: ' + JSON.stringify(credential))
+    }
+
+    if (!credential) {
+      credential = this.credentialRepository.create({
+        connectionId: session.connectionId,
+        hash: Buffer.from(encrypt),
+        revocationId: utils.uuid(),
+      })
+
+      await this.credentialRepository.save(credential)
+      this.logger.debug('New credential: ' + JSON.stringify(credential))
+    }
   }
 
   private async sendMenuSelection(session: SessionEntity): Promise<SessionEntity> {
@@ -340,7 +374,7 @@ export class CoreService implements EventHandler {
     return await this.sessionRepository.save(session)
   }
 
-  private async sendContextualMenu(session: SessionEntity) {
+  private async sendContextualMenu(session: SessionEntity): Promise<SessionEntity> {
     const item: ContextualMenuItem[] = []
     switch (session.state) {
       case StateStep.START:
@@ -373,13 +407,14 @@ export class CoreService implements EventHandler {
         timestamp: new Date(),
       }),
     )
+    return await this.sessionRepository.save(session)
   }
 
   private async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
     const claims: Claim[] = []
 
-    if (session.credential_metadata) {
-      Object.entries(session.credential_metadata).forEach(([key, value]) => {
+    if (session.credentialMetadata) {
+      Object.entries(session.credentialMetadata).forEach(([key, value]) => {
         claims.push(
           new Claim({
             name: key,
@@ -394,6 +429,9 @@ export class CoreService implements EventHandler {
         }),
       )
     }
+
+    // Generate credential and delete if it exists
+    await this.handleCredential(session)
 
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
     const credentialId = (await this.apiClient.credentialTypes.getAll())[0].id
@@ -433,6 +471,7 @@ export class CoreService implements EventHandler {
         ],
       })
     }
+    // new Sha256().hash()
   }
 
   private async sendDataStore(session: SessionEntity): Promise<SessionEntity> {
@@ -451,7 +490,7 @@ export class CoreService implements EventHandler {
       }
 
       // Upload registry on data store
-      const base64Data = session.credential_metadata.facePhoto.split(',')[1]
+      const base64Data = session.credentialMetadata.facePhoto.split(',')[1]
       const binaryData = Buffer.from(base64Data, 'base64')
       const formData = new FormData()
       const blob = new Blob([binaryData], { type: 'application/octet-stream' })
@@ -482,14 +521,13 @@ export class CoreService implements EventHandler {
     session.userAgent = null
     session.tp = null
     session.nfcSupport = null
-    session.credential_metadata = null
+    session.credentialMetadata = null
     return await this.sessionRepository.save(session)
   }
 
   private async abortVerification(session: SessionEntity): Promise<SessionEntity> {
     session.state = StateStep.START
     await this.sendText(session.connectionId, 'ABORT_PROCESS', session.lang)
-    await this.sendContextualMenu(session)
     return await this.purgeUserData(session)
   }
 
@@ -506,7 +544,6 @@ export class CoreService implements EventHandler {
       session.state = StateStep.TIMEOUT
       await this.sendText(session.connectionId, 'TIMEOUT_PROCESS', session.lang)
       this.logger.debug(`Session with ID ${session.id} has expired`)
-      await this.sendContextualMenu(session)
       return await this.purgeUserData(session)
     }
     return session
