@@ -6,14 +6,14 @@ import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } fro
 import * as path from 'path'
 import { ConnectionsEventModule, MessageEventModule } from '@2060.io/service-agent-nestjs-client'
 import { ApiVersion } from '@2060.io/service-agent-client'
-import { VisionModule, WebrtcModule } from '@/controllers'
+import { VisionModule, WebRtcModule } from '@/controllers'
 import { CoreModule } from '@/core.module'
 
 @Module({
   imports: [
     CoreModule,
     VisionModule,
-    WebrtcModule,
+    WebRtcModule,
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {

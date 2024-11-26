@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common'
-import { CredentialEntity, PeerEntity, SessionEntity } from '@/models'
+import { CredentialEntity, WebRtcPeerEntity, SessionEntity } from '@/models'
 import { CoreService } from '@/core.service'
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm'
 import { ConnectionEntity } from '@2060.io/service-agent-nestjs-client'
@@ -20,10 +20,10 @@ const defaultOptions = {
 @Global()
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ConnectionEntity, CredentialEntity, PeerEntity, SessionEntity]),
+    TypeOrmModule.forFeature([ConnectionEntity, CredentialEntity, WebRtcPeerEntity, SessionEntity]),
     TypeOrmModule.forRoot({
       ...defaultOptions,
-      entities: [ConnectionEntity, CredentialEntity, PeerEntity, SessionEntity],
+      entities: [ConnectionEntity, CredentialEntity, WebRtcPeerEntity, SessionEntity],
     }),
   ],
   controllers: [],

@@ -6,4 +6,4 @@ import { WebrtcService } from './webrtc.service'
   controllers: [WebrtcController],
   providers: [WebrtcService],
 })
-export class WebrtcModule {}
+export class WebRtcModule {}

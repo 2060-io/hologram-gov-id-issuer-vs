@@ -23,7 +23,7 @@ import {
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 import { EventHandler } from '@2060.io/service-agent-nestjs-client'
 import { Injectable, Logger } from '@nestjs/common'
-import { CredentialEntity, PeerEntity, SessionEntity } from '@/models'
+import { CredentialEntity, WebRtcPeerEntity, SessionEntity } from '@/models'
 import { CredentialState, JsonTransformer, Sha256, utils } from '@credo-ts/core'
 import { Cmd, formatBirthDate, MenuSelectEnum, PeerType, StateStep } from '@/common'
 import { Repository } from 'typeorm'
@@ -40,8 +40,8 @@ export class CoreService implements EventHandler {
   constructor(
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
-    @InjectRepository(PeerEntity)
-    private readonly peerRepository: Repository<PeerEntity>,
+    @InjectRepository(WebRtcPeerEntity)
+    private readonly peerRepository: Repository<WebRtcPeerEntity>,
     @InjectRepository(CredentialEntity)
     private readonly credentialRepository: Repository<CredentialEntity>,
     private readonly i18n: I18nService,
@@ -56,50 +56,53 @@ export class CoreService implements EventHandler {
     let inMsg = null
     let session: SessionEntity = null
 
-    this.logger.debug('inputMessage: ' + JSON.stringify(message))
+    try {
+      this.logger.debug('inputMessage: ' + JSON.stringify(message))
 
-    session = await this.handleSession(message.connectionId)
+      session = await this.handleSession(message.connectionId)
 
-    switch (message.type) {
-      case TextMessage.type:
-        content = JsonTransformer.fromJSON(message, TextMessage)
-        break
-      case ContextualMenuSelectMessage.type:
-        inMsg = JsonTransformer.fromJSON(message, ContextualMenuSelectMessage)
-        await this.handleContextualAction(inMsg.selectionId, session)
-        break
-      case MenuSelectMessage.type:
-        inMsg = message as MenuSelectMessage
-        session = await this.handleMenuselection(inMsg.menuItems?.[0]?.id, session)
-        break
-      case MediaMessage.type:
-        inMsg = JsonTransformer.fromJSON(message, MediaMessage)
-        content = 'media'
-        break
-      case ProfileMessage.type:
-        inMsg = JsonTransformer.fromJSON(message, ProfileMessage)
-        session.lang = inMsg.preferredLanguage
-        await this.welcomeMessage(session.connectionId)
-        session = await this.sendMrzRequest(session)
-        break
-      case MrzDataSubmitMessage.type:
-        content = JsonTransformer.fromJSON(message, MrzDataSubmitMessage)
-        break
-      case EMrtdDataSubmitMessage.type:
-        content = JsonTransformer.fromJSON(message, EMrtdDataSubmitMessage)
-        break
-      case CredentialReceptionMessage.type:
-        content = JsonTransformer.fromJSON(message, CredentialReceptionMessage)
-        break
-      default:
-        break
+      switch (message.type) {
+        case TextMessage.type:
+          content = JsonTransformer.fromJSON(message, TextMessage)
+          break
+        case ContextualMenuSelectMessage.type:
+          inMsg = JsonTransformer.fromJSON(message, ContextualMenuSelectMessage)
+          await this.handleContextualAction(inMsg.selectionId, session)
+          break
+        case MenuSelectMessage.type:
+          inMsg = message as MenuSelectMessage
+          session = await this.handleMenuselection(inMsg.menuItems?.[0]?.id, session)
+          break
+        case MediaMessage.type:
+          inMsg = JsonTransformer.fromJSON(message, MediaMessage)
+          content = 'media'
+          break
+        case ProfileMessage.type:
+          inMsg = JsonTransformer.fromJSON(message, ProfileMessage)
+          session.lang = inMsg.preferredLanguage
+          await this.welcomeMessage(session.connectionId)
+          session = await this.sendMrzRequest(session)
+          break
+        case MrzDataSubmitMessage.type:
+          content = JsonTransformer.fromJSON(message, MrzDataSubmitMessage)
+          break
+        case EMrtdDataSubmitMessage.type:
+          content = JsonTransformer.fromJSON(message, EMrtdDataSubmitMessage)
+          break
+        case CredentialReceptionMessage.type:
+          content = JsonTransformer.fromJSON(message, CredentialReceptionMessage)
+          break
+        default:
+          break
+      }
+
+      if (content != null) {
+        if (typeof content === 'string') content = content.trim()
+        if (content.length === 0) content = null
+      }
+    } catch (error) {
+      this.logger.error(`inputMessage: ${error}`)
     }
-
-    if (content != null) {
-      if (typeof content === 'string') content = content.trim()
-      if (content.length === 0) content = null
-    }
-
     await this.handleStateInput(content, session)
   }
 
@@ -177,66 +180,75 @@ export class CoreService implements EventHandler {
   }
 
   async handleStateInput(content: any, session: SessionEntity): Promise<SessionEntity> {
-    session = await this.timeoutSession(session)
-    switch (session.state) {
-      case StateStep.START:
-        if (content !== null) await this.sendText(session.connectionId, 'HELP', session.lang)
-        break
-      case StateStep.MRZ:
-        if (content instanceof MrzDataSubmitMessage) {
-          await this.sendText(session.connectionId, 'MRZ_SUCCESSFULL', session.lang)
-          session = await this.sendEMrtdRequest(session, content.threadId)
-          // TODO: is a MRZ valid?
-        }
-        break
-      case StateStep.EMRTD:
-        if (content instanceof EMrtdDataSubmitMessage) {
-          await this.sendText(session.connectionId, 'EMRTD_SUCCESSFULL', session.lang)
-          session.state = StateStep.VERIFICATION
-          session.credentialMetadata = {
-            documentType: content.dataGroups.processed.documentType ?? null,
-            documentNumber: content.dataGroups.processed.documentNumber ?? null,
-            issuingState: content.dataGroups.processed.issuingState ?? null,
-            firstName: content.dataGroups.processed.firstName ?? null,
-            lastName: content.dataGroups.processed.lastName ?? null,
-            sex: content.dataGroups.processed.sex ?? null,
-            nationality: content.dataGroups.processed.nationality ?? null,
-            birthDate: formatBirthDate(content.dataGroups.processed.dateOfBirth) ?? null,
-            issuanceDate: content.dataGroups.processed.issuingState ?? null, // TODO: review
-            expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
-            facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
+    try {
+      session = await this.timeoutSession(session)
+      switch (session.state) {
+        case StateStep.START:
+          if (content !== null) await this.sendText(session.connectionId, 'HELP', session.lang)
+          break
+        case StateStep.MRZ:
+          if (content instanceof MrzDataSubmitMessage) {
+            await this.sendText(session.connectionId, 'MRZ_SUCCESSFULL', session.lang)
+            session = await this.sendEMrtdRequest(session, content.threadId)
+            session.credentialMetadata = {
+              ...session.credentialMetadata,
+              mrzData: content.mrzData.raw,
+            }
+            // TODO: is a MRZ valid?
           }
-          session = await this.sendDataStore(session)
-          session = await this.startVideoCall(session)
-        }
-        break
-      case StateStep.VERIFICATION:
-        if (content === 'success') {
-          session.state = StateStep.ISSUE
-          await this.sendCredentialData(session)
-        } else if (content === 'failure') await this.sendMenuSelection(session)
-        break
-      case StateStep.ISSUE:
-        if (content instanceof CredentialReceptionMessage) {
-          // Generate credential and delete if it exists
-          await this.handleCredential(session)
-          switch (content.state) {
-            case CredentialState.Done:
-              await this.sendText(session.connectionId, 'CREDENTIAL_ACCEPTED', session.lang)
-              session = await this.purgeUserData(session)
-              await this.sendText(session.connectionId, 'NEW_CREDENTIAL', session.lang)
-              break
-            case CredentialState.Declined:
-              await this.sendText(session.connectionId, 'CREDENTIAL_REJECTED', session.lang)
-              session = await this.abortVerification(session)
-              break
-            default:
-              break
+          break
+        case StateStep.EMRTD:
+          if (content instanceof EMrtdDataSubmitMessage) {
+            await this.sendText(session.connectionId, 'EMRTD_SUCCESSFULL', session.lang)
+            session.state = StateStep.VERIFICATION
+            session.credentialMetadata = {
+              ...session.credentialMetadata,
+              documentType: content.dataGroups.processed.documentType ?? null,
+              documentNumber: content.dataGroups.processed.documentNumber ?? null,
+              issuingState: content.dataGroups.processed.issuingState ?? null,
+              firstName: content.dataGroups.processed.firstName ?? null,
+              lastName: content.dataGroups.processed.lastName ?? null,
+              sex: content.dataGroups.processed.sex ?? null,
+              nationality: content.dataGroups.processed.nationality ?? null,
+              birthDate: formatBirthDate(content.dataGroups.processed.dateOfBirth) ?? null,
+              issuanceDate: content.dataGroups.processed.issuingState ?? null, // TODO: review
+              expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
+              facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
+            }
+            session = await this.sendDataStore(session)
+            session = await this.startVideoCall(session)
           }
-        }
-        break
-      default:
-        break
+          break
+        case StateStep.VERIFICATION:
+          if (content === 'success') {
+            session.state = StateStep.ISSUE
+            await this.sendCredentialData(session)
+          } else if (content === 'failure') await this.sendMenuSelection(session)
+          break
+        case StateStep.ISSUE:
+          if (content instanceof CredentialReceptionMessage) {
+            // Generate credential and delete if it exists
+            await this.handleCredential(session)
+            switch (content.state) {
+              case CredentialState.Done:
+                await this.sendText(session.connectionId, 'CREDENTIAL_ACCEPTED', session.lang)
+                session = await this.purgeUserData(session)
+                await this.sendText(session.connectionId, 'NEW_CREDENTIAL', session.lang)
+                break
+              case CredentialState.Declined:
+                await this.sendText(session.connectionId, 'CREDENTIAL_REJECTED', session.lang)
+                session = await this.abortVerification(session)
+                break
+              default:
+                break
+            }
+          }
+          break
+        default:
+          break
+      }
+    } catch (error) {
+      this.logger.error('handleStateInput: ' + error)
     }
     return await this.sendContextualMenu(session)
   }
@@ -276,10 +288,7 @@ export class CoreService implements EventHandler {
 
   private async handleCredential(session: SessionEntity) {
     // encrypt credential
-    const hashString =
-      session.credentialMetadata.birthDate +
-      session.credentialMetadata.nationality +
-      session.credentialMetadata.documentNumber // TODO: review hash is better with mrz
+    const hashString = session.credentialMetadata.mrzData
     const encrypt = new Sha256().hash(hashString)
 
     let credential = await this.credentialRepository.findOneBy({
@@ -417,12 +426,14 @@ export class CoreService implements EventHandler {
 
     if (session.credentialMetadata) {
       Object.entries(session.credentialMetadata).forEach(([key, value]) => {
-        claims.push(
-          new Claim({
-            name: key,
-            value: value ?? null,
-          }),
-        )
+        if (key !== 'mrzData') {
+          claims.push(
+            new Claim({
+              name: key,
+              value: value ?? null,
+            }),
+          )
+        }
       })
       claims.push(
         new Claim({

@@ -1,8 +1,8 @@
 import { EventNotificationType, PeerType } from '@/common'
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm'
 
-@Entity('peer_registry')
-export class PeerEntity {
+@Entity('webrtc_peer')
+export class WebRtcPeerEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { PeerType } from '@/common'
-import { PeerEntity, SessionEntity } from '@/models'
+import { WebRtcPeerEntity, SessionEntity } from '@/models'
 import { InjectRepository } from '@nestjs/typeorm'
 import { JoinCallRequest, NotificationRequest } from '@/dto'
 import { Repository } from 'typeorm'
@@ -12,21 +12,21 @@ export class WebrtcService {
   private readonly logger = new Logger(WebrtcService.name)
 
   constructor(
-    @InjectRepository(PeerEntity)
-    private readonly peerRepository: Repository<PeerEntity>,
+    @InjectRepository(WebRtcPeerEntity)
+    private readonly peerRepository: Repository<WebRtcPeerEntity>,
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
   ) {}
 
   async joinCall(notificationRequest: NotificationRequest): Promise<void> {
-    const peer = await this.updatePeerEntity(notificationRequest)
+    const peer = await this.updateWebRtcPeerEntity(notificationRequest)
 
     if (peer.type === PeerType.PEER_USER) {
       const session = await this.sessionRepository.findOneBy({
         connectionId: peer.connectionId,
       })
 
-      const crv = new PeerEntity()
+      const crv = new WebRtcPeerEntity()
       const peerId = utils.uuid()
       crv.id = peerId
       crv.connectionId = null
@@ -54,10 +54,10 @@ export class WebrtcService {
   }
 
   async leaveCall(notificationRequest: NotificationRequest): Promise<void> {
-    await this.updatePeerEntity(notificationRequest)
+    await this.updateWebRtcPeerEntity(notificationRequest)
   }
 
-  async updatePeerEntity(notificationRequest: NotificationRequest): Promise<PeerEntity> {
+  async updateWebRtcPeerEntity(notificationRequest: NotificationRequest): Promise<WebRtcPeerEntity> {
     const peer = await this.peerRepository.findOneBy({ id: notificationRequest.peerId })
     if (!peer) {
       throw new Error(`No call found for peerId: ${notificationRequest.peerId}`)

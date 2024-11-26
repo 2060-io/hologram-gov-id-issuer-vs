@@ -1,6 +1,5 @@
 FROM node:22 as base
 
-# AFJ specifc setup
 WORKDIR /www
 ENV RUN_MODE="docker"
 
