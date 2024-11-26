@@ -2,8 +2,7 @@
 
 ![2060 logo](https://raw.githubusercontent.com/2060-io/.github/44bf28569fec0251a9367a9f6911adfa18a01a7c/profile/assets/2060_logo.svg)
 
-In this document, you will learn how to setup a development environment for working/modifying the citizen-registry backend.
-If you want to quickly deploy a clone or customize of one of the Citizen Registry demos, you'd better jump to the [kubernetes howto]() documentation.
+In this document, you will learn how to setup a development environment for working/modifying the unic-id backend.
 
 ## Setup a SSL port forwarding service
 
@@ -21,7 +20,7 @@ tunnels:
         schemes:
             - https
     backend:
-        addr: 2903
+        addr: 2902
         proto: http
         schemes:
             - https
@@ -37,7 +36,7 @@ region: us
 Then, start ngrok service:
 
 ```
-$ ngrok start
+$ ngrok start --config=ngrok-config.yml --all
 ngrok                                                                                                              (Ctrl+C to quit)
 
 Build better APIs with ngrok. Early access: ngrok.com/early-access
@@ -61,27 +60,12 @@ Copy the docker-compose-template file to docker.compose.yml and set your nrogk e
 version: '3.3'
 
 services:
-  artemis:
-    image: apache/activemq-artemis
-    ports:
-      - "8161:8161"
-      - "61616:61616"
-      - "5672:5672"
-    restart: unless-stopped
-    environment:
-      - ARTEMIS_USER=quarkus
-      - ARTEMIS_PASSWORD=Quar2060enbPi26
-    networks:
-       - chatbot
-    volumes:
-      - /tmp/citizen-registry/artemis/artemis-instance:/var/lib/artemis-instance
-
 # the service-agent is the container that will handle all the didcomm messaging.
 # Your backend will use it to send and receive messages, receive new connection notifications, issue credentials, verify credentials,...
 # Port 3000 provide an internal API for your backend and should only be visible by your backend. For details regarding the service agent API, go to http://localhost:3000 after having started the container.
 # Port 3001 must be publicly available through a https public URL. DIDComm messaging App will connect to this public endpoint.
   service-agent:
-    image: gitlab.mobiera.com:4567/2060/2060-service-agent:dev
+    image: io2060/2060-service-agent:dev
     networks:
       - chatbot
     ports:
@@ -98,12 +82,36 @@ services:
 # make sure an avatar.png image is present in src/main/resources/META-INF/resources of the backend project
       - AGENT_INVITATION_IMAGE_URL=https://p2903.testing.2060.io/avatar.png
 # set service-agent service name
-      - AGENT_NAME=Gaia Registry Service (mj)
+      - AGENT_NAME=Unic Id
       - USE_CORS=true
 # where to send the receive events: here replace p2903.testing.2060.io with the ngrok domain name that will forward to port 2903 (the backend project you will run locally)
       - EVENTS_BASE_URL=https://p2903.testing.2060.io
-    volumes:
-       - /tmp/citizen-registry/afj:/root/.afj
+  
+  unic-id-dts:
+    build: 
+      context: ../
+      dockerfile: Dockerfile
+    image: 2060-unic-id-dts
+    container_name: unic-id-dts
+    restart: always
+    networks:
+      - chatbot
+    ports:
+      - 2802:5000
+    environment:
+      - AGENT_PORT=5000
+      - SERVICE_AGENT_ADMIN_BASE_URL=http://service-agent:2800
+      - API_VERSION=v1
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=gaia
+      - POSTGRES_PASSWORD=2060demo
+      - VISION_URL=https://vision.dev.2060.io
+      - WEBRTC_URL=https://dts-webrtc.dev.2060.io
+      - PUBLIC_BASE_URL=<your backend ngrok url>
+      - DATASTORE_URL=<your datastore ngrok url>
+      - CREDENTIAL_NAME=Unic Id
+      - ID_VERIFICATION_TIMEOUT_SECONDS=900
+      - LOG_LEVEL=3
   
   postgres:
     image: postgres:15.2
@@ -115,8 +123,6 @@ services:
       - POSTGRES_PASSWORD=2060demo
       - POSTGRES_USER=gaia 
       - PGDATA=/var/lib/postgresql/data/pgdata
-    volumes:
-       - /tmp/citizen-registry/postgresql:/var/lib/postgresql/data
 
 # the datastore is the container that will store identity photos.
 # Normally it should not be exposed directly to a public URL, 
@@ -160,27 +166,11 @@ verify containers are started:
 $ docker ps
 CONTAINER ID   IMAGE                                                 COMMAND                  CREATED         STATUS         PORTS                                                                                                               NAMES
 8ed71159651b   io2060/2060-datastore:main                            "/usr/local/s2i/run"     3 seconds ago   Up 3 seconds   8080/tcp, 8443/tcp, 0.0.0.0:2904->2904/tcp, 8778/tcp                                                                docker-datastore-1
-ee0e59f83606   apache/activemq-artemis                               "/docker-run.sh run"     3 seconds ago   Up 3 seconds   1883/tcp, 0.0.0.0:5672->5672/tcp, 5445/tcp, 9404/tcp, 0.0.0.0:8161->8161/tcp, 61613/tcp, 0.0.0.0:61616->61616/tcp   docker-artemis-1
-100b146e717c   gitlab.mobiera.com:4567/2060/2060-service-agent:dev   "/bin/sh -c 'yarn st…"   3 seconds ago   Up 3 seconds   0.0.0.0:3000-3001->3000-3001/tcp                                                                                    docker-service-agent-1
+e5a115362594   2060-unic-id-dts                "docker-entrypoint.s…"   4 hours ago   Exited (137) 4 hours ago             unic-id-dts
+100b146e717c   io2060/2060-service-agent:dev   "/bin/sh -c 'yarn st…"   3 seconds ago   Up 3 seconds   0.0.0.0:3000-3001->3000-3001/tcp                                                                                    docker-service-agent-1
 12b7355f9b34   postgres:15.2                                         "docker-entrypoint.s…"   3 seconds ago   Up 3 seconds   0.0.0.0:5432->5432/tcp                                                                                              docker-postgres-1
 ```
 
-
-## Edit application.properties and start Quarkus backend
-
-edit src/main/resources/application.properties so that the vision service will know about your chatbot:
-
-```
-# here replace p3001.testing.2060.io with the ngrok domain name that will forward to port 2903 (the quarkus backend) 
-%dev.io.unicid.vision.redirdomain.q=p2603.testing.2060.io
-# here replace p3001.testing.2060.io with the ngrok domain name that will forward to port 2904 (the datastore container) 
-%dev.io.unicid.vision.redirdomain.d=p2604.testing.2060.io
-```
-start quarkus:
-
-```
-$ ./mvnw clean quarkus:dev
-```
 
 ### Scan the Agent QR Code with the Hologram App and start using your service
 
