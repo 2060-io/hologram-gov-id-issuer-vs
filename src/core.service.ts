@@ -218,6 +218,8 @@ export class CoreService implements EventHandler {
         break
       case StateStep.ISSUE:
         if (content instanceof CredentialReceptionMessage) {
+          // Generate credential and delete if it exists
+          await this.handleCredential(session)
           switch (content.state) {
             case CredentialState.Done:
               await this.sendText(session.connectionId, 'CREDENTIAL_ACCEPTED', session.lang)
@@ -277,13 +279,13 @@ export class CoreService implements EventHandler {
     const hashString =
       session.credentialMetadata.birthDate +
       session.credentialMetadata.nationality +
-      session.credentialMetadata.documentNumber
+      session.credentialMetadata.documentNumber // TODO: review hash is better with mrz
     const encrypt = new Sha256().hash(hashString)
 
     let credential = await this.credentialRepository.findOneBy({
       hash: Buffer.from(encrypt),
     })
-    this.logger.debug('handleCredential session: ' + JSON.stringify(credential))
+    this.logger.debug('handleCredential credential: ' + JSON.stringify(credential))
 
     if (credential) {
       await this.credentialRepository.remove(credential)
@@ -430,9 +432,6 @@ export class CoreService implements EventHandler {
       )
     }
 
-    // Generate credential and delete if it exists
-    await this.handleCredential(session)
-
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
     const credentialId = (await this.apiClient.credentialTypes.getAll())[0].id
     await this.apiClient.messages.send(
@@ -471,7 +470,6 @@ export class CoreService implements EventHandler {
         ],
       })
     }
-    // new Sha256().hash()
   }
 
   private async sendDataStore(session: SessionEntity): Promise<SessionEntity> {
