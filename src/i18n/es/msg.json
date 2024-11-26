@@ -1,0 +1,29 @@
+{
+  "WELCOME":"Bienvenido a UnicID!",
+  "HELP":"Acceder al menu contextual para ver las opciones disponibles.",
+  "MRZ_REQUEST":"Solo necesitamos unos pocos pasos para verificar tu documento de identificación.",
+  "EMRTD_REQUEST":"Por favor, ten listo tu Documento de Identidad o Pasaporte.\nAsegúrate de que sea compatible con la tecnología NFC.",
+  "FACE_REQUEST":"Ahora verificaremos tu rostro.",
+  "MRZ_SUCCESSFULL":"Documento de identidad leído con éxito. Felicitaciones, tu documento es compatible con UnicID.",
+  "EMRTD_SUCCESSFULL":"Documento de identidad leído con éxito.",
+  "ROOT_TITTLE": "Menú Contextual",
+  "TIMEOUT_PROCESS": "La verificación de identidad ha expirado. Revisa el menú de arriba para iniciar una nueva verificación de identidad.",
+  "ABORT_PROCESS": "Verificación de identidad cancelada. Revisa el menú superior para iniciar una nueva verificación de identidad.",
+  "CREDENTIAL_OFFER": "Felicidades! Aquí está tu credencial de UnicID.",
+  "CREDENTIAL_ACCEPTED": "Guarda tu credencial en tu Billetera para que puedas presentarla a terceros.",
+  "NEW_CREDENTIAL": "En cualquier momento, revisa el menú de arriba para iniciar una nueva verificación de identidad.",
+  "CREDENTIAL_REJECTED": "Lamentamos que no quieras recibir tu credencial de UnicID.",
+  "MENU_SELECT": {
+    "PROMPT": {
+      "VERIFICATION":"Reintentar?"
+    },
+    "OPTIONS": {
+      "YES":"Si",
+      "NO":"No"
+    }
+  },
+  "CMD": {
+    "CREATE":"Nueva Verificación de Identidad",
+    "ABORT":"Abortar verificación de Identidad"
+  }
+}

@@ -1,12 +1,9 @@
-version: '3.3'
+version: '3'
 
 services:
-# the service-agent is the container that will handle all the didcomm messaging.
-# Your backend will use it to send and receive messages, receive new connection notifications, issue credentials, verify credentials,...
-# Port 3000 provide an internal API for your backend and should only be visible by your backend. For details regarding the service agent API, go to http://localhost:3000 after having started the container.
-# Port 3001 must be publicly available through a https public URL. DIDComm messaging App will connect to this public endpoint.
   service-agent:
     image: io2060/2060-service-agent:dev
+    restart: always
     networks:
       - chatbot
     ports:
@@ -15,18 +12,44 @@ services:
     environment:
       - AGENT_PUBLIC_DID=did:web:p2801.ovpndev.2060.io
       - AGENT_ENDPOINT=wss://p2801.ovpndev.2060.io
-      - AGENT_INVITATION_IMAGE_URL=http://172.26.26.3:2903/avatar.png
-      - AGENT_LABEL=Unic id (dev)
+      - AGENT_INVITATION_IMAGE_URL=https://p2802.ovpndev.2060.io/avatar.png
+      - AGENT_LABEL=Chatbot demo dts
       - ANONCREDS_SERVICE_BASE_URL=https://p2801.ovpndev.2060.io
       - USE_CORS=true
-      - EVENTS_BASE_URL=http://172.26.26.3:2903
+      - EVENTS_BASE_URL=https://p2802.ovpndev.2060.io
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=gaia
       - POSTGRES_PASSWORD=2060demo
       - AGENT_WALLET_KEY_DERIVATION_METHOD=ARGON2I_INT
       - AGENT_INVITATION_BASE_URL=https://hologram.zone/
       - REDIS_HOST=redis
-  
+
+  unic-id-dts:
+    build: 
+      context: ../
+      dockerfile: Dockerfile
+    image: 2060-unic-id-dts
+    container_name: unic-id-dts
+    restart: always
+    networks:
+      - chatbot
+    ports:
+      - 2802:5000
+    environment:
+      - AGENT_PORT=5000
+      - SERVICE_AGENT_ADMIN_BASE_URL=https://p2800.ovpndev.2060.io
+      - API_VERSION=v1
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=gaia
+      - POSTGRES_PASSWORD=2060demo
+      - VISION_URL=https://vision.dev.2060.io
+      - WEBRTC_URL=https://dts-webrtc.dev.2060.io
+      - PUBLIC_BASE_URL=https://p2802.ovpndev.2060.io
+      - DATASTORE_URL=https://p2804.ovpndev.2060.io
+      - CREDENTIAL_NAME=Unic Id
+      - ID_VERIFICATION_TIMEOUT_SECONDS=900
+      - LOG_LEVEL=3
+
   redis:
     image: redis:alpine
     restart: always
@@ -35,30 +58,26 @@ services:
     ports:
       - 6379:6379
     command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru
-  
+
   postgres:
     image: postgres:15.2
+    restart: always
     networks:
       - chatbot
     ports:
       - 5432:5432
     environment:
       - POSTGRES_PASSWORD=2060demo
-      - POSTGRES_USER=gaia 
-    #   - PGDATA=/var/lib/postgresql/data/pgdata
-    # volumes:
-    #    - /tmp/citizen-registry/postgresql:/var/lib/postgresql/data
+      - POSTGRES_USER=gaia
 
-# the datastore is the container that will store identity photos.
-# Normally it should not be exposed directly to a public URL, 
-# but for this demo, and for beeing able to use the face capture/face recognition service,
-# we will need it.
   datastore:
     image: io2060/2060-datastore:main
     user: root
     ports:
-       - "2604:2604"
+       - "2804:2604"
     restart: unless-stopped
+    networks:
+      - chatbot
     environment:
     - DEBUG=1
     - QUARKUS_HTTP_PORT=2604
@@ -69,13 +88,6 @@ services:
     - IO_TWENTYSIXTY_DATASTORE_MEDIA_MAXCHUNKS=128
     volumes:
        - /tmp/data:/tmp/data
-    networks:
-       - "chatbot"
-
-
+  
 networks:
   chatbot:
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.28.0.0/27
