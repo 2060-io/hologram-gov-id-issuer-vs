@@ -1,4 +1,4 @@
-# Government Citizen Registry - Verifiable ID Card
+# Government Unic Id - Verifiable ID Card
 
 ![2060 logo](https://raw.githubusercontent.com/2060-io/.github/44bf28569fec0251a9367a9f6911adfa18a01a7c/profile/assets/2060_logo.svg)
 
@@ -16,7 +16,7 @@ A conversational DIDComm service is probably **the most secure way of delivering
 
 In these demos, and because we are not connected to a true government database of citizens, you use the conversational service to create a fake digital Identity that you protect with your face biometrics. A corresponding Verifiable Credential of your Identity is issued to you.
 
-Then, as soon as you've got you Verifiable Credential, you can use it to identify yourself and access passwordless services such as the [biometric-authenticator]() demos.
+Then, as soon as you've got you Verifiable Credential, you can use it to identify yourself and access passwordless services such as the [unic-id](https://github.com/2060-io/unic.id-issuer-dts) demos.
 
 ## Device lost, app uninstalled?
 
@@ -34,11 +34,11 @@ Several use cases of Citizen Registries have been deployed for your convenience.
 
 ### Unicid Identity Registry
 
-a government-like registry service. Test URL: [https://gaiaid.io](https://gaiaid.io)
+a government-like registry service. Test URL: [https://unic-id-issuer.demos.dev.io](https://unic-id-issuer.demos.dev.2060.io)
 
 #### Scan the QR code
 
-![GaiaID](https://gaia.demos.2060.io/qr?size=300&bcolor=FFFFFF&balpha=1&fcolor=000000&falpha=1)
+![GaiaID](https://unic-id-issuer.demos.dev.2060.io/qr?size=300&bcolor=FFFFFF&balpha=1&fcolor=000000&falpha=1)
 
 #### Accept the Invitation
 <kbd>
@@ -77,19 +77,3 @@ Now you verify your face, just to be sure capture was OK.
 <img src="assets/IMG_7727.PNG" alt="invitation" style="height:500px; border: 1px solid #EEEEEE;"/>
 <img src="assets/IMG_7728.PNG" alt="invitation" style="height:500px; border: 1px solid #EEEEEE;"/>
 </kbd>
-
-### AvatarID Registry
-
-create your Avatar and protect it with your face biometrics. Test URL: [https://avatar.demos.2060.io/qr](https://avatar.demos.2060.io/qr)
-
-Service is similar to the GaiaID one.
-
-![AvatarID](https://avatar.demos.2060.io/qr?size=300&bcolor=FFFFFF&balpha=1&fcolor=000000&falpha=1)
-
-## Deploy your own demo for your country
-
-Go to the [kubernetes-howto](kubernetes/README.md) section.
-
-## Setting up a development environment
-
-Please refer to [these instructions](docker-dev/README.md).
