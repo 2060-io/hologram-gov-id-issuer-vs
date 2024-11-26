@@ -10,20 +10,30 @@ This application is a Decentralized Trust Service aimed to generate Verifiable C
       - [Call Event](#call-event)
           - [EventNotificationType](#eventnotificationtype)
     - [Vision Service](#vision-service)
-      - [Link Media](#link-media)
       - [List Media](#list-media)
       - [Success](#success)
       - [Failure](#failure)
 
 ## Initial Considerations
-To deploy the service locally, ensure that the variables in the application.properties file are configured as follows:
-```properties
-%dev.io.unicid.vision.redirdomain=https://<publicBaseUrl>
-%dev.io.unicid.registry.res.c.WebRtcResource/mp-rest/url=https://<publicWebRtcServiceUrl>/
-%dev.io.unicid.registry.res.c.VisionResource/mp-rest/url=https://<publicVisionServiceUrl>
-```
+To deploy the service locally, ensure that the environment variables in the application file are configured as follows:
 
-Once everything is set up correctly, you just need to navigate to the `docker-dev` folder and run the command to start Docker Compose. This will bring up all the necessary components that coexist with the project. Finally, you can test the project by running `mvn clean quarkus:dev` in the root folder.
+| **Variable**                   | **Description**                                | **default**                          |
+|--------------------------------|------------------------------------------------|--------------------------------------|
+| `AGENT_PORT`                   | The port on which the agent runs               | `5000`                               |
+| `SERVICE_AGENT_ADMIN_BASE_URL` | Base URL for the service agent admin API       | `http://localhost.com`      |
+| `API_VERSION`                  | API version used by the service                | `v1`                                 |
+| `POSTGRES_HOST`                | Hostname for the PostgreSQL database           | `postgres`                           |
+| `POSTGRES_USER`                | Username for the PostgreSQL database           | `gaia`                               |
+| `POSTGRES_PASSWORD`            | Password for the PostgreSQL database           | `password`                           |
+| `VISION_URL`                   | URL for the Vision Service                     | `http://localhost.com/`         |
+| `WEBRTC_URL`                   | URL for the WebRTC Service                     | `http://localhost.com/`     |
+| `PUBLIC_BASE_URL`              | Public-facing base URL for the service         | `http://localhost.com/`      |
+| `DATASTORE_URL`                | URL for the datastore service                  | `http://localhost.com/`      |
+| `CREDENTIAL_NAME`              | Name of the credential being issued            | `Unic Id`                            |
+| `ID_VERIFICATION_TIMEOUT_SECONDS` | Timeout for ID verification in seconds       | `900`                                |
+| `LOG_LEVEL`                    | Logging verbosity level (1-5)                  | `3`                                  |
+
+Once everything is set up correctly, you just need to navigate to the `docker-dev` folder and run the command to start Docker Compose. This will bring up all the necessary components that coexist with the project. 
 
 ## UnicId API
 
