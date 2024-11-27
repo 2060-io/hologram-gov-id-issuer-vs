@@ -1,16 +1,25 @@
-import { Body, Controller, HttpException, HttpStatus, Inject, Logger, Post } from '@nestjs/common'
+import { Body, Controller, HttpException, HttpStatus, Logger, Post } from '@nestjs/common'
 import { WebrtcService } from './webrtc.service'
 import { EventNotificationType } from '@/common'
 import { NotificationRequest } from '@/dto'
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 
+@ApiTags('WebRTC')
 @Controller()
 export class WebrtcController {
   private readonly logger = new Logger(WebrtcController.name)
 
-  @Inject(WebrtcService)
-  private readonly service: WebrtcService
+  constructor(private readonly service: WebrtcService) {}
 
   @Post('/call-event')
+  @ApiOperation({ summary: 'Handle WebRTC call events' })
+  @ApiResponse({ status: 200, description: 'State successfully updated.' })
+  @ApiResponse({ status: 400, description: 'Event, peerId, or roomId is missing.' })
+  @ApiResponse({ status: 500, description: 'An error occurred while updating the state.' })
+  @ApiBody({
+    type: NotificationRequest,
+    description: 'The notification request payload, including event type, peerId, and roomId.',
+  })
   async callEvent(@Body() notificationRequest: NotificationRequest): Promise<string> {
     const { peerId, event, roomId } = notificationRequest
 
