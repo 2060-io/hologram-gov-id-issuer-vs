@@ -48,9 +48,8 @@ export class CoreService implements EventHandler {
     private readonly i18n: I18nService,
     private readonly configService: ConfigService,
   ) {
-    const baseUrl = configService.get<string>('appConfig.serviceAgentAdmin')
-    const apiVersion = configService.get<ApiVersion>('appConfig.apiVersion')
-    this.apiClient = new ApiClient(baseUrl, apiVersion)
+    const baseUrl = configService.get<string>('appConfig.serviceAgentAdminUrl')
+    this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
   }
 
   async inputMessage(message: BaseMessage): Promise<void> {
@@ -126,11 +125,11 @@ export class CoreService implements EventHandler {
 
   private async startVideoCall(session: SessionEntity): Promise<SessionEntity> {
     const createRoom = new CreateRoomRequest(
-      `${this.configService.get<string>('appConfig.baseUrl')}/call-event`,
+      `${this.configService.get<string>('appConfig.publicBaseUrl')}/call-event`,
       50,
     )
     const response = await fetch(
-      `${this.configService.get<string>('appConfig.webRtcUrl')}/rooms/${utils.uuid()}`,
+      `${this.configService.get<string>('appConfig.webRtcServerUrl')}/rooms/${utils.uuid()}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -471,7 +470,7 @@ export class CoreService implements EventHandler {
     if (!credential || credential.length === 0) {
       await this.apiClient.credentialTypes.create({
         id: utils.uuid(),
-        name: this.configService.get<string>('appConfig.credentialName'),
+        name: 'Unic Id',
         version: '1.0',
         attributes: [
           'documentType',
