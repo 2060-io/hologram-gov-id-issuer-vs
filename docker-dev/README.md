@@ -100,16 +100,14 @@ services:
       - 2802:5000
     environment:
       - AGENT_PORT=5000
-      - SERVICE_AGENT_ADMIN_BASE_URL=http://service-agent:2800
-      - API_VERSION=v1
+      - SERVICE_AGENT_ADMIN_URL=http://service-agent:2800
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=gaia
       - POSTGRES_PASSWORD=2060demo
       - VISION_URL=https://vision.dev.2060.io
-      - WEBRTC_URL=https://dts-webrtc.dev.2060.io
+      - WEBRTC_SERVER_URL=https://dts-webrtc.dev.2060.io
       - PUBLIC_BASE_URL=<your backend ngrok url>
       - DATASTORE_URL=<your datastore ngrok url>
-      - CREDENTIAL_NAME=Unic Id
       - ID_VERIFICATION_TIMEOUT_SECONDS=900
       - LOG_LEVEL=3
   

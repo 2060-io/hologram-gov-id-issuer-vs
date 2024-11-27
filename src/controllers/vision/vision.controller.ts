@@ -1,8 +1,9 @@
 // vision.controller.ts
 import { Controller, Get, Put, Param, HttpStatus, HttpException, Logger } from '@nestjs/common'
 import { VisionService } from './vision.service'
-import { ApiOperation, ApiResponse } from '@nestjs/swagger'
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Vision')
 @Controller()
 export class VisionController {
   private readonly logger = new Logger(VisionController.name)
@@ -38,6 +39,8 @@ export class VisionController {
     description: 'Notify a successful verification or capture for identity represented by token {token}.',
   })
   @ApiResponse({ status: HttpStatus.OK, description: 'OK' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Check arguments or expired token' })
+  @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Server error, please retry.' })
   async success(@Param('token') token: string) {
     if (!token) {
       throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST)
@@ -59,6 +62,8 @@ export class VisionController {
     description: 'Notify a failed verification or capture for identity represented by token {token}.',
   })
   @ApiResponse({ status: HttpStatus.OK, description: 'OK' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Check arguments or expired token' })
+  @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Server error, please retry.' })
   async failure(@Param('token') token: string) {
     if (!token) {
       throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST)

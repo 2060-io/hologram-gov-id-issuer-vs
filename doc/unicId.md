@@ -20,16 +20,14 @@ To deploy the service locally, ensure that the environment variables in the appl
 | **Variable**                   | **Description**                                | **default**                          |
 |--------------------------------|------------------------------------------------|--------------------------------------|
 | `AGENT_PORT`                   | The port on which the agent runs               | `5000`                               |
-| `SERVICE_AGENT_ADMIN_BASE_URL` | Base URL for the service agent admin API       | `http://localhost.com`      |
-| `API_VERSION`                  | API version used by the service                | `v1`                                 |
+| `SERVICE_AGENT_ADMIN_URL` | Base URL for the service agent admin API       | `http://localhost.com`      |
 | `POSTGRES_HOST`                | Hostname for the PostgreSQL database           | `postgres`                           |
 | `POSTGRES_USER`                | Username for the PostgreSQL database           | `gaia`                               |
 | `POSTGRES_PASSWORD`            | Password for the PostgreSQL database           | `password`                           |
 | `VISION_URL`                   | URL for the Vision Service                     | `http://localhost.com/`         |
-| `WEBRTC_URL`                   | URL for the WebRTC Service                     | `http://localhost.com/`     |
+| `WEBRTC_SERVER_URL`                   | URL for the WebRTC Service                     | `http://localhost.com/`     |
 | `PUBLIC_BASE_URL`              | Public-facing base URL for the service         | `http://localhost.com/`      |
 | `DATASTORE_URL`                | URL for the datastore service                  | `http://localhost.com/`      |
-| `CREDENTIAL_NAME`              | Name of the credential being issued            | `Unic Id`                            |
 | `ID_VERIFICATION_TIMEOUT_SECONDS` | Timeout for ID verification in seconds       | `900`                                |
 | `LOG_LEVEL`                    | Logging verbosity level (1-5)                  | `3`                                  |
 
