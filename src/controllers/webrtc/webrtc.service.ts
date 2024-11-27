@@ -6,6 +6,7 @@ import { JoinCallRequest, NotificationRequest } from '@/dto'
 import { Repository } from 'typeorm'
 import { utils } from '@credo-ts/core'
 import { instanceToPlain } from 'class-transformer'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class WebrtcService {
@@ -16,6 +17,7 @@ export class WebrtcService {
     private readonly peerRepository: Repository<WebRtcPeerEntity>,
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
+    private readonly configService: ConfigService,
   ) {}
 
   async joinCall(notificationRequest: NotificationRequest): Promise<void> {
@@ -38,14 +40,14 @@ export class WebrtcService {
 
       const joinCallRequest = new JoinCallRequest()
       joinCallRequest.wsUrl = `${peer.wsUrl}/?roomId=${peer.roomId}&peerId=${peerId}`
-      joinCallRequest.callbackBaseUrl = process.env.PUBLIC_BASE_URL
-      joinCallRequest.datastoreBaseUrl = process.env.DATASTORE_URL
+      joinCallRequest.callbackBaseUrl = this.configService.get<string>('appConfig.baseUrl')
+      joinCallRequest.datastoreBaseUrl = this.configService.get<string>('appConfig.dataStoreUrl')
       joinCallRequest.token = session.id
       joinCallRequest.lang = session.lang
 
       this.logger.log(`joinCall: token: ${JSON.stringify(instanceToPlain(joinCallRequest))}`)
 
-      await fetch(`${process.env.VISION_URL}/join-call`, {
+      await fetch(`${this.configService.get<string>('appConfig.visionUrl')}/join-call`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(instanceToPlain(joinCallRequest)),

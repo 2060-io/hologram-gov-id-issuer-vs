@@ -1,3 +1,4 @@
+import { ApiVersion } from '@2060.io/service-agent-client'
 import { registerAs } from '@nestjs/config'
 
 /**
@@ -11,40 +12,82 @@ export default registerAs('appConfig', () => ({
    * Defaults to 5000 if APP_PORT is not set in the environment variables.
    * @type {number}
    */
-  appPort: parseInt(process.env.AGENT_PORT, 5000) || 5000,
+  appPort: parseInt(process.env.AGENT_PORT) || 5000,
 
   /**
    * Hostname or IP address for the PostgreSQL database.
-   * Defaults to an empty string if POSTGRES_HOST is not set in the environment variables.
+   * Defaults 'postgres' string if POSTGRES_HOST is not set in the environment variables.
    * @type {string}
    */
-  postgresHost: process.env.POSTGRES_HOST || '',
+  postgresHost: process.env.POSTGRES_HOST || 'postgres',
 
   /**
    * Username for the PostgreSQL database.
-   * Defaults to an empty string if POSTGRES_USER is not set in the environment variables.
+   * Defaults 'unicid' string if POSTGRES_USER is not set in the environment variables.
    * @type {string}
    */
-  postgresUser: process.env.POSTGRES_USER || '',
+  postgresUser: process.env.POSTGRES_USER || 'unicid',
 
   /**
    * Password for the PostgreSQL database.
-   * Defaults to an empty string if POSTGRES_PASSWORD is not set in the environment variables.
+   * Defaults 'demo' string if POSTGRES_PASSWORD is not set in the environment variables.
    * @type {string}
    */
-  postgresPassword: process.env.POSTGRES_PASSWORD || '',
+  postgresPassword: process.env.POSTGRES_PASSWORD || 'demo',
 
   /**
    * Base URL for the Service Agent Admin.
-   * Defaults to an empty string if SERVICE_AGENT_ADMIN_BASE_URL is not set in the environment variables.
+   * Defaults to 'http://localhost:3000' if SERVICE_AGENT_ADMIN_BASE_URL is not set in the environment variables.
    * @type {string}
    */
-  serviceAgentAdminBaseUrl: process.env.SERVICE_AGENT_ADMIN_BASE_URL || '',
+  serviceAgentAdmin: process.env.SERVICE_AGENT_ADMIN_BASE_URL || 'http://localhost:3000',
 
   /**
    * API version for the application.
    * Defaults to '1.0' if API_VERSION is not set in the environment variables.
+   * @type {ApiVersion}
+   */
+  apiVersion: (process.env.API_VERSION as ApiVersion) || ApiVersion.V1,
+
+  /**
+   * Base URL for the application.
+   * Defaults to 'http://localhost:2902' if PUBLIC_BASE_URL is not set.
    * @type {string}
    */
-  apiVersion: process.env.API_VERSION || 'v1',
+  baseUrl: process.env.PUBLIC_BASE_URL || 'http://localhost:2902',
+
+  /**
+   * WebRTC server URL for handling real-time communication.
+   * Defaults to a development URL if WEBRTC_URL is not set.
+   * @type {string}
+   */
+  webRtcUrl: process.env.WEBRTC_URL || 'https://dts-webrtc.dev.2060.io',
+
+  /**
+   * URL for the datastore service.
+   * Defaults to 'http://localhost:2904' if DATASTORE_URL is not set.
+   * @type {string}
+   */
+  dataStoreUrl: process.env.DATASTORE_URL || 'http://localhost:2904',
+
+  /**
+   * Vision API URL for image processing or related features.
+   * Defaults to a development URL if VISION_URL is not set.
+   * @type {string}
+   */
+  visionUrl: process.env.VISION_URL || 'https://vision.dev.2060.io',
+
+  /**
+   * Timeout for ID verification, in seconds.
+   * Defaults to 900 seconds (15 minutes) if ID_VERIFICATION_TIMEOUT_SECONDS is not set.
+   * @type {number}
+   */
+  verificationTimeout: parseInt(process.env.ID_VERIFICATION_TIMEOUT_SECONDS) || 900,
+
+  /**
+   * The name of the type of credential used.
+   * Defaults to 'Chatbot Id' if CREDENTIAL_NAME is not set.
+   * @type {string}
+   */
+  credentialName: process.env.CREDENTIAL_NAME || 'Chatbot Id',
 }))

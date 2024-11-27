@@ -3,27 +3,29 @@ import { CredentialEntity, WebRtcPeerEntity, SessionEntity } from '@/models'
 import { CoreService } from '@/core.service'
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm'
 import { ConnectionEntity } from '@2060.io/service-agent-nestjs-client'
-
-const defaultOptions = {
-  type: 'postgres',
-  host: process.env.POSTGRES_HOST,
-  port: 5432,
-  username: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_USER,
-  schema: 'public',
-  synchronize: true,
-  ssl: false,
-  logging: false,
-} as TypeOrmModuleOptions
+import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([ConnectionEntity, CredentialEntity, WebRtcPeerEntity, SessionEntity]),
-    TypeOrmModule.forRoot({
-      ...defaultOptions,
-      entities: [ConnectionEntity, CredentialEntity, WebRtcPeerEntity, SessionEntity],
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
+        type: 'postgres',
+        host: configService.get<string>('appConfig.postgresHost'),
+        port: 5432,
+        username: configService.get<string>('appConfig.postgresUser'),
+        password: configService.get<string>('appConfig.postgresPassword'),
+        database: configService.get<string>('appConfig.postgresUser'),
+        entities: [ConnectionEntity, CredentialEntity, WebRtcPeerEntity, SessionEntity],
+        synchronize: true,
+        ssl: false,
+        logging: false,
+        retryAttempts: 3,
+        retryDelay: 2000,
+      }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [],

@@ -31,6 +31,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { I18nService } from 'nestjs-i18n'
 import { CreateRoomRequest, WebRtcCallDataV1 } from '@/dto'
 import { fetch, FormData } from 'undici'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class CoreService implements EventHandler {
@@ -45,9 +46,10 @@ export class CoreService implements EventHandler {
     @InjectRepository(CredentialEntity)
     private readonly credentialRepository: Repository<CredentialEntity>,
     private readonly i18n: I18nService,
+    private readonly configService: ConfigService,
   ) {
-    const baseUrl = process.env.SERVICE_AGENT_ADMIN_BASE_URL || ''
-    const apiVersion = (process.env.API_VERSION as ApiVersion) || ApiVersion.V1
+    const baseUrl = configService.get<string>('appConfig.serviceAgentAdmin')
+    const apiVersion = configService.get<ApiVersion>('appConfig.apiVersion')
     this.apiClient = new ApiClient(baseUrl, apiVersion)
   }
 
@@ -123,12 +125,18 @@ export class CoreService implements EventHandler {
   }
 
   private async startVideoCall(session: SessionEntity): Promise<SessionEntity> {
-    const createRoom = new CreateRoomRequest(`${process.env.PUBLIC_BASE_URL}/call-event`, 50)
-    const response = await fetch(`${process.env.WEBRTC_URL}/rooms/${utils.uuid()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(createRoom),
-    })
+    const createRoom = new CreateRoomRequest(
+      `${this.configService.get<string>('appConfig.baseUrl')}/call-event`,
+      50,
+    )
+    const response = await fetch(
+      `${this.configService.get<string>('appConfig.webRtcUrl')}/rooms/${utils.uuid()}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createRoom),
+      },
+    )
     const wsUrl: WebRtcCallDataV1 = JsonTransformer.fromJSON(await response.json(), WebRtcCallDataV1)
 
     this.logger.log(`Create new room ${wsUrl.roomId} on: ${wsUrl.wsUrl}`)
@@ -463,7 +471,7 @@ export class CoreService implements EventHandler {
     if (!credential || credential.length === 0) {
       await this.apiClient.credentialTypes.create({
         id: utils.uuid(),
-        name: process.env.CREDENTIAL_NAME,
+        name: this.configService.get<string>('appConfig.credentialName'),
         version: '1.0',
         attributes: [
           'documentType',
@@ -486,12 +494,15 @@ export class CoreService implements EventHandler {
   private async sendDataStore(session: SessionEntity): Promise<SessionEntity> {
     try {
       // Create registry on data store
-      const createResponse = await fetch(`${process.env.DATASTORE_URL}/c/${session.id}/1?token=null`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const createResponse = await fetch(
+        `${this.configService.get<string>('appConfig.dataStoreUrl')}/c/${session.id}/1?token=null`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      })
+      )
       if (!createResponse.ok) {
         throw new Error(
           `Create registry failed with status ${createResponse.status}: ${createResponse.statusText}`,
@@ -505,11 +516,14 @@ export class CoreService implements EventHandler {
       const blob = new Blob([binaryData], { type: 'application/octet-stream' })
       formData.append('chunk', blob)
 
-      const uploadResponse = await fetch(`${process.env.DATASTORE_URL}/u/${session.id}/0?token=null`, {
-        method: 'PUT',
-        headers: {},
-        body: formData,
-      })
+      const uploadResponse = await fetch(
+        `${this.configService.get<string>('appConfig.dataStoreUrl')}/u/${session.id}/0?token=null`,
+        {
+          method: 'PUT',
+          headers: {},
+          body: formData,
+        },
+      )
       if (!uploadResponse.ok) {
         const errorText = await uploadResponse.text()
         throw new Error(
@@ -541,7 +555,7 @@ export class CoreService implements EventHandler {
   }
 
   private async timeoutSession(session: SessionEntity): Promise<SessionEntity> {
-    const timeoutEnv = Number(process.env.ID_VERIFICATION_TIMEOUT_SECONDS) || 900
+    const timeoutEnv = this.configService.get<number>('appConfig.verificationTimeout')
     if (!session.updatedTs) {
       throw new Error('The session entity does not have a valid updatedTs value')
     }
