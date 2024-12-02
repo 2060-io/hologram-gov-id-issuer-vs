@@ -156,6 +156,8 @@ export class CoreService implements EventHandler {
     await this.apiClient.messages.send(
       new CallOfferRequestMessage({
         connectionId: session.connectionId,
+        // offerExpirationTime: this.configService.get<number>('appConfig.verificationTimeout').toString()
+        // description: this.getText('FACE_REQUEST', session.lang)
         parameters: {
           ...wsUrl,
           peerId: peer.id,
