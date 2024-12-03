@@ -6,6 +6,8 @@
   "FACE_REQUEST":"Ahora verificaremos tu rostro.",
   "MRZ_SUCCESSFULL":"Documento de identidad leído con éxito. Felicitaciones, tu documento es compatible con UnicID.",
   "EMRTD_SUCCESSFULL":"Documento de identidad leído con éxito.",
+  "VERIFICATION_SUCCESSFULL":"Verificación exitosa.",
+  "MRTD_FAILED":"No fue posible verificar tu documento. Motivo: <reason>.",
   "ROOT_TITTLE": "Menú Contextual",
   "TIMEOUT_PROCESS": "La verificación de identidad ha expirado. Revisa el menú de arriba para iniciar una nueva verificación de identidad.",
   "ABORT_PROCESS": "Verificación de identidad cancelada. Revisa el menú superior para iniciar una nueva verificación de identidad.",

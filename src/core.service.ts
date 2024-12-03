@@ -15,6 +15,7 @@ import {
   MenuDisplayMessage,
   MenuItem,
   MenuSelectMessage,
+  MrtdSubmitState,
   MrzDataRequestMessage,
   MrzDataSubmitMessage,
   ProfileMessage,
@@ -195,35 +196,43 @@ export class CoreService implements EventHandler {
           break
         case StateStep.MRZ:
           if (content instanceof MrzDataSubmitMessage) {
-            await this.sendText(session.connectionId, 'MRZ_SUCCESSFULL', session.lang)
-            session = await this.sendEMrtdRequest(session, content.threadId)
-            session.credentialMetadata = {
-              ...session.credentialMetadata,
-              mrzData: content.mrzData.raw,
+            if (content.state === MrtdSubmitState.Submitted) {
+              await this.sendText(session.connectionId, 'MRZ_SUCCESSFULL', session.lang)
+              session = await this.sendEMrtdRequest(session, content.threadId)
+              session.credentialMetadata = {
+                ...session.credentialMetadata,
+                mrzData: content.mrzData.raw,
+              }
+              // TODO: is a MRZ valid?
+            } else {
+              await this.handleMrtdDataSubmit(session, content.state)
             }
-            // TODO: is a MRZ valid?
           }
           break
         case StateStep.EMRTD:
           if (content instanceof EMrtdDataSubmitMessage) {
-            await this.sendText(session.connectionId, 'EMRTD_SUCCESSFULL', session.lang)
-            session.state = StateStep.VERIFICATION
-            session.credentialMetadata = {
-              ...session.credentialMetadata,
-              documentType: content.dataGroups.processed.documentType ?? null,
-              documentNumber: content.dataGroups.processed.documentNumber ?? null,
-              issuingState: content.dataGroups.processed.issuingState ?? null,
-              firstName: content.dataGroups.processed.firstName ?? null,
-              lastName: content.dataGroups.processed.lastName ?? null,
-              sex: content.dataGroups.processed.sex ?? null,
-              nationality: content.dataGroups.processed.nationality ?? null,
-              birthDate: formatBirthDate(content.dataGroups.processed.dateOfBirth) ?? null,
-              issuanceDate: content.dataGroups.processed.issuingState ?? null, // TODO: review
-              expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
-              facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
+            if (content.state === MrtdSubmitState.Submitted) {
+              await this.sendText(session.connectionId, 'EMRTD_SUCCESSFULL', session.lang)
+              session.state = StateStep.VERIFICATION
+              session.credentialMetadata = {
+                ...session.credentialMetadata,
+                documentType: content.dataGroups.processed.documentType ?? null,
+                documentNumber: content.dataGroups.processed.documentNumber ?? null,
+                issuingState: content.dataGroups.processed.issuingState ?? null,
+                firstName: content.dataGroups.processed.firstName ?? null,
+                lastName: content.dataGroups.processed.lastName ?? null,
+                sex: content.dataGroups.processed.sex ?? null,
+                nationality: content.dataGroups.processed.nationality ?? null,
+                birthDate: formatBirthDate(content.dataGroups.processed.dateOfBirth) ?? null,
+                issuanceDate: content.dataGroups.processed.issuingState ?? null, // TODO: review
+                expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
+                facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
+              }
+              session = await this.sendDataStore(session)
+              session = await this.startVideoCall(session)
+            } else {
+              await this.handleMrtdDataSubmit(session, content.state)
             }
-            session = await this.sendDataStore(session)
-            session = await this.startVideoCall(session)
           }
           break
         case StateStep.VERIFICATION:
@@ -259,9 +268,22 @@ export class CoreService implements EventHandler {
     }
     return await this.sendContextualMenu(session)
   }
+  
+  private async handleMrtdDataSubmit(session: SessionEntity, state: MrtdSubmitState) {
+    const text = this.getText('MRTD_FAILED', session.lang).replace('<reason>', state)
+    await this.apiClient.messages.send(
+      new TextMessage({
+        connectionId: session.connectionId,
+        content: text,
+      }),
+    )
+    await this.sendMenuSelection(session)
+  }
 
   async handleMenuselection(id: string, session: SessionEntity): Promise<SessionEntity> {
     switch (session.state) {
+      case StateStep.MRZ:
+      case StateStep.EMRTD:
       case StateStep.VERIFICATION:
         if (id === MenuSelectEnum.CONFIRM_YES_VALUE) session = await this.startVideoCall(session)
         if (id === MenuSelectEnum.CONFIRM_NO_VALUE) {
@@ -324,6 +346,8 @@ export class CoreService implements EventHandler {
     let prompt = ''
     const menuitems: MenuItem[] = []
     switch (session.state) {
+      case StateStep.MRZ:
+      case StateStep.EMRTD:
       case StateStep.VERIFICATION:
         prompt = this.getText('MENU_SELECT.PROMPT.VERIFICATION', session.lang)
         menuitems.push({
