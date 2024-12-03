@@ -202,6 +202,7 @@ export class CoreService implements EventHandler {
               session.credentialMetadata = {
                 ...session.credentialMetadata,
                 mrzData: content.mrzData.raw,
+                mrzThreadId: content.threadId,
               }
               // TODO: is a MRZ valid?
             } else {
@@ -268,7 +269,7 @@ export class CoreService implements EventHandler {
     }
     return await this.sendContextualMenu(session)
   }
-  
+
   private async handleMrtdDataSubmit(session: SessionEntity, state: MrtdSubmitState) {
     const text = this.getText('MRTD_FAILED', session.lang).replace('<reason>', state)
     await this.apiClient.messages.send(
@@ -281,20 +282,30 @@ export class CoreService implements EventHandler {
   }
 
   async handleMenuselection(id: string, session: SessionEntity): Promise<SessionEntity> {
-    switch (session.state) {
-      case StateStep.MRZ:
-      case StateStep.EMRTD:
-      case StateStep.VERIFICATION:
-        if (id === MenuSelectEnum.CONFIRM_YES_VALUE) session = await this.startVideoCall(session)
-        if (id === MenuSelectEnum.CONFIRM_NO_VALUE) {
-          session.state = StateStep.START
-          session = await this.abortVerification(session)
-        }
-        break
-      default:
-        break
+    const handleYesAction = async (session: SessionEntity): Promise<SessionEntity> => {
+      switch (session.state) {
+        case StateStep.MRZ:
+          return this.sendMrzRequest(session)
+        case StateStep.EMRTD:
+          return this.sendEMrtdRequest(session, session.credentialMetadata.mrzThreadId)
+        case StateStep.VERIFICATION:
+          return this.startVideoCall(session)
+        default:
+          return session
+      }
     }
-    return await this.sessionRepository.save(session)
+
+    const handleNoAction = async (session: SessionEntity): Promise<SessionEntity> => {
+      return this.abortVerification(session)
+    }
+
+    if (id === MenuSelectEnum.CONFIRM_YES_VALUE) {
+      session = await handleYesAction(session)
+    } else if (id === MenuSelectEnum.CONFIRM_NO_VALUE) {
+      session = await handleNoAction(session)
+    }
+
+    return this.sessionRepository.save(session)
   }
 
   private async handleSession(connectionId: string): Promise<SessionEntity> {
@@ -453,7 +464,7 @@ export class CoreService implements EventHandler {
 
     if (session.credentialMetadata) {
       Object.entries(session.credentialMetadata).forEach(([key, value]) => {
-        if (key !== 'mrzData') {
+        if (!(key === 'mrzData' || key === 'mrzThreadId')) {
           claims.push(
             new Claim({
               name: key,
