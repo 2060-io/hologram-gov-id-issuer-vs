@@ -83,7 +83,7 @@ export class CoreService implements EventHandler {
           inMsg = JsonTransformer.fromJSON(message, ProfileMessage)
           session.lang = inMsg.preferredLanguage
           await this.welcomeMessage(session.connectionId)
-          session = await this.sendMrzRequest(session)
+          if (session.state == StateStep.START) session = await this.sendMrzRequest(session)
           break
         case MrzDataSubmitMessage.type:
           content = JsonTransformer.fromJSON(message, MrzDataSubmitMessage)
@@ -390,29 +390,25 @@ export class CoreService implements EventHandler {
   }
 
   private async sendMrzRequest(session: SessionEntity): Promise<SessionEntity> {
-    if (session.state == StateStep.START) {
-      session.state = StateStep.MRZ
-      await this.sendText(session.connectionId, 'MRZ_REQUEST', session.lang)
-      await this.apiClient.messages.send(
-        new MrzDataRequestMessage({
-          connectionId: session.connectionId,
-        }),
-      )
-    }
+    session.state = StateStep.MRZ
+    await this.sendText(session.connectionId, 'MRZ_REQUEST', session.lang)
+    await this.apiClient.messages.send(
+      new MrzDataRequestMessage({
+        connectionId: session.connectionId,
+      }),
+    )
     return await this.sessionRepository.save(session)
   }
 
   private async sendEMrtdRequest(session: SessionEntity, threadId: string): Promise<SessionEntity> {
-    if (session.state == StateStep.MRZ) {
-      session.state = StateStep.EMRTD
-      await this.sendText(session.connectionId, 'EMRTD_REQUEST', session.lang)
-      await this.apiClient.messages.send(
-        new EMrtdDataRequestMessage({
-          connectionId: session.connectionId,
-          threadId: threadId,
-        }),
-      )
-    }
+    session.state = StateStep.EMRTD
+    await this.sendText(session.connectionId, 'EMRTD_REQUEST', session.lang)
+    await this.apiClient.messages.send(
+      new EMrtdDataRequestMessage({
+        connectionId: session.connectionId,
+        threadId: threadId,
+      }),
+    )
     return await this.sessionRepository.save(session)
   }
 
