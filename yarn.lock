@@ -14,7 +14,7 @@
     mrz "^4.2.0"
     tsyringe "^4.8.0"
 
-"@2060.io/service-agent-client@*", "@2060.io/service-agent-client@^1.1.0-dev.23":
+"@2060.io/service-agent-client@*", "@2060.io/service-agent-client@^1.1.0-dev.26":
   version "1.1.0-dev.26"
   resolved "https://registry.yarnpkg.com/@2060.io/service-agent-client/-/service-agent-client-1.1.0-dev.26.tgz#f40ab1565b58957e6674fd7d2dbd5e2984cdb738"
   integrity sha512-FoCOaLgX/PnkES9Qxt8F5crmgER7rO2+QVk62zjz44FS/cPrlBvSYj3U/HgU9jtZ1gYrgRkYZsw2mIxu3Dp6Qw==
@@ -25,7 +25,7 @@
     express "^4.18.1"
     tslog "^4.8.2"
 
-"@2060.io/service-agent-model@*", "@2060.io/service-agent-model@^1.1.0-dev.23":
+"@2060.io/service-agent-model@*", "@2060.io/service-agent-model@^1.1.0-dev.26":
   version "1.1.0-dev.26"
   resolved "https://registry.yarnpkg.com/@2060.io/service-agent-model/-/service-agent-model-1.1.0-dev.26.tgz#1b164e969ac62315337c4bc60f376c5353ed17ce"
   integrity sha512-QzrejX+SekeqnjN/8NruClsiBFTucvuJLMUeYpH1+Z7nL4B6aDUmBzjzxUCkpN30uZaSBzQDlk3aBr/TVYAaUA==
@@ -37,7 +37,7 @@
     credo-ts-receipts "^0.0.1-alpha.5"
     mrz "^4.2.0"
 
-"@2060.io/service-agent-nestjs-client@^1.1.0-dev.23":
+"@2060.io/service-agent-nestjs-client@^1.1.0-dev.26":
   version "1.1.0-dev.26"
   resolved "https://registry.yarnpkg.com/@2060.io/service-agent-nestjs-client/-/service-agent-nestjs-client-1.1.0-dev.26.tgz#b54d2c0c39f769968e294125078fc11cb66267e6"
   integrity sha512-WPG3Rn5P2Qyfu8aZ3I2eWt7dUXpgflnTEkV7uQ6Uq+btw2rW9SFWtKkhtSy1hrtnCnPhmHlllBiFCpZxeBlplQ==
