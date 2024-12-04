@@ -232,7 +232,7 @@ export class CoreService implements EventHandler {
           break
         case StateStep.VERIFICATION:
           if (content === 'success') {
-            await this.sendText(session.connectionId, 'VERIFICATION_SUCCESSFULL', session.lang)
+            await this.sendText(session.connectionId, 'VERIFICATION_SUCCESSFUL', session.lang)
             session.state = StateStep.ISSUE
             await this.sendCredentialData(session)
           } else if (content === 'failure') await this.sendMenuSelection(session)
