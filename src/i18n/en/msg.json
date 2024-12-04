@@ -7,7 +7,7 @@
   "CALL_REJECT":"Verification failed.",
   "MRZ_SUCCESSFULL": "ID Document successfully read. Congratulations, your document is compatible with UnicID.",
   "EMRTD_SUCCESSFULL":"ID Document successfully read.",
-  "VERIFICATION_SUCCESSFULL":"Verification successful.",
+  "VERIFICATION_SUCCESSFUL":"Verification successful.",
   "ROOT_TITTLE": "Context Menu",
   "TIMEOUT_PROCESS": "ID Verification Timed out. Check menu above to start a new ID Verification.",
   "ABORT_PROCESS": "ID Verification Aborted. Check menu above to start a new ID Verification.",
