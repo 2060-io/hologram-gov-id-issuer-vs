@@ -1,6 +1,7 @@
 import {
   BaseMessage,
   CallOfferRequestMessage,
+  CallRejectRequestMessage,
   Claim,
   ConnectionStateUpdated,
   ContextualMenuItem,
@@ -93,6 +94,10 @@ export class CoreService implements EventHandler {
         case CredentialReceptionMessage.type:
           content = JsonTransformer.fromJSON(message, CredentialReceptionMessage)
           break
+        case CallRejectRequestMessage.type:
+          await this.sendText(session.connectionId, 'CALL_REJECT', session.lang)
+          await this.sendMenuSelection(session)
+          break
         default:
           break
       }
@@ -128,14 +133,11 @@ export class CoreService implements EventHandler {
       `${this.configService.get<string>('appConfig.publicBaseUrl')}/call-event`,
       50,
     )
-    const response = await fetch(
-      `${this.configService.get<string>('appConfig.webRtcServerUrl')}/rooms/${utils.uuid()}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(createRoom),
-      },
-    )
+    const response = await fetch(`${this.configService.get<string>('appConfig.webRtcServerUrl')}/rooms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(createRoom),
+    })
     const wsUrl: WebRtcCallDataV1 = JsonTransformer.fromJSON(await response.json(), WebRtcCallDataV1)
 
     this.logger.log(`Create new room ${wsUrl.roomId} on: ${wsUrl.wsUrl}`)
@@ -151,11 +153,13 @@ export class CoreService implements EventHandler {
     await this.peerRepository.save(peer)
     this.logger.log('New peer: ' + JSON.stringify(peer))
 
-    await this.sendText(session.connectionId, 'FACE_REQUEST', session.lang)
-
     await this.apiClient.messages.send(
       new CallOfferRequestMessage({
         connectionId: session.connectionId,
+        offerExpirationTime: new Date(
+          Date.now() + this.configService.get<number>('appConfig.verificationTimeout') * 1000,
+        ),
+        description: this.getText('FACE_REQUEST', session.lang),
         parameters: {
           ...wsUrl,
           peerId: peer.id,
@@ -228,6 +232,7 @@ export class CoreService implements EventHandler {
           break
         case StateStep.VERIFICATION:
           if (content === 'success') {
+            await this.sendText(session.connectionId, 'VERIFICATION_SUCCESSFUL', session.lang)
             session.state = StateStep.ISSUE
             await this.sendCredentialData(session)
           } else if (content === 'failure') await this.sendMenuSelection(session)

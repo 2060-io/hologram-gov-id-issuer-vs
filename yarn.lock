@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@2060.io/credo-ts-didcomm-mrtd@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-mrtd/-/credo-ts-didcomm-mrtd-0.0.8.tgz#faf0d24a651957138437f30ff0ff15695256eece"
-  integrity sha512-l6jDnDOu9yDIobQprCmaJCesUpmd/8AspKKI9KTlNlOFfmms++UcBEcBdQttVbb7KYJawsttoAWbLHJvWBUtfQ==
+"@2060.io/credo-ts-didcomm-mrtd@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-mrtd/-/credo-ts-didcomm-mrtd-0.0.9.tgz#fb0780c16f4a391ee902c026811a97dcf48013e3"
+  integrity sha512-KlFhrjdaHDHKDH7zKevBr2H19ueZMSXj/kySd1NixIqiEyZW3hVDzhnu9GjXdO1olezOs80hc9Khu07xWdpdwA==
   dependencies:
     "@li0ard/tsemrtd" "^0.2.0"
     class-transformer "0.5.1"
@@ -15,9 +15,9 @@
     tsyringe "^4.8.0"
 
 "@2060.io/service-agent-client@*", "@2060.io/service-agent-client@^1.1.0-dev.23":
-  version "1.1.0-dev.23"
-  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-client/-/service-agent-client-1.1.0-dev.23.tgz#83ecba99529cf7a82a46e16e79460ad111ebaceb"
-  integrity sha512-+JfajXm7DY8ZZygRMEE2FHhZRyNAT/3DOZHRAdSX65UkZghsYNHcnK6FK8Xffv+XQWdb7ENSEhmkJ9Yy8khByA==
+  version "1.1.0-dev.26"
+  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-client/-/service-agent-client-1.1.0-dev.26.tgz#f40ab1565b58957e6674fd7d2dbd5e2984cdb738"
+  integrity sha512-FoCOaLgX/PnkES9Qxt8F5crmgER7rO2+QVk62zjz44FS/cPrlBvSYj3U/HgU9jtZ1gYrgRkYZsw2mIxu3Dp6Qw==
   dependencies:
     "@2060.io/service-agent-model" "*"
     class-transformer "0.5.1"
@@ -26,11 +26,11 @@
     tslog "^4.8.2"
 
 "@2060.io/service-agent-model@*", "@2060.io/service-agent-model@^1.1.0-dev.23":
-  version "1.1.0-dev.23"
-  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-model/-/service-agent-model-1.1.0-dev.23.tgz#5d4dede8436663f9b444c7ebff7133efa76d0b5f"
-  integrity sha512-/ww4ALb6BJVMtoBBg/QtqXmS7anaH3IPDHwgua0LKHKmPMDreSAHBov9b6VTD3XxfWMRgYmKyAc+7uv4Wi0oww==
+  version "1.1.0-dev.26"
+  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-model/-/service-agent-model-1.1.0-dev.26.tgz#1b164e969ac62315337c4bc60f376c5353ed17ce"
+  integrity sha512-QzrejX+SekeqnjN/8NruClsiBFTucvuJLMUeYpH1+Z7nL4B6aDUmBzjzxUCkpN30uZaSBzQDlk3aBr/TVYAaUA==
   dependencies:
-    "@2060.io/credo-ts-didcomm-mrtd" "^0.0.8"
+    "@2060.io/credo-ts-didcomm-mrtd" "^0.0.9"
     "@credo-ts/core" "^0.5.11"
     class-transformer "0.5.1"
     class-validator "0.14.1"
@@ -38,9 +38,9 @@
     mrz "^4.2.0"
 
 "@2060.io/service-agent-nestjs-client@^1.1.0-dev.23":
-  version "1.1.0-dev.23"
-  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-nestjs-client/-/service-agent-nestjs-client-1.1.0-dev.23.tgz#0da10657a49cf20cdb92547e09c1d4e3754d6c96"
-  integrity sha512-xpdK1l9uHE0uCbSYrB22tWMfEumP54FNdvSYQpDAI6GjHC7ieeMuanR6WLWw6Pc6LLDepANfjqFmS8VVbT8OMg==
+  version "1.1.0-dev.26"
+  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-nestjs-client/-/service-agent-nestjs-client-1.1.0-dev.26.tgz#b54d2c0c39f769968e294125078fc11cb66267e6"
+  integrity sha512-WPG3Rn5P2Qyfu8aZ3I2eWt7dUXpgflnTEkV7uQ6Uq+btw2rW9SFWtKkhtSy1hrtnCnPhmHlllBiFCpZxeBlplQ==
   dependencies:
     "@2060.io/service-agent-client" "*"
     "@2060.io/service-agent-model" "*"
