@@ -11,11 +11,6 @@ export class JoinCallRequest {
 
   @IsOptional()
   @IsString()
-  @Expose({ name: 'datastore_base_url' })
-  datastoreBaseUrl?: string
-
-  @IsOptional()
-  @IsString()
   @Expose({ name: 'callback_base_url' })
   callbackBaseUrl?: string
 
