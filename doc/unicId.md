@@ -27,7 +27,6 @@ To deploy the service locally, ensure that the environment variables in the appl
 | `VISION_URL`                   | URL for the Vision Service                     | `http://localhost.com/`         |
 | `WEBRTC_SERVER_URL`                   | URL for the WebRTC Service                     | `http://localhost.com/`     |
 | `PUBLIC_BASE_URL`              | Public-facing base URL for the service         | `http://localhost.com/`      |
-| `DATASTORE_URL`                | URL for the datastore service                  | `http://localhost.com/`      |
 | `ID_VERIFICATION_TIMEOUT_SECONDS` | Timeout for ID verification in seconds       | `900`                                |
 | `LOG_LEVEL`                    | Logging verbosity level (1-5)                  | `3`                                  |
 

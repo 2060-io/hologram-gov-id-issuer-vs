@@ -32,7 +32,7 @@ import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { I18nService } from 'nestjs-i18n'
 import { CreateRoomRequest, WebRtcCallDataV1 } from '@/dto'
-import { fetch, FormData } from 'undici'
+import { fetch } from 'undici'
 import { ConfigService } from '@nestjs/config'
 
 @Injectable()
@@ -203,6 +203,9 @@ export class CoreService implements EventHandler {
           if (content instanceof MrzDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
               await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang)
+              session.mrzData = Array.isArray(content.mrzData.raw)
+                ? content.mrzData.raw.join('\n')
+                : content.mrzData.raw
               session = await this.sendEMrtdRequest(session)
               // TODO: is a MRZ valid?
             } else {
@@ -228,7 +231,6 @@ export class CoreService implements EventHandler {
                 expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
                 facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
               }
-              session = await this.sendDataStore(session)
               session = await this.startVideoCall(session)
             } else {
               await this.handleMrtdDataSubmitError(session, content.state)
@@ -517,53 +519,6 @@ export class CoreService implements EventHandler {
         ],
       })
     }
-  }
-
-  private async sendDataStore(session: SessionEntity): Promise<SessionEntity> {
-    try {
-      // Create registry on data store
-      const createResponse = await fetch(
-        `${this.configService.get<string>('appConfig.dataStoreUrl')}/c/${session.id}/1?token=null`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-      if (!createResponse.ok) {
-        throw new Error(
-          `Create registry failed with status ${createResponse.status}: ${createResponse.statusText}`,
-        )
-      }
-
-      // Upload registry on data store
-      const base64Data = session.credentialClaims.facePhoto.split(',')[1]
-      const binaryData = Buffer.from(base64Data, 'base64')
-      const formData = new FormData()
-      const blob = new Blob([binaryData], { type: 'application/octet-stream' })
-      formData.append('chunk', blob)
-
-      const uploadResponse = await fetch(
-        `${this.configService.get<string>('appConfig.dataStoreUrl')}/u/${session.id}/0?token=null`,
-        {
-          method: 'PUT',
-          headers: {},
-          body: formData,
-        },
-      )
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text()
-        throw new Error(
-          `Upload registry failed with status ${uploadResponse.status}: ${uploadResponse.statusText}. Response body: ${errorText}`,
-        )
-      }
-
-      this.logger.debug('sendDataStore: Data uploaded')
-    } catch (error) {
-      this.logger.error(`sendDataStore: Canon't save data - ${error}`)
-    }
-    return session
   }
 
   // Special flows

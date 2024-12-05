@@ -24,11 +24,6 @@ tunnels:
         proto: http
         schemes:
             - https
-    datastore:
-        addr: 2904
-        proto: http
-        schemes:
-            - https
 version: "2"
 region: us
 ```
@@ -107,7 +102,6 @@ services:
       - VISION_URL=https://vision.dev.2060.io
       - WEBRTC_SERVER_URL=https://dts-webrtc.dev.2060.io
       - PUBLIC_BASE_URL=<your backend ngrok url>
-      - DATASTORE_URL=<your datastore ngrok url>
       - ID_VERIFICATION_TIMEOUT_SECONDS=900
       - LOG_LEVEL=3
   
@@ -121,29 +115,6 @@ services:
       - POSTGRES_PASSWORD=2060demo
       - POSTGRES_USER=gaia 
       - PGDATA=/var/lib/postgresql/data/pgdata
-
-# the datastore is the container that will store identity photos.
-# Normally it should not be exposed directly to a public URL, 
-# but for this demo, and for beeing able to use the face capture/face recognition service,
-# we will need it.
-  datastore:
-    image: io2060/2060-datastore:main
-    ports:
-       - "2604:2604"
-    restart: unless-stopped
-    environment:
-    - DEBUG=1
-    - QUARKUS_HTTP_PORT=2604
-    - IO_TWENTYSIXTY_DATASTORE_TMP_DIR=/tmp/data/tmp
-    - IO_TWENTYSIXTY_DATASTORE_TMP_LIFETIMEDAYS=5
-    - IO_TWENTYSIXTY_DATASTORE_REPO_LIFETIMEDAYS=43800
-    - IO_TWENTYSIXTY_DATASTORE_REPO_FS_DIR=/tmp/data/repo
-    - IO_TWENTYSIXTY_DATASTORE_MEDIA_MAXCHUNKS=128
-    volumes:
-       - /tmp/data:/tmp/data
-    networks:
-       - "chatbot"
-
 
 networks:
   chatbot:
@@ -163,7 +134,6 @@ verify containers are started:
 ```
 $ docker ps
 CONTAINER ID   IMAGE                                                 COMMAND                  CREATED         STATUS         PORTS                                                                                                               NAMES
-8ed71159651b   io2060/2060-datastore:main                            "/usr/local/s2i/run"     3 seconds ago   Up 3 seconds   8080/tcp, 8443/tcp, 0.0.0.0:2904->2904/tcp, 8778/tcp                                                                docker-datastore-1
 e5a115362594   2060-unic-id-dts                "docker-entrypoint.s…"   4 hours ago   Exited (137) 4 hours ago             unic-id-dts
 100b146e717c   io2060/2060-service-agent:dev   "/bin/sh -c 'yarn st…"   3 seconds ago   Up 3 seconds   0.0.0.0:3000-3001->3000-3001/tcp                                                                                    docker-service-agent-1
 12b7355f9b34   postgres:15.2                                         "docker-entrypoint.s…"   3 seconds ago   Up 3 seconds   0.0.0.0:5432->5432/tcp                                                                                              docker-postgres-1

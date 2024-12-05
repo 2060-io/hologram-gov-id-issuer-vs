@@ -10,10 +10,5 @@ tunnels:
         proto: http
         schemes:
             - https
-    datastore:
-        addr: 2904
-        proto: http
-        schemes:
-            - https
 version: "2"
 region: us
