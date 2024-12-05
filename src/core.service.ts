@@ -203,6 +203,9 @@ export class CoreService implements EventHandler {
           if (content instanceof MrzDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
               await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang)
+              session.mrzData = Array.isArray(content.mrzData.raw)
+                ? content.mrzData.raw.join('\n')
+                : content.mrzData.raw
               session = await this.sendEMrtdRequest(session)
               // TODO: is a MRZ valid?
             } else {
