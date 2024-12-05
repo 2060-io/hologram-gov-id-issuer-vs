@@ -20,7 +20,7 @@ export class VisionService {
     })
     if (!session) throw new Error('Unrecognized token.')
 
-    const medias: string[] = [sessionId]
+    const medias: string[] = [session.credentialClaims.facePhoto]
     this.logger.log(`listMedias: token: ${medias}`)
     return medias
   }

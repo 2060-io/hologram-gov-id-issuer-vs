@@ -56,13 +56,6 @@ export default registerAs('appConfig', () => ({
   webRtcServerUrl: process.env.WEBRTC_SERVER_URL || 'https://dts-webrtc.dev.2060.io',
 
   /**
-   * URL for the datastore service.
-   * Defaults to 'http://localhost:2904' if DATASTORE_URL is not set.
-   * @type {string}
-   */
-  dataStoreUrl: process.env.DATASTORE_URL || 'http://localhost:2904',
-
-  /**
    * Vision API URL for image processing or related features.
    * Defaults to a development URL if VISION_URL is not set.
    * @type {string}

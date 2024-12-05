@@ -41,7 +41,7 @@ export class WebrtcService {
       const joinCallRequest = new JoinCallRequest()
       joinCallRequest.wsUrl = `${peer.wsUrl}/?roomId=${peer.roomId}&peerId=${peerId}`
       joinCallRequest.callbackBaseUrl = this.configService.get<string>('appConfig.publicBaseUrl')
-      joinCallRequest.datastoreBaseUrl = this.configService.get<string>('appConfig.dataStoreUrl')
+      joinCallRequest.datastoreBaseUrl = '' // TODO: remove this param
       joinCallRequest.token = session.id
       joinCallRequest.lang = session.lang
 
