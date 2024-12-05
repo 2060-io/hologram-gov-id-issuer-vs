@@ -10,6 +10,9 @@ export class SessionEntity {
   @Column({ name: 'connection_id', type: 'varchar', nullable: false })
   connectionId: string
 
+  @Column({ name: 'thread_id', type: 'varchar', nullable: true })
+  threadId: string
+
   @Column({ type: 'varchar', length: 10, nullable: true })
   lang?: string
 
@@ -29,7 +32,10 @@ export class SessionEntity {
   nfcSupport: boolean
 
   @Column('jsonb', { name: 'credential_metadata', nullable: true })
-  credentialMetadata?: Record<string, any>
+  credentialClaims?: Record<string, any>
+
+  @Column({ type: 'varchar', nullable: true })
+  mrzData?: string
 
   @CreateDateColumn({ name: 'created_ts' })
   createdTs?: Date

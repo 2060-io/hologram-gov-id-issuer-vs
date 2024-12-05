@@ -87,6 +87,7 @@ export class CoreService implements EventHandler {
           if (session.state == StateStep.START) session = await this.sendMrzRequest(session)
           break
         case MrzDataSubmitMessage.type:
+          session.threadId = message.threadId
           content = JsonTransformer.fromJSON(message, MrzDataSubmitMessage)
           break
         case EMrtdDataSubmitMessage.type:
@@ -201,26 +202,20 @@ export class CoreService implements EventHandler {
         case StateStep.MRZ:
           if (content instanceof MrzDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
-              await this.sendText(session.connectionId, 'MRZ_SUCCESSFULL', session.lang)
-              session = await this.sendEMrtdRequest(session, content.threadId)
-              session.credentialMetadata = {
-                ...session.credentialMetadata,
-                mrzData: content.mrzData.raw,
-                mrzThreadId: content.threadId,
-              }
+              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang)
+              session = await this.sendEMrtdRequest(session)
               // TODO: is a MRZ valid?
             } else {
-              await this.handleMrtdDataSubmit(session, content.state)
+              await this.handleMrtdDataSubmitError(session, content.state)
             }
           }
           break
         case StateStep.EMRTD:
           if (content instanceof EMrtdDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
-              await this.sendText(session.connectionId, 'EMRTD_SUCCESSFULL', session.lang)
+              await this.sendText(session.connectionId, 'EMRTD_SUCCESSFUL', session.lang)
               session.state = StateStep.VERIFICATION
-              session.credentialMetadata = {
-                ...session.credentialMetadata,
+              session.credentialClaims = {
                 documentType: content.dataGroups.processed.documentType ?? null,
                 documentNumber: content.dataGroups.processed.documentNumber ?? null,
                 issuingState: content.dataGroups.processed.issuingState ?? null,
@@ -236,7 +231,7 @@ export class CoreService implements EventHandler {
               session = await this.sendDataStore(session)
               session = await this.startVideoCall(session)
             } else {
-              await this.handleMrtdDataSubmit(session, content.state)
+              await this.handleMrtdDataSubmitError(session, content.state)
             }
           }
           break
@@ -275,7 +270,7 @@ export class CoreService implements EventHandler {
     return await this.sendContextualMenu(session)
   }
 
-  private async handleMrtdDataSubmit(session: SessionEntity, state: MrtdSubmitState) {
+  private async handleMrtdDataSubmitError(session: SessionEntity, state: MrtdSubmitState) {
     const text = this.getText('MRTD_FAILED', session.lang).replace('<reason>', state)
     await this.apiClient.messages.send(
       new TextMessage({
@@ -292,7 +287,7 @@ export class CoreService implements EventHandler {
         case StateStep.MRZ:
           return this.sendMrzRequest(session)
         case StateStep.EMRTD:
-          return this.sendEMrtdRequest(session, session.credentialMetadata.mrzThreadId)
+          return this.sendEMrtdRequest(session)
         case StateStep.VERIFICATION:
           return this.startVideoCall(session)
         default:
@@ -333,7 +328,7 @@ export class CoreService implements EventHandler {
 
   private async handleCredential(session: SessionEntity) {
     // encrypt credential
-    const hashString = session.credentialMetadata.mrzData
+    const hashString = session.mrzData
     const encrypt = new Sha256().hash(hashString)
 
     let credential = await this.credentialRepository.findOneBy({
@@ -416,13 +411,13 @@ export class CoreService implements EventHandler {
     return await this.sessionRepository.save(session)
   }
 
-  private async sendEMrtdRequest(session: SessionEntity, threadId: string): Promise<SessionEntity> {
+  private async sendEMrtdRequest(session: SessionEntity): Promise<SessionEntity> {
     session.state = StateStep.EMRTD
     await this.sendText(session.connectionId, 'EMRTD_REQUEST', session.lang)
     await this.apiClient.messages.send(
       new EMrtdDataRequestMessage({
         connectionId: session.connectionId,
-        threadId: threadId,
+        threadId: session.threadId,
       }),
     )
     return await this.sessionRepository.save(session)
@@ -467,16 +462,14 @@ export class CoreService implements EventHandler {
   private async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
     const claims: Claim[] = []
 
-    if (session.credentialMetadata) {
-      Object.entries(session.credentialMetadata).forEach(([key, value]) => {
-        if (!(key === 'mrzData' || key === 'mrzThreadId')) {
-          claims.push(
-            new Claim({
-              name: key,
-              value: value ?? null,
-            }),
-          )
-        }
+    if (session.credentialClaims) {
+      Object.entries(session.credentialClaims).forEach(([key, value]) => {
+        claims.push(
+          new Claim({
+            name: key,
+            value: value ?? null,
+          }),
+        )
       })
       claims.push(
         new Claim({
@@ -545,7 +538,7 @@ export class CoreService implements EventHandler {
       }
 
       // Upload registry on data store
-      const base64Data = session.credentialMetadata.facePhoto.split(',')[1]
+      const base64Data = session.credentialClaims.facePhoto.split(',')[1]
       const binaryData = Buffer.from(base64Data, 'base64')
       const formData = new FormData()
       const blob = new Blob([binaryData], { type: 'application/octet-stream' })
@@ -576,10 +569,12 @@ export class CoreService implements EventHandler {
   // Special flows
   private async purgeUserData(session): Promise<SessionEntity> {
     session.state = StateStep.START
+    session.threadId = null
     session.userAgent = null
     session.tp = null
     session.nfcSupport = null
-    session.credentialMetadata = null
+    session.credentialClaims = null
+    session.mrzData = null
     return await this.sessionRepository.save(session)
   }
 
