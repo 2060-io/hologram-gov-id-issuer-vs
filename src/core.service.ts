@@ -32,7 +32,7 @@ import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { I18nService } from 'nestjs-i18n'
 import { CreateRoomRequest, WebRtcCallDataV1 } from '@/dto'
-import { fetch, FormData } from 'undici'
+import { fetch } from 'undici'
 import { ConfigService } from '@nestjs/config'
 
 @Injectable()
