@@ -227,7 +227,7 @@ export class CoreService implements EventHandler {
                 issuingState: whereAlpha3(content.dataGroups.processed.issuingState).alpha2 ?? null,
                 firstName: content.dataGroups.processed.firstName ?? null,
                 lastName: content.dataGroups.processed.lastName ?? null,
-                sex: ['M', 'F'].includes(rawSex) ?? 'X',
+                sex: ['M', 'F'].includes(rawSex) ? rawSex : 'X',
                 nationality: whereAlpha3(content.dataGroups.processed.nationality).alpha2 ?? null,
                 birthDate: content.dataGroups.processed.dateOfBirth ?? null,
                 issuanceDate,
