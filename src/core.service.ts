@@ -477,7 +477,8 @@ export class CoreService implements EventHandler {
     }
 
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
-    const credentialId = (await this.apiClient.credentialTypes.getAll())[0].id
+    let credentialId = (await this.apiClient.credentialTypes.getAll())[0]?.id
+    if (!credentialId) credentialId = (await this.sendCredentialType())[0]?.id
     await this.apiClient.messages.send(
       new CredentialIssuanceMessage({
         connectionId: session.connectionId,
@@ -490,11 +491,11 @@ export class CoreService implements EventHandler {
     return session
   }
 
-  private async sendCredentialType(): Promise<void> {
+  private async sendCredentialType(): Promise<CredentialTypeInfo[]> {
     const credential: CredentialTypeInfo[] = await this.apiClient.credentialTypes.getAll()
 
     if (!credential || credential.length === 0) {
-      await this.apiClient.credentialTypes.create({
+      const newCredential = await this.apiClient.credentialTypes.create({
         id: utils.uuid(),
         name: 'Unic Id',
         version: '1.0',
@@ -512,7 +513,9 @@ export class CoreService implements EventHandler {
           'facePhoto',
         ],
       })
+      credential.push(newCredential)
     }
+    return credential
   }
 
   // Special flows
