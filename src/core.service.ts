@@ -34,6 +34,7 @@ import { I18nService } from 'nestjs-i18n'
 import { CreateRoomRequest, WebRtcCallDataV1 } from '@/dto'
 import { fetch } from 'undici'
 import { ConfigService } from '@nestjs/config'
+import { whereAlpha3 } from 'iso-3166-1'
 
 @Injectable()
 export class CoreService implements EventHandler {
@@ -219,14 +220,15 @@ export class CoreService implements EventHandler {
               await this.sendText(session.connectionId, 'EMRTD_SUCCESSFUL', session.lang)
               session.state = StateStep.VERIFICATION
               const issuanceDate = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
+              const rawSex = content.dataGroups.processed.sex ?? 'X'
               session.credentialClaims = {
                 documentType: content.dataGroups.processed.documentType ?? null,
                 documentNumber: content.dataGroups.processed.documentNumber ?? null,
-                issuingState: content.dataGroups.processed.issuingState ?? null,
+                issuingState: whereAlpha3(content.dataGroups.processed.issuingState).alpha2 ?? null,
                 firstName: content.dataGroups.processed.firstName ?? null,
                 lastName: content.dataGroups.processed.lastName ?? null,
-                sex: content.dataGroups.processed.sex ?? null,
-                nationality: content.dataGroups.processed.nationality ?? null,
+                sex: ['M', 'F'].includes(rawSex) ?? 'X',
+                nationality: whereAlpha3(content.dataGroups.processed.nationality).alpha2 ?? null,
                 birthDate: content.dataGroups.processed.dateOfBirth ?? null,
                 issuanceDate,
                 expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
