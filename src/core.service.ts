@@ -27,7 +27,7 @@ import { EventHandler } from '@2060.io/service-agent-nestjs-client'
 import { Injectable, Logger } from '@nestjs/common'
 import { CredentialEntity, WebRtcPeerEntity, SessionEntity } from '@/models'
 import { CredentialState, JsonTransformer, Sha256, utils } from '@credo-ts/core'
-import { Cmd, formatBirthDate, MenuSelectEnum, PeerType, StateStep } from '@/common'
+import { Cmd, MenuSelectEnum, PeerType, StateStep } from '@/common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { I18nService } from 'nestjs-i18n'
@@ -218,6 +218,7 @@ export class CoreService implements EventHandler {
             if (content.state === MrtdSubmitState.Submitted) {
               await this.sendText(session.connectionId, 'EMRTD_SUCCESSFUL', session.lang)
               session.state = StateStep.VERIFICATION
+              const issuanceDate = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
               session.credentialClaims = {
                 documentType: content.dataGroups.processed.documentType ?? null,
                 documentNumber: content.dataGroups.processed.documentNumber ?? null,
@@ -226,8 +227,8 @@ export class CoreService implements EventHandler {
                 lastName: content.dataGroups.processed.lastName ?? null,
                 sex: content.dataGroups.processed.sex ?? null,
                 nationality: content.dataGroups.processed.nationality ?? null,
-                birthDate: formatBirthDate(content.dataGroups.processed.dateOfBirth) ?? null,
-                issuanceDate: content.dataGroups.processed.issuingState ?? null, // TODO: review
+                birthDate: content.dataGroups.processed.dateOfBirth ?? null,
+                issuanceDate,
                 expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
                 facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
               }
@@ -473,12 +474,6 @@ export class CoreService implements EventHandler {
           }),
         )
       })
-      claims.push(
-        new Claim({
-          name: 'issued',
-          value: new Date().toDateString(),
-        }),
-      )
     }
 
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
@@ -515,7 +510,6 @@ export class CoreService implements EventHandler {
           'issuanceDate',
           'expirationDate',
           'facePhoto',
-          'issued',
         ],
       })
     }
