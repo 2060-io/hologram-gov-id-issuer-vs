@@ -27,13 +27,14 @@ import { EventHandler } from '@2060.io/service-agent-nestjs-client'
 import { Injectable, Logger } from '@nestjs/common'
 import { CredentialEntity, WebRtcPeerEntity, SessionEntity } from '@/models'
 import { CredentialState, JsonTransformer, Sha256, utils } from '@credo-ts/core'
-import { Cmd, formatBirthDate, MenuSelectEnum, PeerType, StateStep } from '@/common'
+import { Cmd, MenuSelectEnum, PeerType, StateStep } from '@/common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { I18nService } from 'nestjs-i18n'
 import { CreateRoomRequest, WebRtcCallDataV1 } from '@/dto'
 import { fetch } from 'undici'
 import { ConfigService } from '@nestjs/config'
+import { whereAlpha3 } from 'iso-3166-1'
 
 @Injectable()
 export class CoreService implements EventHandler {
@@ -218,16 +219,18 @@ export class CoreService implements EventHandler {
             if (content.state === MrtdSubmitState.Submitted) {
               await this.sendText(session.connectionId, 'EMRTD_SUCCESSFUL', session.lang)
               session.state = StateStep.VERIFICATION
+              const issuanceDate = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
+              const rawSex = content.dataGroups.processed.sex ?? 'X'
               session.credentialClaims = {
                 documentType: content.dataGroups.processed.documentType ?? null,
                 documentNumber: content.dataGroups.processed.documentNumber ?? null,
-                issuingState: content.dataGroups.processed.issuingState ?? null,
+                issuingState: whereAlpha3(content.dataGroups.processed.issuingState).alpha2 ?? null,
                 firstName: content.dataGroups.processed.firstName ?? null,
                 lastName: content.dataGroups.processed.lastName ?? null,
-                sex: content.dataGroups.processed.sex ?? null,
-                nationality: content.dataGroups.processed.nationality ?? null,
-                birthDate: formatBirthDate(content.dataGroups.processed.dateOfBirth) ?? null,
-                issuanceDate: content.dataGroups.processed.issuingState ?? null, // TODO: review
+                sex: ['M', 'F'].includes(rawSex) ? rawSex : 'X',
+                nationality: whereAlpha3(content.dataGroups.processed.nationality).alpha2 ?? null,
+                birthDate: content.dataGroups.processed.dateOfBirth ?? null,
+                issuanceDate,
                 expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
                 facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
               }
@@ -473,16 +476,11 @@ export class CoreService implements EventHandler {
           }),
         )
       })
-      claims.push(
-        new Claim({
-          name: 'issued',
-          value: new Date().toDateString(),
-        }),
-      )
     }
 
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
-    const credentialId = (await this.apiClient.credentialTypes.getAll())[0].id
+    let credentialId = (await this.apiClient.credentialTypes.getAll())[0]?.id
+    if (!credentialId) credentialId = (await this.sendCredentialType())[0]?.id
     await this.apiClient.messages.send(
       new CredentialIssuanceMessage({
         connectionId: session.connectionId,
@@ -495,11 +493,11 @@ export class CoreService implements EventHandler {
     return session
   }
 
-  private async sendCredentialType(): Promise<void> {
+  private async sendCredentialType(): Promise<CredentialTypeInfo[]> {
     const credential: CredentialTypeInfo[] = await this.apiClient.credentialTypes.getAll()
 
     if (!credential || credential.length === 0) {
-      await this.apiClient.credentialTypes.create({
+      const newCredential = await this.apiClient.credentialTypes.create({
         id: utils.uuid(),
         name: 'Unic Id',
         version: '1.0',
@@ -515,10 +513,11 @@ export class CoreService implements EventHandler {
           'issuanceDate',
           'expirationDate',
           'facePhoto',
-          'issued',
         ],
       })
+      credential.push(newCredential)
     }
+    return credential
   }
 
   // Special flows
