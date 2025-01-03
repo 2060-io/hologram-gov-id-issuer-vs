@@ -219,19 +219,19 @@ export class CoreService implements EventHandler {
             if (content.state === MrtdSubmitState.Submitted) {
               await this.sendText(session.connectionId, 'EMRTD_SUCCESSFUL', session.lang)
               session.state = StateStep.VERIFICATION
-              const issuanceDate = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
+              const credentialIssuanceDate = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
               const rawSex = content.dataGroups.processed.sex ?? 'X'
               session.credentialClaims = {
                 documentType: content.dataGroups.processed.documentType ?? null,
                 documentNumber: content.dataGroups.processed.documentNumber ?? null,
-                issuingState: whereAlpha3(content.dataGroups.processed.issuingState).alpha2 ?? null,
+                documentIssuingState: whereAlpha3(content.dataGroups.processed.issuingState).alpha2 ?? null,
                 firstName: content.dataGroups.processed.firstName ?? null,
                 lastName: content.dataGroups.processed.lastName ?? null,
                 sex: ['M', 'F'].includes(rawSex) ? rawSex : 'X',
                 nationality: whereAlpha3(content.dataGroups.processed.nationality).alpha2 ?? null,
                 birthDate: content.dataGroups.processed.dateOfBirth ?? null,
-                issuanceDate,
-                expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
+                credentialIssuanceDate,
+                documentExpirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
                 facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
               }
               session = await this.startVideoCall(session)
@@ -504,14 +504,14 @@ export class CoreService implements EventHandler {
         attributes: [
           'documentType',
           'documentNumber',
-          'issuingState',
+          'documentIssuingState',
           'firstName',
           'lastName',
           'sex',
           'nationality',
           'birthDate',
-          'issuanceDate',
-          'expirationDate',
+          'credentialIssuanceDate',
+          'documentExpirationDate',
           'facePhoto',
         ],
       })
