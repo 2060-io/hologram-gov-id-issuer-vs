@@ -2,14 +2,11 @@ import {
   BaseMessage,
   CallOfferRequestMessage,
   CallRejectRequestMessage,
-  Claim,
   ConnectionStateUpdated,
   ContextualMenuItem,
   ContextualMenuSelectMessage,
   ContextualMenuUpdateMessage,
-  CredentialIssuanceMessage,
   CredentialReceptionMessage,
-  CredentialTypeInfo,
   EMrtdDataRequestMessage,
   EMrtdDataSubmitMessage,
   MediaMessage,
@@ -26,7 +23,7 @@ import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
 import { CredentialEventService, EventHandler } from '@2060.io/service-agent-nestjs-client'
 import { Injectable, Logger } from '@nestjs/common'
 import { WebRtcPeerEntity, SessionEntity } from '@/models'
-import { CredentialState, JsonTransformer, Sha256, utils } from '@credo-ts/core'
+import { CredentialState, JsonTransformer, utils } from '@credo-ts/core'
 import { Cmd, MenuSelectEnum, PeerType, StateStep } from '@/common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -435,11 +432,7 @@ export class CoreService implements EventHandler {
 
   // Generate credential and delete if it exists
   private async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
-    await this.credentialEvent.issuance(
-      session.connectionId,
-      session.credentialClaims,
-      session.mrzData
-    )
+    await this.credentialEvent.issuance(session.connectionId, session.credentialClaims, session.mrzData)
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
 
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(session.credentialClaims))

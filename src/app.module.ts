@@ -51,7 +51,7 @@ import { CoreModule } from '@/core.module'
             'birthDate',
             'issuanceDate',
             'expirationDate',
-            'facePhoto'
+            'facePhoto',
           ],
           supportRevocation: true,
           maximumCredentialNumber: 1000,
