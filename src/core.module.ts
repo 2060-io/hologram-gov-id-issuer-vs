@@ -1,8 +1,8 @@
 import { Global, Module } from '@nestjs/common'
-import { CredentialEntity, WebRtcPeerEntity, SessionEntity } from '@/models'
+import { WebRtcPeerEntity, SessionEntity } from '@/models'
 import { CoreService } from '@/core.service'
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm'
-import { ConnectionEntity } from '@2060.io/service-agent-nestjs-client'
+import { ConnectionEntity, CredentialEntity } from '@2060.io/service-agent-nestjs-client'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Global()

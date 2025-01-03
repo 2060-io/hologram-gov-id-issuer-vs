@@ -23,9 +23,9 @@ import {
   TextMessage,
 } from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { EventHandler } from '@2060.io/service-agent-nestjs-client'
+import { CredentialEventService, EventHandler } from '@2060.io/service-agent-nestjs-client'
 import { Injectable, Logger } from '@nestjs/common'
-import { CredentialEntity, WebRtcPeerEntity, SessionEntity } from '@/models'
+import { WebRtcPeerEntity, SessionEntity } from '@/models'
 import { CredentialState, JsonTransformer, Sha256, utils } from '@credo-ts/core'
 import { Cmd, MenuSelectEnum, PeerType, StateStep } from '@/common'
 import { Repository } from 'typeorm'
@@ -46,8 +46,7 @@ export class CoreService implements EventHandler {
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(WebRtcPeerEntity)
     private readonly peerRepository: Repository<WebRtcPeerEntity>,
-    @InjectRepository(CredentialEntity)
-    private readonly credentialRepository: Repository<CredentialEntity>,
+    private readonly credentialEvent: CredentialEventService,
     private readonly i18n: I18nService,
     private readonly configService: ConfigService,
   ) {
@@ -118,7 +117,6 @@ export class CoreService implements EventHandler {
   async newConnection(event: ConnectionStateUpdated): Promise<void> {
     const session = await this.handleSession(event.connectionId)
     await this.sendContextualMenu(session)
-    await this.sendCredentialType()
   }
 
   async closeConnection(event: ConnectionStateUpdated): Promise<void> {
@@ -249,8 +247,6 @@ export class CoreService implements EventHandler {
           break
         case StateStep.ISSUE:
           if (content instanceof CredentialReceptionMessage) {
-            // Generate credential and delete if it exists
-            await this.handleCredential(session)
             switch (content.state) {
               case CredentialState.Done:
                 await this.sendText(session.connectionId, 'CREDENTIAL_ACCEPTED', session.lang)
@@ -329,33 +325,6 @@ export class CoreService implements EventHandler {
       this.logger.debug('New session: ' + JSON.stringify(session))
     }
     return await this.sessionRepository.save(session)
-  }
-
-  private async handleCredential(session: SessionEntity) {
-    // encrypt credential
-    const hashString = session.mrzData
-    const encrypt = new Sha256().hash(hashString)
-
-    let credential = await this.credentialRepository.findOneBy({
-      hash: Buffer.from(encrypt),
-    })
-    this.logger.debug('handleCredential credential: ' + JSON.stringify(credential))
-
-    if (credential) {
-      await this.credentialRepository.remove(credential)
-      this.logger.debug('Existing credential removed: ' + JSON.stringify(credential))
-    }
-
-    if (!credential) {
-      credential = this.credentialRepository.create({
-        connectionId: session.connectionId,
-        hash: Buffer.from(encrypt),
-        revocationId: utils.uuid(),
-      })
-
-      await this.credentialRepository.save(credential)
-      this.logger.debug('New credential: ' + JSON.stringify(credential))
-    }
   }
 
   private async sendMenuSelection(session: SessionEntity): Promise<SessionEntity> {
@@ -464,61 +433,45 @@ export class CoreService implements EventHandler {
     return await this.sessionRepository.save(session)
   }
 
+  // Generate credential and delete if it exists
   private async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
-    const claims: Claim[] = []
-
-    if (session.credentialClaims) {
-      Object.entries(session.credentialClaims).forEach(([key, value]) => {
-        claims.push(
-          new Claim({
-            name: key,
-            value: value ?? null,
-          }),
-        )
-      })
-    }
-
-    await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
-    let credentialId = (await this.apiClient.credentialTypes.getAll())[0]?.id
-    if (!credentialId) credentialId = (await this.sendCredentialType())[0]?.id
-    await this.apiClient.messages.send(
-      new CredentialIssuanceMessage({
-        connectionId: session.connectionId,
-        credentialDefinitionId: credentialId,
-        claims: claims,
-      }),
+    await this.credentialEvent.issuance(
+      session.connectionId,
+      session.credentialClaims,
+      session.mrzData
     )
+    await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
 
-    this.logger.debug('sendCredential with claims: ' + JSON.stringify(claims))
+    this.logger.debug('sendCredential with claims: ' + JSON.stringify(session.credentialClaims))
     return session
   }
 
-  private async sendCredentialType(): Promise<CredentialTypeInfo[]> {
-    const credential: CredentialTypeInfo[] = await this.apiClient.credentialTypes.getAll()
+  // private async sendCredentialType(): Promise<CredentialTypeInfo[]> {
+  //   const credential: CredentialTypeInfo[] = await this.apiClient.credentialTypes.getAll()
 
-    if (!credential || credential.length === 0) {
-      const newCredential = await this.apiClient.credentialTypes.create({
-        id: utils.uuid(),
-        name: 'Unic Id',
-        version: '1.0',
-        attributes: [
-          'documentType',
-          'documentNumber',
-          'issuingState',
-          'firstName',
-          'lastName',
-          'sex',
-          'nationality',
-          'birthDate',
-          'issuanceDate',
-          'expirationDate',
-          'facePhoto',
-        ],
-      })
-      credential.push(newCredential)
-    }
-    return credential
-  }
+  //   if (!credential || credential.length === 0) {
+  //     const newCredential = await this.apiClient.credentialTypes.create({
+  //       id: utils.uuid(),
+  //       name: 'Unic Id',
+  //       version: '1.0',
+  //       attributes: [
+  //         'documentType',
+  //         'documentNumber',
+  //         'issuingState',
+  //         'firstName',
+  //         'lastName',
+  //         'sex',
+  //         'nationality',
+  //         'birthDate',
+  //         'issuanceDate',
+  //         'expirationDate',
+  //         'facePhoto',
+  //       ],
+  //     })
+  //     credential.push(newCredential)
+  //   }
+  //   return credential
+  // }
 
   // Special flows
   private async purgeUserData(session): Promise<SessionEntity> {
