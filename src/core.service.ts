@@ -203,7 +203,7 @@ export class CoreService implements EventHandler {
         case StateStep.MRZ:
           if (content instanceof MrzDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
-              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang)
+              // await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang) // TODO: When MRZ is valid it could enable this message
               session.mrzData = Array.isArray(content.mrzData.raw)
                 ? content.mrzData.raw.join('\n')
                 : content.mrzData.raw
