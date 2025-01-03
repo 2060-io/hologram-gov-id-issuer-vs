@@ -446,33 +446,6 @@ export class CoreService implements EventHandler {
     return session
   }
 
-  // private async sendCredentialType(): Promise<CredentialTypeInfo[]> {
-  //   const credential: CredentialTypeInfo[] = await this.apiClient.credentialTypes.getAll()
-
-  //   if (!credential || credential.length === 0) {
-  //     const newCredential = await this.apiClient.credentialTypes.create({
-  //       id: utils.uuid(),
-  //       name: 'Unic Id',
-  //       version: '1.0',
-  //       attributes: [
-  //         'documentType',
-  //         'documentNumber',
-  //         'issuingState',
-  //         'firstName',
-  //         'lastName',
-  //         'sex',
-  //         'nationality',
-  //         'birthDate',
-  //         'issuanceDate',
-  //         'expirationDate',
-  //         'facePhoto',
-  //       ],
-  //     })
-  //     credential.push(newCredential)
-  //   }
-  //   return credential
-  // }
-
   // Special flows
   private async purgeUserData(session): Promise<SessionEntity> {
     session.state = StateStep.START
