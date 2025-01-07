@@ -547,7 +547,7 @@ export class CoreService implements EventHandler {
     const updatedTime = new Date(session.updatedTs)
     const timeDifferenceInSeconds = Math.floor((now.getTime() - updatedTime.getTime()) / 1000)
 
-    if (timeoutEnv && timeDifferenceInSeconds > timeoutEnv) {
+    if (timeoutEnv && timeDifferenceInSeconds > timeoutEnv && session.state !== StateStep.ISSUE) {
       session.state = StateStep.TIMEOUT
       await this.sendText(session.connectionId, 'TIMEOUT_PROCESS', session.lang)
       this.logger.debug(`Session with ID ${session.id} has expired`)
