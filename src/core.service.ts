@@ -203,7 +203,7 @@ export class CoreService implements EventHandler {
         case StateStep.MRZ:
           if (content instanceof MrzDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
-              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang)
+              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang) // TODO: When MRZ can checked add to the message "Congratulations, your document is compatible with UnicID."
               session.mrzData = Array.isArray(content.mrzData.raw)
                 ? content.mrzData.raw.join('\n')
                 : content.mrzData.raw
