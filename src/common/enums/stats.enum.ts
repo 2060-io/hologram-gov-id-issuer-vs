@@ -18,10 +18,3 @@ export enum STAT_KPI {
   VC_ACCEPTED,
   VC_REFUSED,
 }
-
-export enum STAT_ID {
-  GLOBAL,
-  COUNTRY,
-  COUNTRY_DOC_TYPE,
-  COUNTRY_DOC_TYPE_EXP_YEAR,
-}
