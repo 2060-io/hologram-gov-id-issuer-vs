@@ -198,7 +198,7 @@ export class CoreService implements EventHandler {
         case StateStep.MRZ:
           if (content instanceof MrzDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
-              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang)
+              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang) // TODO: When MRZ can checked add to the message "Congratulations, your document is compatible with UnicID."
               session.mrzData = Array.isArray(content.mrzData.raw)
                 ? content.mrzData.raw.join('\n')
                 : content.mrzData.raw
@@ -214,19 +214,19 @@ export class CoreService implements EventHandler {
             if (content.state === MrtdSubmitState.Submitted) {
               await this.sendText(session.connectionId, 'EMRTD_SUCCESSFUL', session.lang)
               session.state = StateStep.VERIFICATION
-              const issuanceDate = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
+              const credentialIssuanceDate = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
               const rawSex = content.dataGroups.processed.sex ?? 'X'
               session.credentialClaims = {
                 documentType: content.dataGroups.processed.documentType ?? null,
                 documentNumber: content.dataGroups.processed.documentNumber ?? null,
-                issuingState: whereAlpha3(content.dataGroups.processed.issuingState).alpha2 ?? null,
+                documentIssuingState: whereAlpha3(content.dataGroups.processed.issuingState).alpha2 ?? null,
                 firstName: content.dataGroups.processed.firstName ?? null,
                 lastName: content.dataGroups.processed.lastName ?? null,
                 sex: ['M', 'F'].includes(rawSex) ? rawSex : 'X',
                 nationality: whereAlpha3(content.dataGroups.processed.nationality).alpha2 ?? null,
                 birthDate: content.dataGroups.processed.dateOfBirth ?? null,
-                issuanceDate,
-                expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
+                credentialIssuanceDate,
+                documentExpirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
                 facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
               }
               session = await this.startVideoCall(session)
@@ -439,6 +439,33 @@ export class CoreService implements EventHandler {
     return session
   }
 
+  private async sendCredentialType(): Promise<CredentialTypeInfo[]> {
+    const credential: CredentialTypeInfo[] = await this.apiClient.credentialTypes.getAll()
+
+    if (!credential || credential.length === 0) {
+      const newCredential = await this.apiClient.credentialTypes.create({
+        id: utils.uuid(),
+        name: 'Unic Id',
+        version: '1.0',
+        attributes: [
+          'documentType',
+          'documentNumber',
+          'documentIssuingState',
+          'firstName',
+          'lastName',
+          'sex',
+          'nationality',
+          'birthDate',
+          'credentialIssuanceDate',
+          'documentExpirationDate',
+          'facePhoto',
+        ],
+      })
+      credential.push(newCredential)
+    }
+    return credential
+  }
+
   // Special flows
   private async purgeUserData(session): Promise<SessionEntity> {
     session.state = StateStep.START
@@ -466,7 +493,7 @@ export class CoreService implements EventHandler {
     const updatedTime = new Date(session.updatedTs)
     const timeDifferenceInSeconds = Math.floor((now.getTime() - updatedTime.getTime()) / 1000)
 
-    if (timeoutEnv && timeDifferenceInSeconds > timeoutEnv) {
+    if (timeoutEnv && timeDifferenceInSeconds > timeoutEnv && session.state !== StateStep.ISSUE) {
       session.state = StateStep.TIMEOUT
       await this.sendText(session.connectionId, 'TIMEOUT_PROCESS', session.lang)
       this.logger.debug(`Session with ID ${session.id} has expired`)
