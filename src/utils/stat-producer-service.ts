@@ -78,22 +78,27 @@ export class StatProducerService implements OnModuleInit, OnModuleDestroy {
   }
 
   async spool(
-    statClass: string,
+    statClass: string | string[],
     entityId: string,
     statEnums: StatEnum[],
     ts: Date = new Date(),
     increment: number = 1,
   ): Promise<void> {
-    const event = new StatEvent(entityId, statEnums, increment, ts, statClass)
+    const statClasses = Array.isArray(statClass) ? statClass : [statClass]
 
-    try {
-      const msg = {
-        body: JSON.stringify(event),
+    for (const currentStatClass of statClasses) {
+      const event = new StatEvent(entityId, statEnums, increment, ts, currentStatClass)
+
+      try {
+        const msg = {
+          body: JSON.stringify(event),
+        }
+        this.sender.send(msg)
+        this.logger.debug(`Sending message: ${msg.body}`)
+      } catch (error) {
+        this.logger.error(`Failed to send message: ${error.message}`)
+        throw error
       }
-      this.sender.send(msg)
-    } catch (error) {
-      this.logger.error(`Failed to send message: ${error.message}`)
-      throw error
     }
   }
 
