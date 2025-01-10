@@ -1,4 +1,5 @@
 // stats.service.ts
+import { StatEnum, StatEvent } from '@/utils/stats'
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { Container, Connection, Sender, create_container } from 'rhea'
 
@@ -83,23 +84,13 @@ export class StatProducerService implements OnModuleInit, OnModuleDestroy {
     ts: Date,
     increment: number = 1,
   ): Promise<void> {
-    const event: StatEvent = {
-      entityId,
-      enums: statEnums.map(se => ({
-        index: se.index,
-        description: se.value,
-      })),
-      increment,
-      ts,
-      statClass,
-    }
+    const event = new StatEvent(entityId, statEnums, increment, ts, statClass)
 
     try {
       const msg = {
         body: JSON.stringify(event),
       }
       this.sender.send(msg)
-      this.logger.log(`Sent message: ${JSON.stringify(msg)}`)
     } catch (error) {
       this.logger.error(`Failed to send message: ${error.message}`)
       throw error
