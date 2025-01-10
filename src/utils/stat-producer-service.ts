@@ -81,7 +81,7 @@ export class StatProducerService implements OnModuleInit, OnModuleDestroy {
     statClass: string,
     entityId: string,
     statEnums: StatEnum[],
-    ts: Date,
+    ts: Date = new Date(),
     increment: number = 1,
   ): Promise<void> {
     const event = new StatEvent(entityId, statEnums, increment, ts, statClass)
