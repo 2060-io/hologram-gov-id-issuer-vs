@@ -20,8 +20,8 @@ import {
   TextMessage,
 } from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { CredentialEventService, EventHandler } from '@2060.io/service-agent-nestjs-client'
-import { Injectable, Logger } from '@nestjs/common'
+import { CredentialService, EventHandler } from '@2060.io/service-agent-nestjs-client'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { WebRtcPeerEntity, SessionEntity } from '@/models'
 import { CredentialState, JsonTransformer, utils } from '@credo-ts/core'
 import { Cmd, MenuSelectEnum, PeerType, StateStep } from '@/common'
@@ -34,7 +34,7 @@ import { ConfigService } from '@nestjs/config'
 import { whereAlpha3 } from 'iso-3166-1'
 
 @Injectable()
-export class CoreService implements EventHandler {
+export class CoreService implements EventHandler, OnModuleInit {
   private readonly apiClient: ApiClient
   private readonly logger = new Logger(CoreService.name)
 
@@ -43,12 +43,36 @@ export class CoreService implements EventHandler {
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(WebRtcPeerEntity)
     private readonly peerRepository: Repository<WebRtcPeerEntity>,
-    private readonly credentialEvent: CredentialEventService,
+    private readonly credentialService: CredentialService,
     private readonly i18n: I18nService,
     private readonly configService: ConfigService,
   ) {
     const baseUrl = configService.get<string>('appConfig.serviceAgentAdminUrl')
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
+  }
+
+  async onModuleInit() {
+    await this.credentialService.create(
+      [
+        'documentType',
+        'documentNumber',
+        'documentIssuingState',
+        'firstName',
+        'lastName',
+        'sex',
+        'nationality',
+        'birthDate',
+        'credentialIssuanceDate',
+        'documentExpirationDate',
+        'facePhoto',
+      ],
+      {
+        name: 'Unic Id',
+        supportRevocation: true,
+        maximumCredentialNumber: 1000,
+        autoRevocationEnabled: true,
+      },
+    )
   }
 
   async inputMessage(message: BaseMessage): Promise<void> {
@@ -432,7 +456,9 @@ export class CoreService implements EventHandler {
 
   // Generate credential and delete if it exists
   private async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
-    await this.credentialEvent.issuance(session.connectionId, session.credentialClaims, session.mrzData)
+    await this.credentialService.issuance(session.connectionId, session.credentialClaims, {
+      identifier: session.mrzData,
+    })
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
 
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(session.credentialClaims))
