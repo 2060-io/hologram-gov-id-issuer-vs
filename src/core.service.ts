@@ -236,6 +236,7 @@ export class CoreService implements EventHandler, OnModuleInit {
         case StateStep.EMRTD:
           if (content instanceof EMrtdDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
+              session.mrzData = content.dataGroups.raw.DG1
               await this.sendText(session.connectionId, 'EMRTD_SUCCESSFUL', session.lang)
               session.state = StateStep.VERIFICATION
               const credentialIssuanceDate = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
