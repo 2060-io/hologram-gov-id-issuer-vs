@@ -2,6 +2,7 @@ import {
   BaseMessage,
   CallOfferRequestMessage,
   CallRejectRequestMessage,
+  Claim,
   ConnectionStateUpdated,
   ContextualMenuItem,
   ContextualMenuSelectMessage,
@@ -52,7 +53,7 @@ export class CoreService implements EventHandler, OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.credentialService.create(
+    await this.credentialService.createType(
       [
         'documentType',
         'documentNumber',
@@ -70,7 +71,6 @@ export class CoreService implements EventHandler, OnModuleInit {
         name: 'Unic Id',
         supportRevocation: true,
         maximumCredentialNumber: 1000,
-        autoRevocationEnabled: true,
       },
     )
   }
@@ -454,8 +454,12 @@ export class CoreService implements EventHandler, OnModuleInit {
 
   // Generate credential and delete if it exists
   private async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
-    await this.credentialService.issuance(session.connectionId, session.credentialClaims, {
-      identifier: session.mrzData,
+    const claims: Claim[] = Object.entries(session.credentialClaims).map(
+      ([name, value]) => new Claim({ name, value }),
+    )
+    await this.credentialService.issue(session.connectionId, claims, {
+      refId: session.mrzData,
+      revokeIfAlreadyIssued: true,
     })
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
 
