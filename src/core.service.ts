@@ -54,6 +54,8 @@ export class CoreService implements EventHandler, OnModuleInit {
 
   async onModuleInit() {
     await this.credentialService.createType(
+      'Unic Id',
+      '1.0',
       [
         'documentType',
         'documentNumber',
@@ -68,9 +70,8 @@ export class CoreService implements EventHandler, OnModuleInit {
         'facePhoto',
       ],
       {
-        name: 'Unic Id',
         supportRevocation: true,
-        maximumCredentialNumber: 1000,
+        maximumCredentialNumber: 3,
       },
     )
   }
