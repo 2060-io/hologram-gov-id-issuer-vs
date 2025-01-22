@@ -71,7 +71,7 @@ export class CoreService implements EventHandler, OnModuleInit {
       ],
       {
         supportRevocation: true,
-        maximumCredentialNumber: 3,
+        maximumCredentialNumber: 1000,
       },
     )
   }
