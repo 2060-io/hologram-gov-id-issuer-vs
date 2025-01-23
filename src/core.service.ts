@@ -8,9 +8,7 @@ import {
   ContextualMenuSelectMessage,
   ContextualMenuUpdateMessage,
   convertShortDate,
-  CredentialIssuanceMessage,
   CredentialReceptionMessage,
-  CredentialTypeInfo,
   EMrtdDataRequestMessage,
   EMrtdDataSubmitMessage,
   MediaMessage,
@@ -24,10 +22,10 @@ import {
   TextMessage,
 } from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { EventHandler } from '@2060.io/service-agent-nestjs-client'
-import { Injectable, Logger } from '@nestjs/common'
-import { CredentialEntity, WebRtcPeerEntity, SessionEntity } from '@/models'
-import { CredentialState, JsonTransformer, Sha256, utils } from '@credo-ts/core'
+import { CredentialService, EventHandler } from '@2060.io/service-agent-nestjs-client'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { WebRtcPeerEntity, SessionEntity } from '@/models'
+import { CredentialState, JsonTransformer, utils } from '@credo-ts/core'
 import { Cmd, MenuSelectEnum, PeerType, STAT_KPI, StateStep } from '@/common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -39,7 +37,7 @@ import { whereAlpha3 } from 'iso-3166-1'
 import { StatProducerService, StatEnum } from '@/utils'
 
 @Injectable()
-export class CoreService implements EventHandler {
+export class CoreService implements EventHandler, OnModuleInit {
   private readonly apiClient: ApiClient
   private readonly logger = new Logger(CoreService.name)
 
@@ -48,14 +46,37 @@ export class CoreService implements EventHandler {
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(WebRtcPeerEntity)
     private readonly peerRepository: Repository<WebRtcPeerEntity>,
-    @InjectRepository(CredentialEntity)
-    private readonly credentialRepository: Repository<CredentialEntity>,
+    private readonly credentialService: CredentialService,
     private readonly i18n: I18nService,
     private readonly configService: ConfigService,
     private readonly statProducer: StatProducerService,
   ) {
     const baseUrl = configService.get<string>('appConfig.serviceAgentAdminUrl')
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
+  }
+
+  async onModuleInit() {
+    await this.credentialService.createType(
+      'Unic Id',
+      '1.0',
+      [
+        'documentType',
+        'documentNumber',
+        'documentIssuingState',
+        'firstName',
+        'lastName',
+        'sex',
+        'nationality',
+        'birthDate',
+        'credentialIssuanceDate',
+        'documentExpirationDate',
+        'facePhoto',
+      ],
+      {
+        supportRevocation: true,
+        maximumCredentialNumber: 1000,
+      },
+    )
   }
 
   async inputMessage(message: BaseMessage): Promise<void> {
@@ -122,7 +143,6 @@ export class CoreService implements EventHandler {
   async newConnection(event: ConnectionStateUpdated): Promise<void> {
     const session = await this.handleSession(event.connectionId)
     await this.sendContextualMenu(session)
-    await this.sendCredentialType()
   }
 
   async closeConnection(event: ConnectionStateUpdated): Promise<void> {
@@ -207,10 +227,7 @@ export class CoreService implements EventHandler {
         case StateStep.MRZ:
           if (content instanceof MrzDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
-              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang)
-              session.mrzData = Array.isArray(content.mrzData.raw)
-                ? content.mrzData.raw.join('\n')
-                : content.mrzData.raw
+              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang) // TODO: When MRZ can checked add to the message "Congratulations, your document is compatible with UnicID."
               session = await this.sendEMrtdRequest(session)
               // TODO: is a MRZ valid?
 
@@ -229,21 +246,22 @@ export class CoreService implements EventHandler {
         case StateStep.EMRTD:
           if (content instanceof EMrtdDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
+              session.mrzData = content.dataGroups.processed.mrzString
               await this.sendText(session.connectionId, 'EMRTD_SUCCESSFUL', session.lang)
               session.state = StateStep.VERIFICATION
-              const issuanceDate = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
+              const credentialIssuanceDate = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
               const rawSex = content.dataGroups.processed.sex ?? 'X'
               session.credentialClaims = {
                 documentType: content.dataGroups.processed.documentType ?? null,
                 documentNumber: content.dataGroups.processed.documentNumber ?? null,
-                issuingState: whereAlpha3(content.dataGroups.processed.issuingState).alpha2 ?? null,
+                documentIssuingState: whereAlpha3(content.dataGroups.processed.issuingState).alpha2 ?? null,
                 firstName: content.dataGroups.processed.firstName ?? null,
                 lastName: content.dataGroups.processed.lastName ?? null,
                 sex: ['M', 'F'].includes(rawSex) ? rawSex : 'X',
                 nationality: whereAlpha3(content.dataGroups.processed.nationality).alpha2 ?? null,
                 birthDate: content.dataGroups.processed.dateOfBirth ?? null,
-                issuanceDate,
-                expirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
+                credentialIssuanceDate,
+                documentExpirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
                 facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
               }
               session = await this.startVideoCall(session)
@@ -269,8 +287,6 @@ export class CoreService implements EventHandler {
           break
         case StateStep.ISSUE:
           if (content instanceof CredentialReceptionMessage) {
-            // Generate credential and delete if it exists
-            await this.handleCredential(session)
             switch (content.state) {
               case CredentialState.Done:
                 await this.sendText(session.connectionId, 'CREDENTIAL_ACCEPTED', session.lang)
@@ -352,33 +368,6 @@ export class CoreService implements EventHandler {
       this.logger.debug('New session: ' + JSON.stringify(session))
     }
     return await this.sessionRepository.save(session)
-  }
-
-  private async handleCredential(session: SessionEntity) {
-    // encrypt credential
-    const hashString = session.mrzData
-    const encrypt = new Sha256().hash(hashString)
-
-    let credential = await this.credentialRepository.findOneBy({
-      hash: Buffer.from(encrypt),
-    })
-    this.logger.debug('handleCredential credential: ' + JSON.stringify(credential))
-
-    if (credential) {
-      await this.credentialRepository.remove(credential)
-      this.logger.debug('Existing credential removed: ' + JSON.stringify(credential))
-    }
-
-    if (!credential) {
-      credential = this.credentialRepository.create({
-        connectionId: session.connectionId,
-        hash: Buffer.from(encrypt),
-        revocationId: utils.uuid(),
-      })
-
-      await this.credentialRepository.save(credential)
-      this.logger.debug('New credential: ' + JSON.stringify(credential))
-    }
   }
 
   private async sendMenuSelection(session: SessionEntity): Promise<SessionEntity> {
@@ -488,61 +477,20 @@ export class CoreService implements EventHandler {
     return await this.sessionRepository.save(session)
   }
 
+  // Generate credential and delete if it exists
   private async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
-    const claims: Claim[] = []
-
-    if (session.credentialClaims) {
-      Object.entries(session.credentialClaims).forEach(([key, value]) => {
-        claims.push(
-          new Claim({
-            name: key,
-            value: value ?? null,
-          }),
-        )
-      })
-    }
-
-    await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
-    let credentialId = (await this.apiClient.credentialTypes.getAll())[0]?.id
-    if (!credentialId) credentialId = (await this.sendCredentialType())[0]?.id
-    await this.apiClient.messages.send(
-      new CredentialIssuanceMessage({
-        connectionId: session.connectionId,
-        credentialDefinitionId: credentialId,
-        claims: claims,
-      }),
+    const claims: Claim[] = Object.entries(session.credentialClaims).map(
+      ([name, value]) => new Claim({ name, value }),
     )
+    await this.credentialService.issue(session.connectionId, claims, {
+      refId: session.mrzData,
+      revokeIfAlreadyIssued: true,
+    })
+    await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
 
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(claims))
     await this.sendStats(STAT_KPI.VC_OFFER, session)
     return session
-  }
-
-  private async sendCredentialType(): Promise<CredentialTypeInfo[]> {
-    const credential: CredentialTypeInfo[] = await this.apiClient.credentialTypes.getAll()
-
-    if (!credential || credential.length === 0) {
-      const newCredential = await this.apiClient.credentialTypes.create({
-        id: utils.uuid(),
-        name: 'Unic Id',
-        version: '1.0',
-        attributes: [
-          'documentType',
-          'documentNumber',
-          'issuingState',
-          'firstName',
-          'lastName',
-          'sex',
-          'nationality',
-          'birthDate',
-          'issuanceDate',
-          'expirationDate',
-          'facePhoto',
-        ],
-      })
-      credential.push(newCredential)
-    }
-    return credential
   }
 
   // Special flows
@@ -573,7 +521,7 @@ export class CoreService implements EventHandler {
     const updatedTime = new Date(session.updatedTs)
     const timeDifferenceInSeconds = Math.floor((now.getTime() - updatedTime.getTime()) / 1000)
 
-    if (timeoutEnv && timeDifferenceInSeconds > timeoutEnv) {
+    if (timeoutEnv && timeDifferenceInSeconds > timeoutEnv && session.state !== StateStep.ISSUE) {
       session.state = StateStep.TIMEOUT
       await this.sendText(session.connectionId, 'TIMEOUT_PROCESS', session.lang)
       this.logger.debug(`Session with ID ${session.id} has expired`)
