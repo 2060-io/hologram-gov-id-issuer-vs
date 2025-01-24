@@ -111,6 +111,10 @@ export class CoreService implements EventHandler, OnModuleInit {
         case MrzDataSubmitMessage.type:
           session.threadId = message.threadId
           content = JsonTransformer.fromJSON(message, MrzDataSubmitMessage)
+          if (!content.mrzData.parsed.valid) {
+            await this.sendText(session.connectionId, 'MRZ_INVALID', session.lang)
+            await this.sendMenuSelection(session)
+          }
           break
         case EMrtdDataSubmitMessage.type:
           content = JsonTransformer.fromJSON(message, EMrtdDataSubmitMessage)
