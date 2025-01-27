@@ -1,5 +1,6 @@
 {
   "WELCOME":"Bienvenido a UnicID!",
+  "NFC_UNSUPPORTED":"Lo sentimos, tu teléfono no tiene soporte para NFC.\nUnicID requiere un teléfono con soporte para NFC.",
   "HELP":"Acceder al menu contextual para ver las opciones disponibles.",
   "MRZ_REQUEST":"Solo necesitamos unos pocos pasos para verificar tu documento de identificación.",
   "EMRTD_REQUEST":"Por favor, ten listo tu Documento de Identidad o Pasaporte.\nAsegúrate de que sea compatible con la tecnología NFC.",

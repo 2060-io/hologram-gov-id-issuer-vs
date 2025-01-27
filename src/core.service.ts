@@ -21,7 +21,8 @@ import {
   TextMessage,
 } from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { CredentialService, EventHandler } from '@2060.io/service-agent-nestjs-client'
+import { ConnectionEntity, CredentialService, EventHandler } from '@2060.io/service-agent-nestjs-client'
+import { MrtdCapabilities } from '@2060.io/credo-ts-didcomm-mrtd'
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { WebRtcPeerEntity, SessionEntity } from '@/models'
 import { CredentialState, JsonTransformer, utils } from '@credo-ts/core'
@@ -44,6 +45,8 @@ export class CoreService implements EventHandler, OnModuleInit {
     private readonly sessionRepository: Repository<SessionEntity>,
     @InjectRepository(WebRtcPeerEntity)
     private readonly peerRepository: Repository<WebRtcPeerEntity>,
+    @InjectRepository(ConnectionEntity)
+    private readonly connRepository: Repository<ConnectionEntity>,
     private readonly credentialService: CredentialService,
     private readonly i18n: I18nService,
     private readonly configService: ConfigService,
@@ -105,8 +108,11 @@ export class CoreService implements EventHandler, OnModuleInit {
         case ProfileMessage.type:
           inMsg = JsonTransformer.fromJSON(message, ProfileMessage)
           session.lang = inMsg.preferredLanguage
-          await this.welcomeMessage(session.connectionId)
-          if (session.state == StateStep.START) session = await this.sendMrzRequest(session)
+          session = await this.handleNFCSupport(session)
+          if (session.state == StateStep.START) {
+            await this.sendText(session.connectionId, 'WELCOME', session.lang)
+            session = await this.sendMrzRequest(session)
+          } else await this.sendText(session.connectionId, 'NFC_UNSUPPORTED', session.lang)
           break
         case MrzDataSubmitMessage.type:
           session.threadId = message.threadId
@@ -148,11 +154,6 @@ export class CoreService implements EventHandler, OnModuleInit {
   async closeConnection(event: ConnectionStateUpdated): Promise<void> {
     const session = await this.handleSession(event.connectionId)
     await this.purgeUserData(session)
-  }
-
-  private async welcomeMessage(connectionId: string) {
-    const lang = (await this.handleSession(connectionId)).lang
-    await this.sendText(connectionId, 'WELCOME', lang)
   }
 
   private async startVideoCall(session: SessionEntity): Promise<SessionEntity> {
@@ -351,6 +352,15 @@ export class CoreService implements EventHandler, OnModuleInit {
     return await this.sessionRepository.save(session)
   }
 
+  async handleNFCSupport(session: SessionEntity): Promise<SessionEntity> {
+    const conn = await this.connRepository.findOneBy({ id: session.connectionId })
+    if (conn?.metadata?.[MrtdCapabilities.EMrtdReadSupport]) {
+      session.nfcSupport = Boolean(JSON.parse(conn.metadata[MrtdCapabilities.EMrtdReadSupport]).value)
+      if (!session.nfcSupport) session.state = StateStep.INCOMPATIBLE_DEVICE
+    }
+    return await this.sessionRepository.save(session)
+  }
+
   private async sendMenuSelection(session: SessionEntity): Promise<SessionEntity> {
     let prompt = ''
     const menuitems: MenuItem[] = []
@@ -478,7 +488,6 @@ export class CoreService implements EventHandler, OnModuleInit {
     session.threadId = null
     session.userAgent = null
     session.tp = null
-    session.nfcSupport = null
     session.credentialClaims = null
     session.mrzData = null
     return await this.sessionRepository.save(session)
