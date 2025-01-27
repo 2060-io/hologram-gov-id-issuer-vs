@@ -352,7 +352,7 @@ export class CoreService implements EventHandler, OnModuleInit {
     const conn = await this.connRepository.findOneBy({ id: session.connectionId })
     if (conn?.metadata?.[MrtdCapabilities.EMrtdReadSupport]) {
       session.nfcSupport = Boolean(JSON.parse(conn.metadata[MrtdCapabilities.EMrtdReadSupport]).value)
-      if (!session.nfcSupport) session.state = StateStep.UNSUPPORTED
+      if (!session.nfcSupport) session.state = StateStep.INCOMPATIBLE_DEVICE
     }
     return await this.sessionRepository.save(session)
   }
