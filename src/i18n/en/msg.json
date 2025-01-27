@@ -8,6 +8,7 @@
   "MRZ_SUCCESSFUL": "ID Document successfully read.",
   "EMRTD_SUCCESSFUL":"ID Document successfully read.",
   "VERIFICATION_SUCCESSFUL":"Verification successful.",
+  "MRZ_INVALID":"It looks like the MRZ is invalid. Please rescan your document and try again.",
   "MRTD_FAILED":"Your document couldn't be verified. Reason: <reason>.",
   "ROOT_TITTLE": "Context Menu",
   "TIMEOUT_PROCESS": "ID Verification Timed out. Check menu above to start a new ID Verification.",

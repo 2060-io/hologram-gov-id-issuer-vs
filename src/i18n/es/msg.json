@@ -8,6 +8,7 @@
   "MRZ_SUCCESSFUL":"Documento de identidad leído con éxito.",
   "EMRTD_SUCCESSFUL":"Documento de identidad leído con éxito.",
   "VERIFICATION_SUCCESSFUL":"Verificación exitosa.",
+  "MRZ_INVALID":"Parece que el MRZ no es válido. Por favor, vuelve a escanear tu documento e inténtalo de nuevo.",
   "MRTD_FAILED":"No fue posible verificar tu documento. Motivo: <reason>.",
   "ROOT_TITTLE": "Menú Contextual",
   "TIMEOUT_PROCESS": "La verificación de identidad ha expirado. Revisa el menú de arriba para iniciar una nueva verificación de identidad.",
