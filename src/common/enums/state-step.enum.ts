@@ -5,5 +5,5 @@ export enum StateStep {
   VERIFICATION,
   ISSUE,
   TIMEOUT,
-  UNSUPPORTED,
+  INCOMPATIBLE_DEVICE,
 }
