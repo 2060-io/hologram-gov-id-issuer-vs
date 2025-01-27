@@ -484,7 +484,6 @@ export class CoreService implements EventHandler, OnModuleInit {
     session.threadId = null
     session.userAgent = null
     session.tp = null
-    session.nfcSupport = null
     session.credentialClaims = null
     session.mrzData = null
     return await this.sessionRepository.save(session)
