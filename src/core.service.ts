@@ -17,7 +17,6 @@ import {
   MrtdSubmitState,
   MrzDataRequestMessage,
   MrzDataSubmitMessage,
-  ProfileMessage,
   TextMessage,
 } from '@2060.io/service-agent-model'
 import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
@@ -105,15 +104,6 @@ export class CoreService implements EventHandler, OnModuleInit {
           inMsg = JsonTransformer.fromJSON(message, MediaMessage)
           content = 'media'
           break
-        case ProfileMessage.type:
-          inMsg = JsonTransformer.fromJSON(message, ProfileMessage)
-          session.lang = inMsg.preferredLanguage
-          session = await this.handleNFCSupport(session)
-          if (session.state == StateStep.START) {
-            await this.sendText(session.connectionId, 'WELCOME', session.lang)
-            session = await this.sendMrzRequest(session)
-          } else await this.sendText(session.connectionId, 'NFC_UNSUPPORTED', session.lang)
-          break
         case MrzDataSubmitMessage.type:
           session.threadId = message.threadId
           content = JsonTransformer.fromJSON(message, MrzDataSubmitMessage)
@@ -147,7 +137,19 @@ export class CoreService implements EventHandler, OnModuleInit {
   }
 
   async newConnection(event: ConnectionStateUpdated): Promise<void> {
-    const session = await this.handleSession(event.connectionId)
+    let session = await this.handleSession(event.connectionId)
+    const conn = await this.connRepository.findOneBy({ id: session.connectionId })
+    session.lang = conn.lang
+    if (conn?.metadata?.[MrtdCapabilities.EMrtdReadSupport]) {
+      session.nfcSupport = Boolean(JSON.parse(conn.metadata[MrtdCapabilities.EMrtdReadSupport]).value)
+      if (!session.nfcSupport) session.state = StateStep.INCOMPATIBLE_DEVICE
+    }
+
+    if (session.state == StateStep.START) {
+      await this.sendText(session.connectionId, 'WELCOME', session.lang)
+      session = await this.sendMrzRequest(session)
+    } else if (session.state === StateStep.INCOMPATIBLE_DEVICE)
+      await this.sendText(session.connectionId, 'NFC_UNSUPPORTED', session.lang)
     await this.sendContextualMenu(session)
   }
 
@@ -348,15 +350,6 @@ export class CoreService implements EventHandler, OnModuleInit {
 
       await this.sessionRepository.save(session)
       this.logger.debug('New session: ' + JSON.stringify(session))
-    }
-    return await this.sessionRepository.save(session)
-  }
-
-  async handleNFCSupport(session: SessionEntity): Promise<SessionEntity> {
-    const conn = await this.connRepository.findOneBy({ id: session.connectionId })
-    if (conn?.metadata?.[MrtdCapabilities.EMrtdReadSupport]) {
-      session.nfcSupport = Boolean(JSON.parse(conn.metadata[MrtdCapabilities.EMrtdReadSupport]).value)
-      if (!session.nfcSupport) session.state = StateStep.INCOMPATIBLE_DEVICE
     }
     return await this.sessionRepository.save(session)
   }
