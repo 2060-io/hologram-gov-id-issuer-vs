@@ -139,7 +139,7 @@ export class CoreService implements EventHandler, OnModuleInit {
   async newConnection(event: ConnectionStateUpdated): Promise<void> {
     let session = await this.handleSession(event.connectionId)
     const conn = await this.connRepository.findOneBy({ id: session.connectionId })
-    session.lang = conn.lang
+    session.lang = conn.userProfile.preferredLanguage
     if (conn?.metadata?.[MrtdCapabilities.EMrtdReadSupport]) {
       session.nfcSupport = Boolean(JSON.parse(conn.metadata[MrtdCapabilities.EMrtdReadSupport]).value)
       if (!session.nfcSupport) session.state = StateStep.INCOMPATIBLE_DEVICE
