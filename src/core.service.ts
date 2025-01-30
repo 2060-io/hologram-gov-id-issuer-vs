@@ -3,7 +3,6 @@ import {
   CallOfferRequestMessage,
   CallRejectRequestMessage,
   Claim,
-  ConnectionStateUpdated,
   ContextualMenuItem,
   ContextualMenuSelectMessage,
   ContextualMenuUpdateMessage,
@@ -136,8 +135,8 @@ export class CoreService implements EventHandler, OnModuleInit {
     await this.handleStateInput(content, session)
   }
 
-  async newConnection(event: ConnectionStateUpdated): Promise<void> {
-    let session = await this.handleSession(event.connectionId)
+  async newConnection(connectionId: string): Promise<void> {
+    let session = await this.handleSession(connectionId)
     const conn = await this.connRepository.findOneBy({ id: session.connectionId })
     session.lang = conn.userProfile.preferredLanguage
     if (conn?.metadata?.[MrtdCapabilities.EMrtdReadSupport]) {
@@ -153,8 +152,8 @@ export class CoreService implements EventHandler, OnModuleInit {
     await this.sendContextualMenu(session)
   }
 
-  async closeConnection(event: ConnectionStateUpdated): Promise<void> {
-    const session = await this.handleSession(event.connectionId)
+  async closeConnection(connectionId: string): Promise<void> {
+    const session = await this.handleSession(connectionId)
     await this.purgeUserData(session)
   }
 
