@@ -16,10 +16,10 @@
     rxjs "^7.2.0"
     tsyringe "^4.8.0"
 
-"@2060.io/service-agent-client@*", "@2060.io/service-agent-client@^1.1.0-dev.38":
-  version "1.1.0-dev.38"
-  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-client/-/service-agent-client-1.1.0-dev.38.tgz#7ad3f6f39f7dc16769a5cd974243a6dc660bad1c"
-  integrity sha512-3jZLQXCN9MkIqF3XTBKec4wLXiMRKLCkRHxhHSLFdkhRcMy60k0lzDSpPlF016SxYFpgpeg9qtHeWdZEo5RGSA==
+"@2060.io/service-agent-client@*", "@2060.io/service-agent-client@^1.1.0-dev.41":
+  version "1.1.0-dev.41"
+  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-client/-/service-agent-client-1.1.0-dev.41.tgz#700c01d20b93004170491bc69fd3b053b5440a27"
+  integrity sha512-aF9EAYk2XQisHm76SMALYd+xsVSFRxZ4xOprE3Twa5a9k93/aXlqXm/upr25krsynYuckBHNJtPiZwwvnzBPgg==
   dependencies:
     "@2060.io/service-agent-model" "*"
     class-transformer "0.5.1"
@@ -27,10 +27,10 @@
     express "^4.18.1"
     tslog "^4.8.2"
 
-"@2060.io/service-agent-model@*", "@2060.io/service-agent-model@^1.1.0-dev.38":
-  version "1.1.0-dev.38"
-  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-model/-/service-agent-model-1.1.0-dev.38.tgz#a3b134b975ff2ce2dbd619530d0030234fa06413"
-  integrity sha512-MqWa+v7NiasfqXAbCro1jvStBBpN3ReFMBS8hFJgUJ1QhgSQIrjnkUpoy+6feNGZDpEIkSRu6MhfiUhaOMdDnw==
+"@2060.io/service-agent-model@*", "@2060.io/service-agent-model@^1.1.0-dev.41":
+  version "1.1.0-dev.41"
+  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-model/-/service-agent-model-1.1.0-dev.41.tgz#851c45534d794cd76df920c9928ef8b5c9ae44c9"
+  integrity sha512-WXYoSE2MILAnxrMX1te7nATBvK/kcBwMP+LdDGkbpgCXuIG/49xTSxnC4zBmVydUU/teLLkmFbIUDka4a81BHw==
   dependencies:
     "@2060.io/credo-ts-didcomm-mrtd" "^0.0.12"
     "@credo-ts/core" "^0.5.11"
@@ -39,11 +39,12 @@
     credo-ts-receipts "^0.0.1-alpha.5"
     mrz "^4.2.0"
 
-"@2060.io/service-agent-nestjs-client@^1.1.0-dev.38":
-  version "1.1.0-dev.38"
-  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-nestjs-client/-/service-agent-nestjs-client-1.1.0-dev.38.tgz#679ee721fb6d7fb5e4827318b84de2adddf97c8e"
-  integrity sha512-0CvpfDbCoc8Rk26bwawgWkLS6gFhkBiOaLl2stta3PJ40i1J3SRNSpcxiuEVnnx0kvYwkFtNeFQLhgF2TUsZEw==
+"@2060.io/service-agent-nestjs-client@^1.1.0-dev.41":
+  version "1.1.0-dev.41"
+  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-nestjs-client/-/service-agent-nestjs-client-1.1.0-dev.41.tgz#2051b281f15f7af2780d093280e1c4508f9b6da1"
+  integrity sha512-aUREZveDT9I6sPhrgeRPmZ8nC+v4Ue06vv3OgY/FSe/xr1YaiXJSKCAjPtI/pf1TMll5Al4pET5IQrDcehhwTg==
   dependencies:
+    "@2060.io/credo-ts-didcomm-mrtd" "^0.0.12"
     "@2060.io/service-agent-client" "*"
     "@2060.io/service-agent-model" "*"
     "@credo-ts/core" "^0.5.11"
