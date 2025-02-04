@@ -69,6 +69,7 @@ export class CoreService implements EventHandler, OnModuleInit {
         'credentialIssuanceDate',
         'documentExpirationDate',
         'facePhoto',
+        'mrzData',
       ],
       {
         supportRevocation: true,
