@@ -257,6 +257,7 @@ export class CoreService implements EventHandler, OnModuleInit {
                 credentialIssuanceDate,
                 documentExpirationDate: content.dataGroups.processed.dateOfExpiry ?? null,
                 facePhoto: content.dataGroups.processed.faceImages[0] ?? null,
+                mrzData: content.dataGroups.processed.mrzString,
               }
               session = await this.startVideoCall(session)
             } else {
