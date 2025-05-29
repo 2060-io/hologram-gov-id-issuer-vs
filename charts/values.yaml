@@ -1,0 +1,79 @@
+name: issuer
+namespace: andres
+service:
+  port: 2903
+images:
+  backend:
+    repository: io2060/unic.id-issuer-dts
+    tag: dev
+domain: test.dev.2060.io
+replicas: 1
+agent:
+  url: http://issuer-agent:3000
+database:
+  host: issuer-postgresql
+  user: unicid
+  pwd: mypassword123
+backend:
+  vision: https://webrtc.demos.dev.2060.io
+  webrtc: https://vision.dev.2060.io
+  timeout: 900
+  logLevel: 3
+
+postgresql:
+  enabled: true
+  auth:
+    database: "unicid"
+    password: "mypassword123"
+    username: "unicid"
+  primary:
+    persistence:
+      enabled: true
+      storageClass: csi-cinder-classic
+      size: 1Gi
+
+redis:
+  enabled: true
+  architecture: "standalone"
+  auth:
+    enabled: true
+    password: "mypassword123"
+  persistence:
+    enabled: true
+    storageClass: csi-cinder-classic
+    size: 1Gi
+
+vs-agent:
+  vsAgentName: issuer-agent
+  vsAgentNamespace: andres
+  vsAgentReplicas: 1
+  vsAgentDomain: test.dev.2060.io
+  agentName: test-issuer
+  eventsBaseUrl: https://issuer.test.dev.2060.io
+  adminPort: 3000
+  agentPort: 3001
+  ingress:
+    public:
+      enableCors: true
+
+  images:
+    agent:
+      repository: io2060/2060-service-agent
+      tag: v1.2.0
+    invitationUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
+
+  extraEnv: 
+    - name: ANONCREDS_SERVICE_BASE_URL
+      value: https://a.issuer-agent.test.dev.2060.io
+    - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
+      value: "true"
+    - name: POSTGRES_HOST
+      value: "issuer-postgresql"
+    - name: POSTGRES_USER
+      value: "unicid"
+    - name: POSTGRES_PASSWORD
+      value: "mypassword123"
+    - name: REDIS_HOST
+      value: "issuer-redis-master"
+    - name: REDIS_PASSWORD
+      value: "mypassword123"
