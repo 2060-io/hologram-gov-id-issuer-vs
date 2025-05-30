@@ -44,6 +44,7 @@ redis:
     size: 1Gi
 
 vs-agent:
+  enabled: true
   vsAgentName: issuer-agent
   vsAgentNamespace: andres
   vsAgentReplicas: 1
