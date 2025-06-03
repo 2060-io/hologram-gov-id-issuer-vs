@@ -16,7 +16,7 @@ agent:
   url: http://issuer-agent:3000
 database:
   enabled: true
-  host: issuer-postgresql
+  host: localhost
   user: unicid
   pwd: mypassword123
 backend:
@@ -51,12 +51,12 @@ vs-agent:
     - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
       value: "true"
     - name: POSTGRES_HOST
-      value: "issuer-postgresql"
+      value: "issuer"
     - name: POSTGRES_USER
       value: "unicid"
     - name: POSTGRES_PASSWORD
       value: "mypassword123"
     - name: REDIS_HOST
-      value: "issuer-redis-master"
+      value: "issuer"
     - name: REDIS_PASSWORD
       value: "mypassword123"
