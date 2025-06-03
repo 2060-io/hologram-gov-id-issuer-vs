@@ -6,11 +6,16 @@ images:
   backend:
     repository: io2060/unic.id-issuer-dts
     tag: dev
+  redis: 
+    enabled: true
+    repository: redis
+    tag: alpine
 domain: test.dev.2060.io
 replicas: 1
 agent:
   url: http://issuer-agent:3000
 database:
+  enabled: true
   host: issuer-postgresql
   user: unicid
   pwd: mypassword123
@@ -19,29 +24,6 @@ backend:
   webrtc: https://vision.dev.2060.io
   timeout: 900
   logLevel: 3
-
-postgresql:
-  enabled: true
-  auth:
-    database: "unicid"
-    password: "mypassword123"
-    username: "unicid"
-  primary:
-    persistence:
-      enabled: true
-      storageClass: csi-cinder-classic
-      size: 1Gi
-
-redis:
-  enabled: true
-  architecture: "standalone"
-  auth:
-    enabled: true
-    password: "mypassword123"
-  persistence:
-    enabled: true
-    storageClass: csi-cinder-classic
-    size: 1Gi
 
 vs-agent:
   enabled: true

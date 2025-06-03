@@ -40,6 +40,44 @@ spec:
                  port:
                    number: {{ .Values.service.port }}
 ---
+{{- if .Values.database.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.name }}-pg-pv-main
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  storageClassName: csi-cinder-classic
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
+---
+{{- if .Values.images.redis.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.name }}-redis-main
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  storageClassName: csi-cinder-classic
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -83,4 +121,43 @@ spec:
               value: "{{ .Values.backend.logLevel }}"
             ports:
             -  containerPort: {{ .Values.service.port }}
+        {{- if .Values.database.enabled }}
+         -  name: postgres
+            image: postgres:15.2
+            imagePullPolicy: Always
+            env:
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.database.pwd }}
+            - name: POSTGRES_USER
+              value: {{ .Values.database.user }}
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+            ports:
+            -  containerPort: 5432
+            volumeMounts:
+            - name: {{ .Values.name }}-pg-pv-main
+              mountPath: /var/lib/postgresql/data
+        {{- end }}
+        {{- if .Values.images.redis.enabled }}
+         -  name: {{ .Values.name }}-redis-container
+            image: "{{ .Values.images.redis.repository }}:{{ .Values.images.redis.tag }}"
+            imagePullPolicy: Always
+            ports:
+            -  containerPort: 6379
+            volumeMounts:
+            - name: {{ .Values.name }}-redis-main
+              mountPath: /home/data
+        {{- end }}
+
+         volumes:
+        {{- if .Values.database.enabled }}
+         - name: {{ .Values.name }}-pg-pv-main
+           persistentVolumeClaim:
+             claimName: {{ .Values.name }}-pg-pv-main
+        {{- end }}
+        {{- if .Values.images.redis.enabled }}
+         - name: {{ .Values.name }}-redis-main
+           persistentVolumeClaim:
+             claimName: {{ .Values.name }}-redis-main
+        {{- end }}
 
