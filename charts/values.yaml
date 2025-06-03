@@ -1,5 +1,5 @@
 name: issuer
-namespace: andres
+namespace: default
 service:
   port: 2903
 images:
@@ -46,7 +46,7 @@ redis:
 vs-agent:
   enabled: true
   vsAgentName: issuer-agent
-  vsAgentNamespace: andres
+  vsAgentNamespace: default
   vsAgentReplicas: 1
   vsAgentDomain: test.dev.2060.io
   agentName: test-issuer

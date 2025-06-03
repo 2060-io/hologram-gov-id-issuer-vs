@@ -110,4 +110,4 @@ jobs:
           sed -i "s/^version:.*/version: $IMAGE_TAG/" ./charts/Chart.yaml
           helm dependency update ./charts
           helm package ./charts -d ./charts
-          helm push ./charts/$IMAGE_TAG.tgz oci://docker.io/$DH_USERNAME
+          helm push ./charts/$IMAGE_NAME-$IMAGE_TAG.tgz oci://docker.io/$DH_USERNAME
