@@ -107,7 +107,7 @@ jobs:
       - name: Push Helm chart to Docker Hub OCI repo
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          sed -i "s/^version:.*/version: $IMAGE_TAG/" ./charts/Chart.yaml
+          sed -i "s/^version:.*/version: $RELEASE_VERSION/" ./charts/Chart.yaml
           helm dependency update ./charts
           helm package ./charts -d ./charts
-          helm push ./charts/$IMAGE_NAME-$IMAGE_TAG.tgz oci://docker.io/$DH_USERNAME
+          helm push ./charts/$IMAGE_NAME-$RELEASE_VERSION.tgz oci://docker.io/$DH_USERNAME
