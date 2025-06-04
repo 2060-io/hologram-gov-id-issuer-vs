@@ -1,10 +1,10 @@
 apiVersion: v2
-name: verifiable-id-issuer
+name: verifiable-id-issuer-chart
 description: A Helm chart for deploying the unic.id issuer application
 version: 0.1.0
 appVersion: "1.0"
 dependencies:
-  - name: vs-agent
+  - name: vs-agent-chart
     version: 1.2.1-dev.8
     repository: oci://registry-1.docker.io/io2060
     condition: vs-agent.enabled
