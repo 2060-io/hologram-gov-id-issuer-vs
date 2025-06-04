@@ -25,7 +25,7 @@ backend:
   timeout: 900
   logLevel: 3
 
-vs-agent:
+vs-agent-chart:
   enabled: true
   vsAgentName: issuer-agent
   vsAgentNamespace: default
