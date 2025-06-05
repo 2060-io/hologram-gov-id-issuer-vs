@@ -9,7 +9,7 @@ on:
 env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
-  IMAGE_NAME: 'verifiable-id-issuer'      
+  IMAGE_NAME: hologram-gov-id-issuer-app
   IMAGE_TAG: ${{ github.ref == 'refs/heads/main' && 'dev' || github.ref }}
 
 jobs:

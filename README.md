@@ -1,4 +1,4 @@
-# Government Unic Id - Verifiable ID Card
+# Hologram Government ID Issuer
 
 ![2060 logo](https://raw.githubusercontent.com/2060-io/.github/44bf28569fec0251a9367a9f6911adfa18a01a7c/profile/assets/2060_logo.svg)
 
@@ -32,13 +32,16 @@ Note: at the moment face capture/verification is performed by connecting to a we
 
 Several use cases of Citizen Registries have been deployed for your convenience. Just download the Hologram Messenger in the App Store or Google play and scan the QR code of the service you would like to try. All these demos are just an instance of the same citizen-registry service with customized settings. You can easily create your own demo for your country by jumping to the [kubernetes howto]() documentation.
 
-### Unicid Identity Registry
+### Gov ID Registry
 
-a government-like registry service. Test URL: [https://unic-id-issuer.demos.dev.io](https://unic-id-issuer.demos.dev.2060.io)
+a government-like registry service. Test URL: [https://hologram-gov-id-issuer.demos.2060.io](https://hologram-gov-id-issuer.demos.2060.io)
 
 #### Scan the QR code
 
-![GaiaID](https://unic-id-issuer.demos.dev.2060.io/qr?size=300&bcolor=FFFFFF&balpha=1&fcolor=000000&falpha=1)
+> TODO
+
+![Hologram Gov ID Issuer](https://hologram-gov-id-issuer.demos.2060.io/qr?size=300&bcolor=FFFFFF&balpha=1&fcolor=000000&falpha=1)
+
 
 #### Accept the Invitation
 <kbd>
