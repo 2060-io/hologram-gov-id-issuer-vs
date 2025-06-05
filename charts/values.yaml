@@ -30,10 +30,10 @@ backend:
 # vs-agent-chart.enabled: true
 vs-agent-chart:
   enabled: false
-  vsAgentName: issuer
-  vsAgentNamespace: default
-  vsAgentReplicas: 1
-  vsAgentDomain: example.io
+  name: issuer
+  namespace: default
+  replicas: 1
+  domain: example.io
   agentName: test-issuer
   eventsBaseUrl: https://issuer-vs.test.dev.2060.io
   database:
