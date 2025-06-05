@@ -1,36 +1,32 @@
-# Hologram Government ID Issuer
+# Hologram Government Digital ID Issuer
 
 ![2060 logo](https://raw.githubusercontent.com/2060-io/.github/44bf28569fec0251a9367a9f6911adfa18a01a7c/profile/assets/2060_logo.svg)
 
-## Purpose of the service
+**Hologram Gov ID Issuer** is an application that, alongside [VS Agent](https://github.com/2060-io/vs-agent) and other open source components developed by [2060.io](https://2060.io), conforms a **DIDcomm conversational [Verifiable Service](https://verana-labs.github.io/verifiable-trust-spec/#what-is-a-verifiable-service-vs)** which issues Digital ID Credentials based on users' real ID documents.
 
-A demo module for building DIDcomm conversational services (chatbots) to issue Verifiable ID Cards to citizens by verifying their face against photo(s) stored in a database.
+The issued credentials are **[AnonCreds](https://www.lfdecentralizedtrust.org/projects/anoncreds) Verifiable Credentials** that can be used to authenticate in other services in a privacy-preserving manner, using Zero Knowledge Proofs and supporting Selective Disclosure of credential attributes.
 
-Using a conversational service for issuing Verifiable Credentials has many benefits:
+## Features
 
-- **time needed** for developing the service is reduced.
-- **security**: it is more secure that issuing a credential through a web browser, as in our case everything is exchanged over a secure DIDComm session, no javascript, no cookies.
-- **security**: it is only required to open the TCP port of the DIDComm service.
-
-A conversational DIDComm service is probably **the most secure way of delivering Verifiable Credentials**.
-
-In these demos, and because we are not connected to a true government database of citizens, you use the conversational service to create a fake digital Identity that you protect with your face biometrics. A corresponding Verifiable Credential of your Identity is issued to you.
-
-Then, as soon as you've got you Verifiable Credential, you can use it to identify yourself and access passwordless services such as the [unic-id](https://github.com/2060-io/unic.id-issuer-dts) demos.
-
-## Device lost, app uninstalled?
-
-If you loose you cellphone or delete the App, then can restore your Identity by simply re-connecting to the same Registry service, verifying your face, and recover your Verifiable Credential.
+- Reads and verify users' Passports and National ID cards, as long as they are compatible with [ICAO 9303](https://www.icao.int/publications/pages/publication.aspx?docnum=9303) (most modern passports do so)
+- Performs liveness detection and face matching of users against their ID document
+- Issues an AnonCreds Verifiable Credential containing all basic attributes of the documents (such as names, photo, nationality, expiration date), which can be later presented (all or some of them) to any service
+- Works with any DIDComm-capable agent that supports calls and eMRTD protocols, such as [Hologram Messenger](https://hologram.zone)
+- And everything with open source software! No need to pay any license fees
 
 ## Service Architecture
 
+The following diagram shows how the different components are combined and interact with users using Hologram app:
+
 ![](arch.svg)
 
-Note: at the moment face capture/verification is performed by connecting to a web link. This will change in a near future when the 2060-webrtc module will be available and corresponding support added to the Hologram Wallet & Messenger App.
 
-## Try the demo(s)
 
-Several use cases of Citizen Registries have been deployed for your convenience. Just download the Hologram Messenger in the App Store or Google play and scan the QR code of the service you would like to try. All these demos are just an instance of the same citizen-registry service with customized settings. You can easily create your own demo for your country by jumping to the [kubernetes howto]() documentation.
+## Try the demo
+
+You can test a deployed demo of this service at [https://gov-id-issuer.demos.dev.2060.io] (TODO: update with production demo)
+
+Once you have your Digital ID Credential, you can present it in services such as **[Hologram Gov ID Verifier](https://gov-id-verifier.demos.dev.2060.io)**.
 
 ### Gov ID Registry
 
@@ -80,3 +76,7 @@ Now you verify your face, just to be sure capture was OK.
 <img src="assets/IMG_7727.PNG" alt="invitation" style="height:500px; border: 1px solid #EEEEEE;"/>
 <img src="assets/IMG_7728.PNG" alt="invitation" style="height:500px; border: 1px solid #EEEEEE;"/>
 </kbd>
+
+## Do you want to run it on your own?
+
+This repo provides Helm charts

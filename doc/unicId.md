@@ -1,14 +1,11 @@
-# UnicId
-## Description
-This application is a Decentralized Trust Service aimed to generate Verifiable Credentials from the reading of official travel documents and biometric verification. For more details see [README](/README.md)
+# Hologram Gov Id Issuer API and deployment guide
 
-- [UnicId](#unicid)
-  - [Description](#description)
+- [Hologram Gov Id Issuer API and deployment guide](#hologram-gov-id-issuer-api-and-deployment-guide)
   - [Initial Considerations](#initial-considerations)
-  - [UnicId API](#unicid-api)
+  - [API](#api)
     - [WebRTC Service](#webrtc-service)
-      - [Call Event](#call-event)
-          - [EventNotificationType](#eventnotificationtype)
+      - [Call event](#call-event)
+        - [EventNotificationType](#eventnotificationtype)
     - [Vision Service](#vision-service)
       - [List Media](#list-media)
       - [Success](#success)
@@ -32,7 +29,7 @@ To deploy the service locally, ensure that the environment variables in the appl
 
 Once everything is set up correctly, you just need to navigate to the `docker-dev` folder and run the command to start Docker Compose. This will bring up all the necessary components that coexist with the project. 
 
-## UnicId API
+## API
 
 This document outlines the user interface provided by UnicId for its integration with various services that either depend on it or are required for its proper functionality.
 
