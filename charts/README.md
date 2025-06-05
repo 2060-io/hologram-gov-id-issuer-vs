@@ -69,6 +69,14 @@ The `values.yaml` file contains the default configuration for the chart. Below a
 | `vs-agent-chart.agentName`        | Name of the agent            | `test-issuer`                       |
 | `vs-agent-chart.eventsBaseUrl`    | Base URL for events          | `https://issuer-vs.example.io` |
 
+## Enabling Dependencies
+If you want to enable additional services, update the `values.yaml` file and set the corresponding `enabled` field to `true`. For more information about these services, refer to their respective repositories:
+
+- Vision Service: https://github.com/2060-io/vision-service
+- WebRTC Server: https://github.com/2060-io/webrtc-server
+- Vision Matcher: https://github.com/2060-io/vision-matcher
+
+
 ## Uninstalling
 To uninstall the chart, run:
 ```
