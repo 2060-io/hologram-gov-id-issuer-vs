@@ -47,7 +47,7 @@ vs-agent-chart:
 
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
-      value: https://a.issuer-agent.test.dev.2060.io
+      value: https://issuer-agent.test.dev.2060.io
     - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
       value: "true"
     - name: POSTGRES_HOST

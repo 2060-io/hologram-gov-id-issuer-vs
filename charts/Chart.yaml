@@ -5,6 +5,6 @@ version: 0.1.0
 appVersion: "1.0"
 dependencies:
   - name: vs-agent-chart
-    version: 1.2.2-dev.3
+    version: 1.3.0-dev.2
     repository: oci://registry-1.docker.io/io2060
     condition: vs-agent-chart.enabled
