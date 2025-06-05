@@ -55,7 +55,7 @@ export class CoreService implements EventHandler, OnModuleInit {
 
   async onModuleInit() {
     await this.credentialService.createType(
-      'Unic Id',
+      'Gov ID',
       '1.0',
       [
         'documentType',

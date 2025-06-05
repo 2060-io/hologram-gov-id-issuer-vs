@@ -13,7 +13,7 @@ services:
       - AGENT_PUBLIC_DID=did:web:p2801.ovpndev.2060.io
       - AGENT_ENDPOINT=wss://p2801.ovpndev.2060.io
       - AGENT_INVITATION_IMAGE_URL=https://p2802.ovpndev.2060.io/avatar.png
-      - AGENT_LABEL=Unic Id dts
+      - AGENT_LABEL=Gov Id Issuer
       - ANONCREDS_SERVICE_BASE_URL=https://p2801.ovpndev.2060.io
       - USE_CORS=true
       - EVENTS_BASE_URL=https://p2802.ovpndev.2060.io
