@@ -1,4 +1,4 @@
-name: issuer
+name: issuer-backend
 namespace: default
 service:
   port: 2903
@@ -6,33 +6,33 @@ images:
   backend:
     repository: io2060/unic.id-issuer-dts
     tag: dev
-  redis: 
-    enabled: true
-    repository: redis
-    tag: alpine
-domain: test.dev.2060.io
+domain: example.io
 replicas: 1
 agent:
-  url: http://issuer-agent:3000
+  url: http://issuer:3000
 database:
-  enabled: true
-  host: localhost
+  host: issuer
   user: unicid
   pwd: mypassword123
 backend:
-  vision: https://webrtc.demos.dev.2060.io
-  webrtc: https://vision.dev.2060.io
+  webrtc: https://webrtc.example.io
+  vision: https://vision.example.io
   timeout: 900
   logLevel: 3
 
 vs-agent-chart:
   enabled: true
-  vsAgentName: issuer-agent
-  vsAgentNamespace: default
+  name: issuer
+  vsAgentName: issuer
   vsAgentReplicas: 1
-  vsAgentDomain: test.dev.2060.io
+  vsAgentDomain: example.io
   agentName: test-issuer
-  eventsBaseUrl: https://issuer.test.dev.2060.io
+  eventsBaseUrl: https://issuer-backend.example.io
+  database:
+    enabled: true
+    host: localhost
+    user: unicid
+    pwd: mypassword123
   adminPort: 3000
   agentPort: 3001
   ingress:
@@ -44,19 +44,21 @@ vs-agent-chart:
       repository: io2060/2060-service-agent
       tag: v1.2.0
     invitationUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
+    redis: 
+      enabled: true
+      repository: redis
+      tag: alpine
 
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
-      value: https://issuer-agent.test.dev.2060.io
+      value: https://issuer.example.io
     - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
       value: "true"
     - name: POSTGRES_HOST
-      value: "issuer"
+      value: "localhost"
     - name: POSTGRES_USER
       value: "unicid"
     - name: POSTGRES_PASSWORD
       value: "mypassword123"
     - name: REDIS_HOST
-      value: "issuer"
-    - name: REDIS_PASSWORD
-      value: "mypassword123"
+      value: "localhost"
