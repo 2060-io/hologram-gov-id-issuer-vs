@@ -22,7 +22,6 @@ backend:
 
 vs-agent-chart:
   enabled: true
-  name: issuer
   vsAgentName: issuer
   vsAgentReplicas: 1
   vsAgentDomain: example.io
