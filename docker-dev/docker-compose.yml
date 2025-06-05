@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  service-agent:
-    image: io2060/2060-service-agent:dev
+  vs-agent:
+    image: io2060/vs-agent:dev
     restart: always
     networks:
       - chatbot
@@ -13,7 +13,7 @@ services:
       - AGENT_PUBLIC_DID=did:web:p2801.ovpndev.2060.io
       - AGENT_ENDPOINT=wss://p2801.ovpndev.2060.io
       - AGENT_INVITATION_IMAGE_URL=https://p2802.ovpndev.2060.io/avatar.png
-      - AGENT_LABEL=Unic Id dts
+      - AGENT_LABEL=Gov Id Issuer
       - ANONCREDS_SERVICE_BASE_URL=https://p2801.ovpndev.2060.io
       - USE_CORS=true
       - EVENTS_BASE_URL=https://p2802.ovpndev.2060.io
@@ -24,12 +24,12 @@ services:
       - AGENT_INVITATION_BASE_URL=https://hologram.zone/
       - REDIS_HOST=redis
 
-  unic-id-dts:
+  hologram-gov-id-issuer-app:
     build: 
       context: ../
       dockerfile: Dockerfile
-    image: 2060-unic-id-dts
-    container_name: unic-id-dts
+    image: hologram-gov-id-issuer-app
+    container_name: hologram-gov-id-issuer-app
     restart: always
     networks:
       - chatbot
@@ -41,8 +41,8 @@ services:
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=gaia
       - POSTGRES_PASSWORD=2060demo
-      - VISION_URL=https://vision.dev.2060.io
-      - WEBRTC_SERVER_URL=https://dts-webrtc.dev.2060.io
+      - VISION_URL=https://vision.demos.2060.io
+      - WEBRTC_SERVER_URL=https://webrtc.demos.2060.io
       - PUBLIC_BASE_URL=https://p2802.ovpndev.2060.io
       - ID_VERIFICATION_TIMEOUT_SECONDS=900
       - LOG_LEVEL=3

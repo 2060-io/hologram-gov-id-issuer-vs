@@ -1,6 +1,6 @@
 {
-  "WELCOME":"welcome to UnicID!",
-  "NFC_UNSUPPORTED":"Sorry, your phone has no NFC support.\nUnicID requires a phone with NFC support.",
+  "WELCOME":"Welcome!",
+  "NFC_UNSUPPORTED":"Sorry, your phone has no NFC support.\nThis service requires a phone with NFC support.",
   "HELP":"Check the contextual menu for available actions.",
   "MRZ_REQUEST":"We only need a few steps to verify your ID Document.",
   "EMRTD_REQUEST":"Please have your ID Document or Passport ready.\nMake sure it is compatible with the NFC technology.",
@@ -14,10 +14,10 @@
   "ROOT_TITTLE": "Context Menu",
   "TIMEOUT_PROCESS": "ID Verification Timed out. Check menu above to start a new ID Verification.",
   "ABORT_PROCESS": "ID Verification Aborted. Check menu above to start a new ID Verification.",
-  "CREDENTIAL_OFFER": "Congratulations! Here is your UnicID Credential.",
+  "CREDENTIAL_OFFER": "Congratulations! Here is your ID Credential.",
   "CREDENTIAL_ACCEPTED": "Save your credential to your Wallet so that you can present it to third parties!",
   "NEW_CREDENTIAL": "At any time, check the menu above to start a new ID Verification.",
-  "CREDENTIAL_REJECTED": "Sad to see you do not want to receive your UnicID credential.",
+  "CREDENTIAL_REJECTED": "Sad to see you do not want to receive your credential.",
   "MENU_SELECT": {
     "PROMPT": {
       "VERIFICATION":"Retry?"

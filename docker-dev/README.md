@@ -77,7 +77,7 @@ services:
 # make sure an avatar.png image is present in src/main/resources/META-INF/resources of the backend project
       - AGENT_INVITATION_IMAGE_URL=https://p2903.testing.2060.io/avatar.png
 # set service-agent service name
-      - AGENT_NAME=Unic Id
+      - AGENT_NAME=Gov Id Issuer
       - USE_CORS=true
 # where to send the receive events: here replace p2903.testing.2060.io with the ngrok domain name that will forward to port 2903 (the backend project you will run locally)
       - EVENTS_BASE_URL=https://p2903.testing.2060.io

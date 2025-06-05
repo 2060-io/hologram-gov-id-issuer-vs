@@ -4,7 +4,7 @@ service:
   port: 2903
 images:
   backend:
-    repository: io2060/unic.id-issuer-dts
+    repository: io2060/hologram-gov-id-issuer-app
     tag: dev
   redis: 
     enabled: true
@@ -17,11 +17,11 @@ agent:
 database:
   enabled: true
   host: localhost
-  user: unicid
+  user: govidissuer
   pwd: mypassword123
 backend:
-  vision: https://webrtc.demos.dev.2060.io
-  webrtc: https://vision.dev.2060.io
+  vision: https://webrtc.demos.2060.io
+  webrtc: https://vision.demos.2060.io
   timeout: 900
   logLevel: 3
 
@@ -43,7 +43,7 @@ vs-agent-chart:
     agent:
       repository: io2060/2060-service-agent
       tag: v1.2.0
-    invitationUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
+    invitationUrl: https://i.issuer.test.dev.2060.io/avatar.png
 
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
@@ -53,7 +53,7 @@ vs-agent-chart:
     - name: POSTGRES_HOST
       value: "issuer"
     - name: POSTGRES_USER
-      value: "unicid"
+      value: "govidissuer"
     - name: POSTGRES_PASSWORD
       value: "mypassword123"
     - name: REDIS_HOST

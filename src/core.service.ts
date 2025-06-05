@@ -55,7 +55,7 @@ export class CoreService implements EventHandler, OnModuleInit {
 
   async onModuleInit() {
     await this.credentialService.createType(
-      'Unic Id',
+      'Gov ID',
       '1.0',
       [
         'documentType',
@@ -230,7 +230,7 @@ export class CoreService implements EventHandler, OnModuleInit {
         case StateStep.MRZ:
           if (content instanceof MrzDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
-              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang) // TODO: When MRZ can checked add to the message "Congratulations, your document is compatible with UnicID."
+              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang) // TODO: When MRZ can checked add to the message "Congratulations, your document is compatible."
               session = await this.sendEMrtdRequest(session)
               // TODO: is a MRZ valid?
             } else {
