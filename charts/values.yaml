@@ -1,10 +1,10 @@
-# Default values for issuer-backend chart
+# Default values for issuer-vs chart
 # If you want to use this chart, you can change the values below
 # and then run `helm upgrade --install chart/ --namespace my-namespace
 # Update namespaces, domains, and other values as needed.
 # You can also enable the vs-agent-chart, vision-matcher-chart, vision-service-chart, and webrtc-server-chart
 # by setting the corresponding values to true.
-name: issuer-backend
+name: issuer-vs
 namespace: default
 service:
   port: 2903
@@ -26,7 +26,7 @@ backend:
   timeout: 900
   logLevel: 3
 
-# If you want to use the issuer-backend chart, you can enable it by setting the following:
+# If you want to use the issuer-vs chart, you can enable it by setting the following:
 # vs-agent-chart.enabled: true
 vs-agent-chart:
   enabled: false
@@ -35,7 +35,7 @@ vs-agent-chart:
   vsAgentReplicas: 1
   vsAgentDomain: example.io
   agentName: test-issuer
-  eventsBaseUrl: https://issuer-backend.example.io
+  eventsBaseUrl: https://issuer-vs.test.dev.2060.io
   database:
     # Don't forget to set the database.enabled to true if you want to use the vs-agent with a database
     enabled: false
@@ -60,7 +60,7 @@ vs-agent-chart:
       tag: alpine
 
   # Recomended extra environment variables for the vs-agent
-  # to work with the issuer-backend chart
+  # to work with the issuer-vs chart
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
       value: https://issuer.example.io
