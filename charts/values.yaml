@@ -1,4 +1,10 @@
-name: issuer
+# Default values for issuer-vs chart
+# If you want to use this chart, you can change the values below
+# and then run `helm upgrade --install chart/ --namespace my-namespace
+# Update namespaces, domains, and other values as needed.
+# You can also enable the vs-agent-chart, vision-matcher-chart, vision-service-chart, and webrtc-server-chart
+# by setting the corresponding values to true.
+name: issuer-vs
 namespace: default
 service:
   port: 2903
@@ -6,33 +12,36 @@ images:
   backend:
     repository: io2060/hologram-gov-id-issuer-app
     tag: dev
-  redis: 
-    enabled: true
-    repository: redis
-    tag: alpine
-domain: test.dev.2060.io
+domain: demos.2060.io
 replicas: 1
 agent:
-  url: http://issuer-agent:3000
+  url: http://issuer:3000
 database:
-  enabled: true
-  host: localhost
-  user: govidissuer
+  host: issuer
+  user: unicid
   pwd: mypassword123
 backend:
-  vision: https://webrtc.demos.2060.io
-  webrtc: https://vision.demos.2060.io
+  webrtc: https://webrtc.demos.2060.io
+  vision: https://vision.demos.2060.io
   timeout: 900
   logLevel: 3
 
+# If you want to use the issuer-vs chart, you can enable it by setting the following:
+# vs-agent-chart.enabled: true
 vs-agent-chart:
-  enabled: true
-  vsAgentName: issuer-agent
-  vsAgentNamespace: default
-  vsAgentReplicas: 1
-  vsAgentDomain: test.dev.2060.io
+  enabled: false
+  name: issuer
+  namespace: default
+  replicas: 1
+  domain: demos.2060.io
   agentName: test-issuer
-  eventsBaseUrl: https://issuer.test.dev.2060.io
+  eventsBaseUrl: https://issuer-vs.demos.2060.io
+  database:
+    # Don't forget to set the database.enabled to true if you want to use the vs-agent with a database
+    enabled: false
+    host: localhost
+    user: unicid
+    pwd: mypassword123
   adminPort: 3000
   agentPort: 3001
   ingress:
@@ -43,20 +52,140 @@ vs-agent-chart:
     agent:
       repository: io2060/2060-service-agent
       tag: v1.2.0
-    invitationUrl: https://i.issuer.test.dev.2060.io/avatar.png
+    invitationUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
+    redis: 
+      # Dont forget to set the redis.enabled to true if you want to use the vs-agent with a redis  
+      enabled: false
+      repository: redis
+      tag: alpine
 
+  # Recomended extra environment variables for the vs-agent
+  # to work with the issuer-vs chart
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
-      value: https://issuer-agent.test.dev.2060.io
+      value: https://issuer.demos.2060.io
     - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
       value: "true"
     - name: POSTGRES_HOST
-      value: "issuer"
+      value: "localhost"
     - name: POSTGRES_USER
       value: "govidissuer"
     - name: POSTGRES_PASSWORD
       value: "mypassword123"
     - name: REDIS_HOST
-      value: "issuer"
-    - name: REDIS_PASSWORD
-      value: "mypassword123"
+      value: "localhost"
+    # uncomment the following line if you want to use redis with a password
+    # - name: REDIS_pASSWORD
+    #   value: "mypassword123"
+
+# If you want to use the vision-service chart, you can enable it by setting the following:
+# vision-service-chart.enabled: true
+vision-service-chart:
+  enabled: false
+  app:
+    name: vision-service
+
+  namespace: 
+    name: default
+
+  # Ingress configuration
+  ingress:
+    name: vision-service-demos-ingress
+    host: vision.demos.2060.io
+    tlsSecret: vision.demos.2060.io-cert
+
+  statefulset:
+    name: vision-service
+    serviceName: vision-service
+    replicas: 1
+    containerName: vision-service
+    image:
+      repository: io2060/vision-service
+      tag: latest
+      pullPolicy: Always
+    storage: 1Gi
+    env:
+      HOST: "0.0.0.0"
+      NUMBER_OF_GESTURES_TO_REQUEST: "2"
+      USE_MEDIASOUP_ICE_RELAY: "false"
+      VISION_MATCHER_BASE_URL: "http://vision-matcher-service.default:5123"
+      ENABLE_DEBUG_ENDPOINTS: "false"
+
+  service:
+    name: vision-service
+    ports: 5000
+
+  # If you want to use the vision-matcher chart, you can enable it by setting the following:
+  # vision-matcher-chart.enabled: true
+  vision-matcher-chart:
+    enabled: false
+    app:
+      name: vision-matcher
+
+    namespace:
+      name: default
+
+    statefulset:
+      name: vision-matcher
+      serviceName: vision-matcher
+      replicas: 1
+      containerName: vision-matcher
+      image:
+        repository: io2060/vision-matcher
+        tag: latest
+        pullPolicy: Always
+      storage: 1Gi
+
+    service:
+      name: vision-matcher-service
+      ports:
+        redis: 5123
+
+# If you want to use the webrtc-server chart, you can enable it by setting the following:
+# webrtc-server-chart.enabled: true
+webrtc-server-chart:
+  enabled: false
+  namespace:
+    name: default
+  service:
+    name: webrtc-demos-service
+  ingress:
+    name: webrtc-demos-ingress
+    host: webrtc.demos.2060.io
+    tlsSecret: webrtc.demos.2060.io-cert
+    loadBalancerMode: false
+  app:
+    name: webrtc-demos
+  statefulset:
+    name: webrtc-demos
+    serviceName: "webrtc-demos-service"
+    replicas: 1
+    containerName: webrtc-demos-container
+    image:
+      repository: io2060/webrtc-server
+      tag: dev
+      pullPolicy: Always
+    storage: 1Gi
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+  env:
+    LOG_LEVEL: "3"
+    DEBUG: "*mediasoup* *INFO* *WARN* *ERROR*"
+    PROTOO_LISTEN_PORT: "4443"
+    MEDIASOUP_CLIENT_PROTOOPORT: "443"
+    MEDIASOUP_CLIENT_ENABLE_ICESERVER: "yes"
+    MEDIASOUP_CLIENT_ICESERVER_HOST: "148.113.140.112"
+    MEDIASOUP_CLIENT_ICESERVER_PROTO: "udp"
+    MEDIASOUP_CLIENT_ICESERVER_PORT: "3478"
+    MEDIASOUP_CLIENT_ICESERVER_USER: "mobiera"
+    MEDIASOUP_CLIENT_ICESERVER_PASS: "L971EHmpPe"
+    MEDIASOUP_INGRESS_HOST: "webrtc.demos.2060.io"
+    HTTPS_CERT_FULLCHAIN: "/config/certificates/tls.crt"
+    HTTPS_CERT_PRIVKEY: "/config/certificates/tls.key"
+  secret:
+    name: webrtc.demos.2060.io-cert
