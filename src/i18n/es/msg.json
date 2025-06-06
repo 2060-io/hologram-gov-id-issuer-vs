@@ -1,6 +1,6 @@
 {
-  "WELCOME":"Bienvenido a UnicID!",
-  "NFC_UNSUPPORTED":"Lo sentimos, tu teléfono no tiene soporte para NFC.\nUnicID requiere un teléfono con soporte para NFC.",
+  "WELCOME":"Bienvenido!",
+  "NFC_UNSUPPORTED":"Lo sentimos, tu teléfono no tiene soporte para NFC.\nEste servicio requiere un teléfono con soporte para NFC.",
   "HELP":"Acceder al menu contextual para ver las opciones disponibles.",
   "MRZ_REQUEST":"Solo necesitamos unos pocos pasos para verificar tu documento de identificación.",
   "EMRTD_REQUEST":"Por favor, ten listo tu Documento de Identidad o Pasaporte.\nAsegúrate de que sea compatible con la tecnología NFC.",
@@ -14,10 +14,10 @@
   "ROOT_TITTLE": "Menú Contextual",
   "TIMEOUT_PROCESS": "La verificación de identidad ha expirado. Revisa el menú de arriba para iniciar una nueva verificación de identidad.",
   "ABORT_PROCESS": "Verificación de identidad cancelada. Revisa el menú superior para iniciar una nueva verificación de identidad.",
-  "CREDENTIAL_OFFER": "Felicidades! Aquí está tu credencial de UnicID.",
-  "CREDENTIAL_ACCEPTED": "Guarda tu credencial en tu Billetera para que puedas presentarla a terceros.",
+  "CREDENTIAL_OFFER": "Felicidades! Aquí está tu credencial.",
+  "CREDENTIAL_ACCEPTED": "Guarda tu credencial en tu billetera para que puedas presentarla a terceros.",
   "NEW_CREDENTIAL": "En cualquier momento, revisa el menú de arriba para iniciar una nueva verificación de identidad.",
-  "CREDENTIAL_REJECTED": "Lamentamos que no quieras recibir tu credencial de UnicID.",
+  "CREDENTIAL_REJECTED": "Lamentamos que no quieras recibir tu credencial.",
   "MENU_SELECT": {
     "PROMPT": {
       "VERIFICATION":"Reintentar?"

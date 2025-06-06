@@ -10,7 +10,7 @@ service:
   port: 2903
 images:
   backend:
-    repository: io2060/unic.id-issuer-dts
+    repository: io2060/hologram-gov-id-issuer-app
     tag: dev
 domain: example.io
 replicas: 1
@@ -69,7 +69,7 @@ vs-agent-chart:
     - name: POSTGRES_HOST
       value: "localhost"
     - name: POSTGRES_USER
-      value: "unicid"
+      value: "govidissuer"
     - name: POSTGRES_PASSWORD
       value: "mypassword123"
     - name: REDIS_HOST

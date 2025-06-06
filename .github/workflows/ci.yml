@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout unic-id
+      - name: Checkout hologram-gov-id-issuer-vs
         uses: actions/checkout@v4
       
       - name: Setup Helm

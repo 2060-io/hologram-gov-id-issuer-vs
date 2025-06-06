@@ -22,10 +22,10 @@ export default registerAs('appConfig', () => ({
 
   /**
    * Username for the PostgreSQL database.
-   * Defaults 'unicid' string if POSTGRES_USER is not set in the environment variables.
+   * Defaults 'govidissuer' string if POSTGRES_USER is not set in the environment variables.
    * @type {string}
    */
-  postgresUser: process.env.POSTGRES_USER || 'unicid',
+  postgresUser: process.env.POSTGRES_USER || 'govidissuer',
 
   /**
    * Password for the PostgreSQL database.
@@ -53,14 +53,14 @@ export default registerAs('appConfig', () => ({
    * Defaults to a development URL if WEBRTC_SERVER_URL is not set.
    * @type {string}
    */
-  webRtcServerUrl: process.env.WEBRTC_SERVER_URL || 'https://dts-webrtc.dev.2060.io',
+  webRtcServerUrl: process.env.WEBRTC_SERVER_URL || 'https://webrtc.demos.2060.io',
 
   /**
    * Vision API URL for image processing or related features.
    * Defaults to a development URL if VISION_URL is not set.
    * @type {string}
    */
-  visionUrl: process.env.VISION_URL || 'https://vision.dev.2060.io',
+  visionUrl: process.env.VISION_URL || 'https://vision.demos.2060.io',
 
   /**
    * Timeout for ID verification, in seconds.
