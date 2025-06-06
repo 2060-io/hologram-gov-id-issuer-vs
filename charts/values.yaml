@@ -12,7 +12,7 @@ images:
   backend:
     repository: io2060/hologram-gov-id-issuer-app
     tag: dev
-domain: example.io
+domain: demos.2060.io
 replicas: 1
 agent:
   url: http://issuer:3000
@@ -21,8 +21,8 @@ database:
   user: unicid
   pwd: mypassword123
 backend:
-  webrtc: https://webrtc.example.io
-  vision: https://vision.example.io
+  webrtc: https://webrtc.demos.2060.io
+  vision: https://vision.demos.2060.io
   timeout: 900
   logLevel: 3
 
@@ -33,9 +33,9 @@ vs-agent-chart:
   name: issuer
   namespace: default
   replicas: 1
-  domain: example.io
+  domain: demos.2060.io
   agentName: test-issuer
-  eventsBaseUrl: https://issuer-vs.test.dev.2060.io
+  eventsBaseUrl: https://issuer-vs.demos.2060.io
   database:
     # Don't forget to set the database.enabled to true if you want to use the vs-agent with a database
     enabled: false
@@ -63,7 +63,7 @@ vs-agent-chart:
   # to work with the issuer-vs chart
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
-      value: https://issuer.example.io
+      value: https://issuer.demos.2060.io
     - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
       value: "true"
     - name: POSTGRES_HOST
@@ -91,8 +91,8 @@ vision-service-chart:
   # Ingress configuration
   ingress:
     name: vision-service-demos-ingress
-    host: vision.example.io
-    tlsSecret: vision.example.io-cert
+    host: vision.demos.2060.io
+    tlsSecret: vision.demos.2060.io-cert
 
   statefulset:
     name: vision-service
@@ -151,8 +151,8 @@ webrtc-server-chart:
     name: webrtc-demos-service
   ingress:
     name: webrtc-demos-ingress
-    host: webrtc.example.io
-    tlsSecret: webrtc.example.io-cert
+    host: webrtc.demos.2060.io
+    tlsSecret: webrtc.demos.2060.io-cert
     loadBalancerMode: false
   app:
     name: webrtc-demos
@@ -184,8 +184,8 @@ webrtc-server-chart:
     MEDIASOUP_CLIENT_ICESERVER_PORT: "3478"
     MEDIASOUP_CLIENT_ICESERVER_USER: "mobiera"
     MEDIASOUP_CLIENT_ICESERVER_PASS: "L971EHmpPe"
-    MEDIASOUP_INGRESS_HOST: "webrtc.example.io"
+    MEDIASOUP_INGRESS_HOST: "webrtc.demos.2060.io"
     HTTPS_CERT_FULLCHAIN: "/config/certificates/tls.crt"
     HTTPS_CERT_PRIVKEY: "/config/certificates/tls.key"
   secret:
-    name: webrtc.example.io-cert
+    name: webrtc.demos.2060.io-cert
