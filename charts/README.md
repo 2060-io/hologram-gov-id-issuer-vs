@@ -1,6 +1,6 @@
-# Verifiable ID Issuer Chart
+# Hologram Government ID Issuer Chart
 
-This Helm chart deploys the necessary services for the Verifiable ID Issuer system, including optional components like the `vs-agent-chart`, `vision-matcher-chart`, `vision-service-chart`, and `webrtc-server-chart`.
+This Helm chart deploys the necessary services for the Hologram Government ID Issuer system, including optional components like the `vs-agent-chart`, `vision-matcher-chart`, `vision-service-chart`, and `webrtc-server-chart`.
 
 ---
 
@@ -20,7 +20,7 @@ Before deploying this chart, ensure the following requirements are met:
 To deploy the chart, use the following command:
 
 ```bash
-helm upgrade --install verifiable-id-issuer ./charts --namespace <namespace> --create-namespace
+helm upgrade --install hologram-gov-id-issuer-vs-chart ./charts --namespace <namespace> --create-namespace
 ```
 
 Replace `<namespace>` with your desired Kubernetes namespace.
@@ -29,7 +29,7 @@ Example with Custom Values
 If you want to customize the deployment, create a `custom-values.yaml` file with your desired configuration and apply it as follows:
 
 ```
-helm upgrade --install verifiable-id-issuer ./charts --namespace <namespace> -f custom-values.yaml
+helm upgrade --install hologram-gov-id-issuer-vs-chart ./charts --namespace <namespace> -f custom-values.yaml
 ```
 
 ## Recommendations
@@ -80,7 +80,7 @@ If you want to enable additional services, update the `values.yaml` file and set
 ## Uninstalling
 To uninstall the chart, run:
 ```
-helm uninstall verifiable-id-issuer --namespace <namespace>
+helm uninstall hologram-gov-id-issuer-vs-chart --namespace <namespace>
 ```
 
 If the `vs-agent-chart` was enabled, ensure you clean up any linked resources to avoid orphaned configurations.
