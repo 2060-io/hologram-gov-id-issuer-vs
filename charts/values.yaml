@@ -30,7 +30,7 @@ vs-agent-chart:
   domain: demos.2060.io
   didcommLabel: test-issuer
   eventsBaseUrl: https://issuer-vs.demos.2060.io
-  agentInvitationImageUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
+  didcommInvitationImageUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
   database:
     enabled: false # Set to true if you want to use a database
     host: localhost
