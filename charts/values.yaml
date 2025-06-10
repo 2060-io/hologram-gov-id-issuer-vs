@@ -39,7 +39,7 @@ vs-agent-chart:
   redis: 
     enabled: false # Set to true if you want to use redis
   adminPort: 3000
-  agentPort: 3001
+  didcommPort: 3001
   ingress:
     public:
       enableCors: true
