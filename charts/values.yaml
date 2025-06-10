@@ -146,10 +146,7 @@ webrtc-server-chart:
     serviceName: "webrtc-demos-service"
     replicas: 1
     containerName: webrtc-demos-container
-    image:
-      repository: io2060/webrtc-server
-      tag: dev
-      pullPolicy: Always
+    pullPolicy: Always
     storage: 1Gi
     resources:
       requests:
