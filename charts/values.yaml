@@ -10,7 +10,7 @@ domain: demos.2060.io
 replicas: 1
 database:
   host: issuer
-  user: unicid
+  user: govidissuer
   pwd: mypassword123
 backend:
   webrtc: https://webrtc.demos.2060.io # URL for the webrtc server
@@ -34,7 +34,7 @@ vs-agent-chart:
   database:
     enabled: false # Set to true if you want to use a database
     host: localhost
-    user: unicid
+    user: govidissuer
     pwd: mypassword123
   redis: 
     enabled: false # Set to true if you want to use redis
