@@ -6,16 +6,8 @@
 # by setting the corresponding values to true.
 name: issuer-vs
 namespace: default
-service:
-  port: 2903
-images:
-  backend:
-    repository: io2060/hologram-gov-id-issuer-app
-    tag: dev
 domain: demos.2060.io
 replicas: 1
-agent:
-  url: http://issuer:3000
 database:
   host: issuer
   user: unicid
@@ -23,6 +15,8 @@ database:
 backend:
   webrtc: https://webrtc.demos.2060.io
   vision: https://vision.demos.2060.io
+  vsAgentAdminUrl: http://issuer:3000
+  port: 2903
   timeout: 900
   logLevel: 3
 
@@ -36,28 +30,19 @@ vs-agent-chart:
   domain: demos.2060.io
   agentName: test-issuer
   eventsBaseUrl: https://issuer-vs.demos.2060.io
+  agentInvitationImageUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
   database:
-    # Don't forget to set the database.enabled to true if you want to use the vs-agent with a database
-    enabled: false
+    enabled: false # Set to true if you want to use a database
     host: localhost
     user: unicid
     pwd: mypassword123
+  redis: 
+    enabled: false # Set to true if you want to use redis
   adminPort: 3000
   agentPort: 3001
   ingress:
     public:
       enableCors: true
-
-  images:
-    agent:
-      repository: io2060/2060-service-agent
-      tag: v1.2.0
-    invitationUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
-    redis: 
-      # Dont forget to set the redis.enabled to true if you want to use the vs-agent with a redis  
-      enabled: false
-      repository: redis
-      tag: alpine
 
   # Recomended extra environment variables for the vs-agent
   # to work with the issuer-vs chart
