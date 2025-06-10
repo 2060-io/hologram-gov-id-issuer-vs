@@ -28,7 +28,7 @@ vs-agent-chart:
   namespace: default
   replicas: 1
   domain: demos.2060.io
-  agentName: test-issuer
+  didcommLabel: test-issuer
   eventsBaseUrl: https://issuer-vs.demos.2060.io
   agentInvitationImageUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
   database:
