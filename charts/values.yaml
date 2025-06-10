@@ -84,10 +84,7 @@ vision-service-chart:
     serviceName: vision-service
     replicas: 1
     containerName: vision-service
-    image:
-      repository: io2060/vision-service
-      tag: latest
-      pullPolicy: Always
+    pullPolicy: Always
     storage: 1Gi
     env:
       HOST: "0.0.0.0"
