@@ -13,12 +13,12 @@ database:
   user: unicid
   pwd: mypassword123
 backend:
-  webrtc: https://webrtc.demos.2060.io
-  vision: https://vision.demos.2060.io
-  vsAgentAdminUrl: http://issuer:3000
-  port: 2903
-  timeout: 900
-  logLevel: 3
+  webrtc: https://webrtc.demos.2060.io # URL for the webrtc server
+  vision: https://vision.demos.2060.io # URL for the vision service
+  vsAgentAdminUrl: http://issuer:3000 # URL for the vs-agent admin interface
+  port: 2903 # Port for the backend service
+  timeout: 900 # Timeout for ID verification in seconds, defined in the backend service for resetting the ID verification process
+  logLevel: 3 # Log level for the backend service, default only errors are logged, set to 3 for debug logs
 
 # If you want to use the issuer-vs chart, you can enable it by setting the following:
 # vs-agent-chart.enabled: true
@@ -164,11 +164,11 @@ webrtc-server-chart:
     PROTOO_LISTEN_PORT: "4443"
     MEDIASOUP_CLIENT_PROTOOPORT: "443"
     MEDIASOUP_CLIENT_ENABLE_ICESERVER: "yes"
-    MEDIASOUP_CLIENT_ICESERVER_HOST: "148.113.140.112"
+    MEDIASOUP_CLIENT_ICESERVER_HOST: "xxx.xxx.xxx.xxx"
     MEDIASOUP_CLIENT_ICESERVER_PROTO: "udp"
     MEDIASOUP_CLIENT_ICESERVER_PORT: "3478"
-    MEDIASOUP_CLIENT_ICESERVER_USER: "mobiera"
-    MEDIASOUP_CLIENT_ICESERVER_PASS: "L971EHmpPe"
+    MEDIASOUP_CLIENT_ICESERVER_USER: "user"
+    MEDIASOUP_CLIENT_ICESERVER_PASS: "password"
     MEDIASOUP_INGRESS_HOST: "webrtc.demos.2060.io"
     HTTPS_CERT_FULLCHAIN: "/config/certificates/tls.crt"
     HTTPS_CERT_PRIVKEY: "/config/certificates/tls.key"
