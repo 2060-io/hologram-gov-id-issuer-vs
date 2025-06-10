@@ -66,7 +66,7 @@ The `values.yaml` file contains the default configuration for the chart. Below a
 | --------------------------------- | ---------------------------- | ----------------------------------- |
 | `vs-agent-chart.enabled`          | Enable the vs-agent service  | `false`                             |
 | `vs-agent-chart.database.enabled` | Enable database for vs-agent | `false`                             |
-| `vs-agent-chart.agentName`        | Name of the agent            | `test-issuer`                       |
+| `vs-agent-chart.didcommLabel`     | Name of the didcomm agent    | `test-issuer`                       |
 | `vs-agent-chart.eventsBaseUrl`    | Base URL for events          | `https://issuer-vs.example.io` |
 
 ## Enabling Dependencies

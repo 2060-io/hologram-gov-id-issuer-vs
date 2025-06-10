@@ -1,3 +1,4 @@
+# Service deployment for the Gov ID Issuer App
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,11 +11,11 @@ spec:
     app: {{ .Values.name }}
   ports:
   - name: q
-    port: {{ .Values.service.port }}
-    targetPort: {{ .Values.service.port }}
+    port: {{ .Values.backend.port }}
+    targetPort: {{ .Values.backend.port }}
     protocol: TCP
 ---
-# Public ingress
+# Ingress resource for the Gov ID Issuer App
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -38,8 +39,9 @@ spec:
               service:
                  name: {{ .Values.name }}
                  port:
-                   number: {{ .Values.service.port }}
+                   number: {{ .Values.backend.port }}
 ---
+# StatefulSet deployment for the Gov ID Issuer App
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -58,13 +60,13 @@ spec:
       spec:
          containers:
          -  name: {{ .Values.name }}-backend-container
-            image: "{{ .Values.images.backend.repository }}:{{ .Values.images.backend.tag }}"
+            image: io2060/hologram-gov-id-issuer-app:{{ .Chart.Version }}
             imagePullPolicy: Always
             env:
             - name: AGENT_PORT
-              value: "{{ .Values.service.port }}"
+              value: "{{ .Values.backend.port }}"
             - name: SERVICE_AGENT_ADMIN_URL
-              value: "{{ .Values.agent.url }}"
+              value: "{{ .Values.backend.vsAgentAdminUrl }}"
             - name: POSTGRES_HOST
               value: {{ .Values.database.host }}
             - name: POSTGRES_USER
@@ -82,4 +84,4 @@ spec:
             - name: LOG_LEVEL
               value: "{{ .Values.backend.logLevel }}"
             ports:
-            -  containerPort: {{ .Values.service.port }}
+            -  containerPort: {{ .Values.backend.port }}
