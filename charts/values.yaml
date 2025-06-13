@@ -4,17 +4,18 @@
 # Update namespaces, domains, and other values as needed.
 # You can also enable the vs-agent-chart, vision-matcher-chart, vision-service-chart, and webrtc-server-chart
 # by setting the corresponding values to true.
+global:
+  domain: demos.2060.io # Global domain for the chart, used for ingress and other services
+
 name: issuer-vs
-namespace: default
-domain: demos.2060.io
 replicas: 1
 database:
   host: issuer
   user: govidissuer
   pwd: mypassword123
 backend:
-  webrtc: https://webrtc.demos.2060.io # URL for the webrtc server
-  vision: https://vision.demos.2060.io # URL for the vision service
+  webrtc: https://webrtc.{{ .Values.global.domain }} # URL for the webrtc server
+  vision: https://vision.{{ .Values.global.domain }} # URL for the vision service
   vsAgentAdminUrl: http://issuer:3000 # URL for the vs-agent admin interface
   port: 2903 # Port for the backend service
   timeout: 900 # Timeout for ID verification in seconds, defined in the backend service for resetting the ID verification process
@@ -25,12 +26,9 @@ backend:
 vs-agent-chart:
   enabled: false
   name: issuer
-  namespace: default
-  replicas: 1
-  domain: demos.2060.io
   didcommLabel: test-issuer
-  eventsBaseUrl: https://issuer-vs.demos.2060.io
-  didcommInvitationImageUrl: https://i.unic-id-issuer.demos.dev.2060.io/avatar.png
+  eventsBaseUrl: http://issuer-vs:2903
+  didcommInvitationImageUrl: https://i.unic-id-issuer.{{ .Values.global.domain }}/avatar.png
   database:
     enabled: false # Set to true if you want to use a database
     host: localhost
@@ -38,17 +36,12 @@ vs-agent-chart:
     pwd: mypassword123
   redis: 
     enabled: false # Set to true if you want to use redis
-  adminPort: 3000
-  didcommPort: 3001
-  ingress:
-    public:
-      enableCors: true
 
   # Recomended extra environment variables for the vs-agent
   # to work with the issuer-vs chart
   extraEnv: 
     - name: ANONCREDS_SERVICE_BASE_URL
-      value: https://issuer.demos.2060.io
+      value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
     - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
       value: "true"
     - name: POSTGRES_HOST
@@ -70,14 +63,11 @@ vision-service-chart:
   app:
     name: vision-service
 
-  namespace: 
-    name: default
-
   # Ingress configuration
   ingress:
     name: vision-service-demos-ingress
-    host: vision.demos.2060.io
-    tlsSecret: vision.demos.2060.io-cert
+    host: vision.{{ .Values.global.domain }}
+    tlsSecret: vision.{{ .Values.global.domain }}-cert
 
   statefulset:
     name: vision-service
@@ -104,9 +94,6 @@ vision-service-chart:
     app:
       name: vision-matcher
 
-    namespace:
-      name: default
-
     statefulset:
       name: vision-matcher
       serviceName: vision-matcher
@@ -124,14 +111,12 @@ vision-service-chart:
 # webrtc-server-chart.enabled: true
 webrtc-server-chart:
   enabled: false
-  namespace:
-    name: default
   service:
     name: webrtc-demos-service
   ingress:
     name: webrtc-demos-ingress
-    host: webrtc.demos.2060.io
-    tlsSecret: webrtc.demos.2060.io-cert
+    host: webrtc.{{ .Values.global.domain }}
+    tlsSecret: webrtc.{{ .Values.global.domain }}-cert
     loadBalancerMode: false
   app:
     name: webrtc-demos
@@ -160,8 +145,8 @@ webrtc-server-chart:
     MEDIASOUP_CLIENT_ICESERVER_PORT: "3478"
     MEDIASOUP_CLIENT_ICESERVER_USER: "user"
     MEDIASOUP_CLIENT_ICESERVER_PASS: "password"
-    MEDIASOUP_INGRESS_HOST: "webrtc.demos.2060.io"
+    MEDIASOUP_INGRESS_HOST: "webrtc.{{ .Values.global.domain }}"
     HTTPS_CERT_FULLCHAIN: "/config/certificates/tls.crt"
     HTTPS_CERT_PRIVKEY: "/config/certificates/tls.key"
   secret:
-    name: webrtc.demos.2060.io-cert
+    name: "webrtc.{{ .Values.global.domain }}-cert"
