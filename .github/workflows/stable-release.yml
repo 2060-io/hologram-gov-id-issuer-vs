@@ -13,7 +13,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  publish_image:
+  build:
     runs-on: ubuntu-latest
 
     steps:
