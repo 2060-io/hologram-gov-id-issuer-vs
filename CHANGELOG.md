@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.0.0...v1.0.1) (2025-06-17)
+
+
+### Bug Fixes
+
+* release-please version ([c0fe9aa](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/c0fe9aa70e634eac08561ea4f8edd0bef3a5403c))
+* stable-release name ([c9a81fb](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/c9a81fbc887da7828638dd64ff4d40ff879a1374))
+
 ## [1.0.0](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v0.0.5...v1.0.0) (2025-06-17)
 
 
