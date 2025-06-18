@@ -27,10 +27,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - {{ .Values.name }}.{{ .Values.global.domain }}
-      secretName: {{ .Values.name }}.{{ .Values.global.domain }}-cert
+        - {{ tpl .Values.ingress.host . }}
+      secretName: {{ tpl .Values.ingress.tlsSecret . }}
   rules:
-    - host: {{ .Values.name }}.{{ .Values.global.domain }}
+    - host: {{ tpl .Values.ingress.host . }}
       http:
         paths:
           - path: /
@@ -78,7 +78,7 @@ spec:
             - name: WEBRTC_SERVER_URL
               value: "{{ tpl .Values.backend.webrtc . }}"
             - name: PUBLIC_BASE_URL
-              value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
+              value: "https://{{ tpl .Values.ingress.host . }}"
             - name: ID_VERIFICATION_TIMEOUT_SECONDS
               value: "{{ .Values.backend.timeout }}"
             - name: LOG_LEVEL
