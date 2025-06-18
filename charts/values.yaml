@@ -13,6 +13,11 @@ database:
   host: issuer
   user: govidissuer
   pwd: mypassword123
+
+ingress:
+  host: "{{ .Values.name }}.{{ .Values.global.domain }}"
+  tlsSecret: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert
+
 backend:
   webrtc: https://webrtc.{{ .Values.global.domain }} # URL for the webrtc server
   vision: https://vision.{{ .Values.global.domain }} # URL for the vision service
@@ -29,6 +34,10 @@ vs-agent-chart:
   didcommLabel: test-issuer
   eventsBaseUrl: http://issuer-vs:2903
   didcommInvitationImageUrl: https://i.unic-id-issuer.{{ .Values.global.domain }}/avatar.png
+  ingress:
+    host: "{{ .Values.name }}.{{ .Values.global.domain }}" # Host for the vs agent service
+    tlsSecret: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert # TLS secret for the vs agent service
+
   database:
     enabled: false # Set to true if you want to use a database
     host: localhost
