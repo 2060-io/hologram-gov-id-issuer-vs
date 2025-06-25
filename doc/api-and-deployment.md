@@ -31,9 +31,9 @@ Once everything is set up correctly, you just need to navigate to the `docker-de
 
 ## API
 
-This document outlines the user interface provided by UnicId for its integration with various services that either depend on it or are required for its proper functionality.
+This document outlines the user interface provided by Gov ID Issuer for its integration with various services that either depend on it or are required for its proper functionality.
 
-UnicId API consists on a REST-like interface that exposes endpoints to:
+Gov ID Issuer App API consists on a REST-like interface that exposes endpoints to:
 
 WebRTC Service
 - Handle service events by logging connections and creating rooms for new connections
