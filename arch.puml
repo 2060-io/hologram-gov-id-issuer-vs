@@ -1,31 +1,32 @@
 @startuml
 
-actor "End-user" as Enduser
+actor "End-user" as Enduser
 
-[2060 Cloud Agent] as CA
+[Hologram Mediator] as CA
 
 rectangle "Hologram Wallet & Messenger" as App {
-  [2060 Mobile Agent] as MA
+  [Hologram app] as MA
 }
 
 
-rectangle "Government Unic Id Service" {
-    [2060 Service Agent] as VS
-    [2060 Data Store] as DS
-    [Postgres] as PS
-    [Government Unic Id Backend (**this project**)] as GAIA
+rectangle "Hologram Gov ID Issuer VS" {
+    [VS Agent] as VS
+    [WebRTC Server] as WebRTC
+    database Postgres as PS
+    [Hologram Gov ID Issuer App (**this repo**)] as GAIA
     [Vision Services] as VISION
 }
 
+Enduser <-> App
 MA --> VS
-App --> VISION
-VISION --> GAIA
-VISION --> DS
-GAIA --> DS
-App <--> Enduser
-VS <--> GAIA
-VS --> CA
 MA <-- CA
-GAIA --> PS
+CA <-- VS
+MA --> WebRTC
+VISION <--> GAIA
+VISION <--> WebRTC
+WebRTC <--> GAIA
+VS <--> GAIA
+VS <--> PS
+PS <--> GAIA
 
 @enduml
