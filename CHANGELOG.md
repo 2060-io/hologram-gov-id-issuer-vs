@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.0.2...v1.0.3) (2025-06-27)
+
+
+### Bug Fixes
+
+* increase request limit to 5MB ([#73](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/73)) ([ea0d287](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/ea0d28798a46d47117cc418f9833f8be11e58fe6))
+
 ## [1.0.2](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.0.1...v1.0.2) (2025-06-18)
 
 
