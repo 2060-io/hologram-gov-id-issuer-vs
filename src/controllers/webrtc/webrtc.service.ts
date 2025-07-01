@@ -7,6 +7,7 @@ import { Repository } from 'typeorm'
 import { utils } from '@credo-ts/core'
 import { instanceToPlain } from 'class-transformer'
 import { ConfigService } from '@nestjs/config'
+import { CoreService } from '@/core.service'
 
 @Injectable()
 export class WebrtcService {
@@ -18,6 +19,7 @@ export class WebrtcService {
     @InjectRepository(SessionEntity)
     private readonly sessionRepository: Repository<SessionEntity>,
     private readonly configService: ConfigService,
+    private readonly coreService: CoreService,
   ) {}
 
   async joinCall(notificationRequest: NotificationRequest): Promise<void> {
@@ -45,12 +47,20 @@ export class WebrtcService {
       joinCallRequest.lang = session.lang
 
       this.logger.log(`joinCall: token: ${JSON.stringify(instanceToPlain(joinCallRequest))}`)
-
-      await fetch(`${this.configService.get<string>('appConfig.visionUrl')}/join-call`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(instanceToPlain(joinCallRequest)),
-      })
+      try {
+        const response = await fetch(`${this.configService.get<string>('appConfig.visionUrl')}/join-call`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(instanceToPlain(joinCallRequest)),
+        })
+        if (!response.ok) {
+          const errorText = await response.text()
+          throw new Error(`Request failed with status ${response.status}: ${errorText}`)
+        }
+      } catch (error) {
+        this.logger.error(`joinCall: ${error}`)
+        await this.coreService.handleStateInput('error', session)
+      }
     }
   }
 
