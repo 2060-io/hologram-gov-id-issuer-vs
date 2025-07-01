@@ -6,7 +6,7 @@
   "EMRTD_REQUEST":"Por favor, ten listo tu Documento de Identidad o Pasaporte.\nAsegúrate de que sea compatible con la tecnología NFC.",
   "FACE_REQUEST":"Ahora verificaremos tu rostro.\nCuando estés listo, haz clic en el botón 'Unirse a la llamada' para comenzar. Si la verificación falla, podrás intentarlo nuevamente.",
   "CALL_REJECT":"Verificación fallida.",
-  "CALL_VISION_ERROR":"Ocurrió un error al intentar iniciar la llamada o verificar la imagen. Por favor, revisa tu conexión a Internet y vuelve a intentarlo..",
+  "CALL_VISION_ERROR":"Ocurrió un error al intentar iniciar la llamada o verificar la imagen. Por favor, revisa tu conexión a Internet y vuelve a intentarlo..}",
   "MRZ_SUCCESSFUL":"Documento de identidad leído con éxito.",
   "EMRTD_SUCCESSFUL":"Documento de identidad leído con éxito.",
   "VERIFICATION_SUCCESSFUL":"Verificación exitosa.",
