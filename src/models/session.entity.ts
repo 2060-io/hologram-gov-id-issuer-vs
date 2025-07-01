@@ -13,7 +13,7 @@ export class SessionEntity {
   @Column({ name: 'thread_id', type: 'varchar', nullable: true })
   threadId: string
 
-  @Column({ type: 'varchar', length: 10, nullable: true })
+  @Column({ type: 'varchar', length: 10, nullable: true, default: 'en' })
   lang?: string
 
   @Column({
