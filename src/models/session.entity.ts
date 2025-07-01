@@ -14,7 +14,7 @@ export class SessionEntity {
   threadId: string
 
   @Column({ type: 'varchar', length: 10, nullable: true, default: 'en' })
-  lang?: string
+  lang: string
 
   @Column({
     type: 'enum',
