@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.0.3...v1.0.4) (2025-07-02)
+
+
+### Bug Fixes
+
+* call vision with a default language in case preferred language from user is not found ([#75](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/75)) ([79d4571](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/79d457133db8de62d334e79cdabb1e5e37c18caa))
+
 ## [1.0.3](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.0.2...v1.0.3) (2025-06-27)
 
 
