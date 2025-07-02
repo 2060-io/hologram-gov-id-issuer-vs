@@ -13,8 +13,8 @@ export class SessionEntity {
   @Column({ name: 'thread_id', type: 'varchar', nullable: true })
   threadId: string
 
-  @Column({ type: 'varchar', length: 10, nullable: true })
-  lang?: string
+  @Column({ type: 'varchar', length: 10, nullable: true, default: 'en' })
+  lang: string
 
   @Column({
     type: 'enum',

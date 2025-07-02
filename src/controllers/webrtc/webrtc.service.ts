@@ -42,7 +42,7 @@ export class WebrtcService {
       joinCallRequest.wsUrl = `${peer.wsUrl}/?roomId=${peer.roomId}&peerId=${peerId}`
       joinCallRequest.callbackBaseUrl = this.configService.get<string>('appConfig.publicBaseUrl')
       joinCallRequest.token = session.id
-      joinCallRequest.lang = session.lang
+      joinCallRequest.lang = session.lang ?? 'en'
 
       this.logger.log(`joinCall: token: ${JSON.stringify(instanceToPlain(joinCallRequest))}`)
 
