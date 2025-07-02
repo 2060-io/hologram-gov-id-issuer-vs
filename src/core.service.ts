@@ -163,39 +163,49 @@ export class CoreService implements EventHandler, OnModuleInit {
       `${this.configService.get<string>('appConfig.publicBaseUrl')}/call-event`,
       50,
     )
-    const response = await fetch(`${this.configService.get<string>('appConfig.webRtcServerUrl')}/rooms`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(createRoom),
-    })
-    const wsUrl: WebRtcCallDataV1 = JsonTransformer.fromJSON(await response.json(), WebRtcCallDataV1)
+    try {
+      const response = await fetch(`${this.configService.get<string>('appConfig.webRtcServerUrl')}/rooms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createRoom),
+      })
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Request failed with status ${response.status}: ${errorText}`)
+      }
 
-    this.logger.log(`Create new room ${wsUrl.roomId} on: ${wsUrl.wsUrl}`)
+      const wsUrl: WebRtcCallDataV1 = JsonTransformer.fromJSON(await response.json(), WebRtcCallDataV1)
 
-    const peer = this.peerRepository.create({
-      id: utils.uuid(),
-      connectionId: session.connectionId,
-      roomId: wsUrl.roomId,
-      wsUrl: wsUrl.wsUrl,
-      type: PeerType.PEER_USER,
-    })
+      this.logger.log(`Create new room ${wsUrl.roomId} on: ${wsUrl.wsUrl}`)
 
-    await this.peerRepository.save(peer)
-    this.logger.log('New peer: ' + JSON.stringify(peer))
-
-    await this.apiClient.messages.send(
-      new CallOfferRequestMessage({
+      const peer = this.peerRepository.create({
+        id: utils.uuid(),
         connectionId: session.connectionId,
-        offerExpirationTime: new Date(
-          Date.now() + this.configService.get<number>('appConfig.verificationTimeout') * 1000,
-        ),
-        description: this.getText('FACE_REQUEST', session.lang),
-        parameters: {
-          ...wsUrl,
-          peerId: peer.id,
-        },
-      }),
-    )
+        roomId: wsUrl.roomId,
+        wsUrl: wsUrl.wsUrl,
+        type: PeerType.PEER_USER,
+      })
+
+      await this.peerRepository.save(peer)
+      this.logger.log('New peer: ' + JSON.stringify(peer))
+
+      await this.apiClient.messages.send(
+        new CallOfferRequestMessage({
+          connectionId: session.connectionId,
+          offerExpirationTime: new Date(
+            Date.now() + this.configService.get<number>('appConfig.verificationTimeout') * 1000,
+          ),
+          description: this.getText('FACE_REQUEST', session.lang),
+          parameters: {
+            ...wsUrl,
+            peerId: peer.id,
+          },
+        }),
+      )
+    } catch (error) {
+      this.logger.error(`startVideoCall: ${error}`)
+      await this.handleStateInput('error', session)
+    }
 
     return session
   }
@@ -272,6 +282,10 @@ export class CoreService implements EventHandler, OnModuleInit {
             session.state = StateStep.ISSUE
             await this.sendCredentialData(session)
           } else if (content === 'failure') await this.sendMenuSelection(session)
+          else if (content === 'error') {
+            session = await this.purgeUserData(session)
+            await this.sendText(session.connectionId, 'CALL_VISION_ERROR', session.lang)
+          }
           break
         case StateStep.ISSUE:
           if (content instanceof CredentialReceptionMessage) {

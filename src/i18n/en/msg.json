@@ -6,6 +6,7 @@
   "EMRTD_REQUEST":"Please have your ID Document or Passport ready.\nMake sure it is compatible with the NFC technology.",
   "FACE_REQUEST":"We will now verify your face.\nWhen ready, click the 'Join Call' button to start. If verification fails, you can retry.",
   "CALL_REJECT":"Verification failed.",
+  "CALL_VISION_ERROR":"An error occurred while trying to start the call or verify the image. Please check your internet connection and try again.",
   "MRZ_SUCCESSFUL": "ID Document successfully read.",
   "EMRTD_SUCCESSFUL":"ID Document successfully read.",
   "VERIFICATION_SUCCESSFUL":"Verification successful.",
