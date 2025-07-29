@@ -5,7 +5,7 @@ import appConfig from '@/config/app.config'
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n'
 import * as path from 'path'
 import { EventsModule } from '@2060.io/service-agent-nestjs-client'
-import { VisionModule, WebRtcModule } from '@/controllers'
+import { HealthModule, VisionModule, WebRtcModule } from '@/controllers'
 import { CoreModule } from '@/core.module'
 
 @Module({
@@ -13,6 +13,7 @@ import { CoreModule } from '@/core.module'
     CoreModule,
     VisionModule,
     WebRtcModule,
+    HealthModule,
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
