@@ -18,7 +18,41 @@ The issued credentials are **[AnonCreds](https://www.lfdecentralizedtrust.org/pr
 
 The following diagram shows how the different components are combined and interact with users using Hologram app:
 
-![](arch.svg)
+```mermaid
+graph TD
+    Enduser([🧍 End-user]) 
+    CA["Hologram Mediator"]
+    
+    subgraph App["**Hologram Wallet & Messenger**"]
+        MA["Hologram app"]
+    end
+    
+    subgraph Gov["**Hologram Gov ID Issuer VS**"]
+        VS["VS Agent"]
+        WebRTC["WebRTC Server"]
+        PS[("Postgres")]
+        GAIA["Hologram Gov ID Issuer App (**this repo**)"]
+        VISION["Vision Services"]
+    end
+    
+    %% Connections
+    Enduser <--> MA
+    MA --> VS
+    MA <--> CA
+    CA <--> VS
+    MA --> WebRTC
+    VISION <--> GAIA
+    VISION <--> WebRTC
+    WebRTC <--> GAIA
+    VS <--> GAIA
+    VS <--> PS
+    PS <--> GAIA
+
+    %% Styling
+    style Enduser stroke:#333,stroke-width:2px,fill:none
+    style App stroke:#333,stroke-width:2px,fill:none
+    style Gov stroke:#333,stroke-width:2px,fill:none
+```
 
 ## Try the demo
 
