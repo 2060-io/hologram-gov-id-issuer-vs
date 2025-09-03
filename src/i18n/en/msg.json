@@ -9,6 +9,7 @@
   "CALL_VISION_ERROR":"An error occurred while trying to start the call or verifying your identity. Please check your internet connection and try again.",
   "MRZ_SUCCESSFUL": "ID Document successfully read.",
   "EMRTD_SUCCESSFUL":"ID Document successfully read.",
+  "EMRTD_VERIFICATION_FAILED":"ID Document couldn't be verified. Please try again.",
   "VERIFICATION_SUCCESSFUL":"Verification successful.",
   "MRZ_INVALID":"It looks like the MRZ is invalid. Please rescan your document and try again.",
   "MRTD_FAILED":"Your document couldn't be verified. Reason: <reason>.",
