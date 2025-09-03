@@ -2,6 +2,20 @@
 # yarn lockfile v1
 
 
+"@2060.io/credo-ts-didcomm-mrtd@0.0.13":
+  version "0.0.13"
+  resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-mrtd/-/credo-ts-didcomm-mrtd-0.0.13.tgz#250b8da5f698a79c5e01d0f2fb7caf40a32b9c03"
+  integrity sha512-uzA5Fp/WvR/W37SLI1Fr570KfINk3rWTIAOM38Wy9ShPsxgwkeD5lxKi90CVBm2q2XteADmKSNF020ILSm2j6g==
+  dependencies:
+    "@li0ard/tsemrtd" "^0.2.2"
+    class-transformer "0.5.1"
+    class-validator "0.14.1"
+    esbuild "^0.24.0"
+    mrz "^4.2.0"
+    reflect-metadata "^0.1.13"
+    rxjs "^7.2.0"
+    tsyringe "^4.8.0"
+
 "@2060.io/credo-ts-didcomm-mrtd@0.0.17", "@2060.io/credo-ts-didcomm-mrtd@^0.0.17":
   version "0.0.17"
   resolved "https://registry.yarnpkg.com/@2060.io/credo-ts-didcomm-mrtd/-/credo-ts-didcomm-mrtd-0.0.17.tgz#3a9989242e6661aa7b602323c5894bb9b01489ce"
@@ -47,7 +61,7 @@
     tsyringe "^4.8.0"
     uuid "^9.0.0"
 
-"@2060.io/service-agent-client@1.2.0", "@2060.io/service-agent-client@^1.1.0-dev.41":
+"@2060.io/service-agent-client@^1.1.0-dev.41":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@2060.io/service-agent-client/-/service-agent-client-1.2.0.tgz#87f85725c1e4b6c9b5b59f40f6fdd6d4e4df0bae"
   integrity sha512-wODfaLasaInQZzdowVcx8A5368K61bQKk/oOlWsabX/xX/c5UQf276qucabI2aD/JJde57Tf11LtI+ULv/eLRQ==
@@ -70,15 +84,61 @@
     credo-ts-receipts "^0.0.1-alpha.5"
     mrz "^4.2.0"
 
-"@2060.io/service-agent-nestjs-client@^1.1.0-dev.41":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@2060.io/service-agent-nestjs-client/-/service-agent-nestjs-client-1.2.0.tgz#790d4d48137ffeb5f440f2c8d8eb593de6edc9e1"
-  integrity sha512-zBOQwtPpydX6s9AV+oFGmHjMr6054cZUrb64c0Jd92lzU+yL34H16zLzNEO8MQQpBDeCFGLLtM97lq7TW3KNSg==
+"@2060.io/vs-agent-client@1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@2060.io/vs-agent-client/-/vs-agent-client-1.3.2.tgz#2d539906e94baf55aa27df2d43207810a2dd736e"
+  integrity sha512-vXPijpabsa9QKvrYKCyEGaePvNQQRuOBa9IpRwobRA5ZZkjLzwYqAVi7cuaSrMt7+hr2mgDpwlTp1xJ9xmYPig==
   dependencies:
-    "@2060.io/credo-ts-didcomm-mrtd" "^0.0.12"
-    "@2060.io/service-agent-client" "1.2.0"
-    "@2060.io/service-agent-model" "1.2.0"
-    "@credo-ts/core" "^0.5.11"
+    "@2060.io/vs-agent-model" "1.3.2"
+    class-transformer "0.5.1"
+    class-validator "0.14.1"
+    express "^4.18.1"
+    tslog "^4.8.2"
+
+"@2060.io/vs-agent-client@1.4.0-dev.43", "@2060.io/vs-agent-client@^1.4.0-dev.42":
+  version "1.4.0-dev.43"
+  resolved "https://registry.yarnpkg.com/@2060.io/vs-agent-client/-/vs-agent-client-1.4.0-dev.43.tgz#271b831076291590ef92782c91826c7e65123371"
+  integrity sha512-sCBcnNwjPQkV4VKWmK7Ej8vnSnIsxnYjjMEjfeDF5pOrrp1nmj4lprfkFXwCWNg0jqkvNOKF+DPipEPAGWQicQ==
+  dependencies:
+    "@2060.io/vs-agent-model" "1.4.0-dev.43"
+    class-transformer "0.5.1"
+    class-validator "0.14.1"
+    express "^4.18.1"
+    tslog "^4.8.2"
+
+"@2060.io/vs-agent-model@1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@2060.io/vs-agent-model/-/vs-agent-model-1.3.2.tgz#4a9a98f23ac484560f84c5c75489a7d40596d85e"
+  integrity sha512-5+5XE8EX+2Q5ddRv/EdcRmPrLMm0YFnz8xBGFoAi3xzeIciREy1v9LZsFDy0qHl5JUORTWvlbisnSB52DQt1sg==
+  dependencies:
+    "@2060.io/credo-ts-didcomm-mrtd" "0.0.13"
+    "@2060.io/credo-ts-didcomm-receipts" "0.0.7"
+    "@credo-ts/core" "0.5.15"
+    class-transformer "0.5.1"
+    class-validator "0.14.1"
+    mrz "^4.2.0"
+
+"@2060.io/vs-agent-model@1.4.0-dev.43", "@2060.io/vs-agent-model@^1.4.0-dev.42":
+  version "1.4.0-dev.43"
+  resolved "https://registry.yarnpkg.com/@2060.io/vs-agent-model/-/vs-agent-model-1.4.0-dev.43.tgz#96a5e179ddbc7deb2adb18dfced680b3d4b0f96b"
+  integrity sha512-EeU8a4lGBqzG/RYXBNQOZ8D4WZkXSAT3x6fur0qffT42KKStMyajpxw7KMRngnm+fOQayzZVFowgVzfHstBC9g==
+  dependencies:
+    "@2060.io/credo-ts-didcomm-mrtd" "0.0.17"
+    "@2060.io/credo-ts-didcomm-receipts" "0.0.7"
+    "@credo-ts/core" "0.5.18-alpha-20250903145047"
+    class-transformer "0.5.1"
+    class-validator "0.14.1"
+    mrz "^4.2.0"
+
+"@2060.io/vs-agent-nestjs-client@^1.1.0-dev.41":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@2060.io/vs-agent-nestjs-client/-/vs-agent-nestjs-client-1.3.2.tgz#6a8bb023476afeb595839695df9350b486035971"
+  integrity sha512-qqVA5M8/lyg7xt18HXvG+tfLy7w3CwWBJAQeIapv5J2NVpwFZD0Ig+3gQ/nZrZCdBmVLlX5ijTrg8dKtL3iiFw==
+  dependencies:
+    "@2060.io/credo-ts-didcomm-mrtd" "0.0.13"
+    "@2060.io/vs-agent-client" "1.3.2"
+    "@2060.io/vs-agent-model" "1.3.2"
+    "@credo-ts/core" "0.5.15"
     "@nestjs/common" "^10.0.0"
     "@nestjs/core" "^10.0.0"
     "@nestjs/platform-express" "^10.0.0"
@@ -88,17 +148,23 @@
     rxjs "^7.8.1"
     typeorm "^0.3.20"
 
-"@2060.io/vs-agent-model@^1.4.0-dev.42":
-  version "1.4.0-dev.42"
-  resolved "https://registry.yarnpkg.com/@2060.io/vs-agent-model/-/vs-agent-model-1.4.0-dev.42.tgz#c6e3880bf557b4df215e5b77c5b58da6ff25c22e"
-  integrity sha512-tAqVOIT7mkT15kMdBajCJJsc9fVaN3ieSSEiotnK0CSZPISY4hpoGCnlCwxhSofT9+cwvWNuH0OW9mTntqif4g==
+"@2060.io/vs-agent-nestjs-client@^1.4.0-dev.42":
+  version "1.4.0-dev.43"
+  resolved "https://registry.yarnpkg.com/@2060.io/vs-agent-nestjs-client/-/vs-agent-nestjs-client-1.4.0-dev.43.tgz#7486ece84a3d0cf50038375d42d1e26b513874b9"
+  integrity sha512-YKexxmmbyCxI0S35O2AzjKGKo3uPczqSmZoyxMWa199d0oI6yA2x6Bt9KbmA8XFFQfND9yXeP6SbUKIcuVDUiQ==
   dependencies:
     "@2060.io/credo-ts-didcomm-mrtd" "0.0.17"
-    "@2060.io/credo-ts-didcomm-receipts" "0.0.7"
-    "@credo-ts/core" "0.5.17-alpha-20250818210456"
-    class-transformer "0.5.1"
-    class-validator "0.14.1"
-    mrz "^4.2.0"
+    "@2060.io/vs-agent-client" "1.4.0-dev.43"
+    "@2060.io/vs-agent-model" "1.4.0-dev.43"
+    "@credo-ts/core" "0.5.18-alpha-20250903145047"
+    "@nestjs/common" "^10.0.0"
+    "@nestjs/core" "^10.0.0"
+    "@nestjs/platform-express" "^10.0.0"
+    "@nestjs/typeorm" "^10.0.2"
+    reflect-metadata "^0.2.0"
+    rhea "^3.0.3"
+    rxjs "^7.8.1"
+    typeorm "^0.3.20"
 
 "@ampproject/remapping@^2.2.0":
   version "2.3.0"
@@ -523,10 +589,58 @@
     web-did-resolver "^2.0.21"
     webcrypto-core "^1.8.0"
 
-"@credo-ts/core@0.5.17-alpha-20250818210456":
-  version "0.5.17-alpha-20250818210456"
-  resolved "https://registry.yarnpkg.com/@credo-ts/core/-/core-0.5.17-alpha-20250818210456.tgz#a1fa348a170c434f3ab0a9c26404fc812900b710"
-  integrity sha512-YH3r50JhQStHSirDmCk9+bRB2ZNWBEjZ/guL8j3t62I0/jMEvlMOb/qlRUFVQ6hsS7pSZI9zmsj/9WaY/NgzGw==
+"@credo-ts/core@0.5.15":
+  version "0.5.15"
+  resolved "https://registry.yarnpkg.com/@credo-ts/core/-/core-0.5.15.tgz#18f9e2f5c42d8cef955c230edad77028a6cd2cd4"
+  integrity sha512-3BYjncNY1Y6JDtxnbza1WVID8OoPgIZEno3z2F8a11xvsemsZCyy9vpyVgQi/Dz3P6/6JLZ/mnJAUwGKFZPnqA==
+  dependencies:
+    "@animo-id/mdoc" "0.2.38"
+    "@animo-id/pex" "4.1.1-alpha.0"
+    "@astronautlabs/jsonpath" "^1.1.2"
+    "@digitalcredentials/jsonld" "^6.0.0"
+    "@digitalcredentials/jsonld-signatures" "^9.4.0"
+    "@digitalcredentials/vc" "^6.0.1"
+    "@multiformats/base-x" "^4.0.1"
+    "@noble/curves" "^1.6.0"
+    "@noble/hashes" "^1.5.0"
+    "@peculiar/asn1-ecc" "^2.3.8"
+    "@peculiar/asn1-schema" "^2.3.8"
+    "@peculiar/asn1-x509" "^2.3.8"
+    "@peculiar/x509" "^1.11.0"
+    "@sd-jwt/core" "^0.7.0"
+    "@sd-jwt/decode" "^0.7.0"
+    "@sd-jwt/jwt-status-list" "^0.7.0"
+    "@sd-jwt/sd-jwt-vc" "^0.7.0"
+    "@sd-jwt/types" "^0.7.0"
+    "@sd-jwt/utils" "^0.7.0"
+    "@sphereon/pex-models" "^2.3.1"
+    "@sphereon/ssi-types" "0.30.2-next.135"
+    "@stablelib/ed25519" "^1.0.2"
+    "@types/ws" "^8.5.4"
+    abort-controller "^3.0.0"
+    big-integer "^1.6.51"
+    borc "^3.0.0"
+    buffer "^6.0.3"
+    class-transformer "0.5.1"
+    class-validator "0.14.1"
+    did-resolver "^4.1.0"
+    lru_map "^0.4.1"
+    luxon "^3.5.0"
+    make-error "^1.3.6"
+    object-inspect "^1.10.3"
+    query-string "^7.0.1"
+    reflect-metadata "^0.1.13"
+    rxjs "^7.8.0"
+    tsyringe "^4.8.0"
+    uuid "^9.0.0"
+    varint "^6.0.0"
+    web-did-resolver "^2.0.21"
+    webcrypto-core "^1.8.0"
+
+"@credo-ts/core@0.5.18-alpha-20250903145047":
+  version "0.5.18-alpha-20250903145047"
+  resolved "https://registry.yarnpkg.com/@credo-ts/core/-/core-0.5.18-alpha-20250903145047.tgz#feea4b7bbcfe27c5ebc034797c6918568dfc16be"
+  integrity sha512-rHsVAx4nayPVRV/IQeuXmZV71mEi0k8wxDSQQQUkQ8luhcoTe04FYpWp4w7uquz3Z8h3dzB2uv73VRtwhVUTLA==
   dependencies:
     "@animo-id/mdoc" "0.2.38"
     "@animo-id/pex" "4.1.1-alpha.0"

@@ -18,8 +18,8 @@ import {
   MrzDataSubmitMessage,
   TextMessage,
 } from '@2060.io/vs-agent-model'
-import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { ConnectionEntity, CredentialService, EventHandler } from '@2060.io/service-agent-nestjs-client'
+import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
+import { ConnectionEntity, CredentialService, EventHandler } from '@2060.io/vs-agent-nestjs-client'
 import { MrtdCapabilities } from '@2060.io/credo-ts-didcomm-mrtd'
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { WebRtcPeerEntity, SessionEntity } from '@/models'
