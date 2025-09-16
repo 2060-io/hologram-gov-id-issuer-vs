@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.0.3...v1.1.0) (2025-09-16)
+
+
+### Features
+
+* add health endpoint and k8s liveness/readiness probes ([#79](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/79)) ([0bb0dab](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/0bb0dab6f8e2e329306b39b6a48d5f3aebd03f91))
+* **chart:** update vs-agent dep to latest dev version ([#80](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/80)) ([6738608](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/67386084de291d5f9e7612ed004976cd56b8b1ba))
+* **chart:** update vs-agent to latest dev version ([#85](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/85)) ([e445b26](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/e445b26cbe628749cbac76a55346af090e68abcb))
+
+
+### Bug Fixes
+
+* add response validation on webrtc and vision start process ([#76](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/76)) ([5ad6758](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/5ad6758e0f4e2649578628b9a9fa3e1293fb60ef))
+* call vision with a default language in case preferred language from user is not found ([#75](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/75)) ([79d4571](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/79d457133db8de62d334e79cdabb1e5e37c18caa))
+
 ## [1.0.3](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.0.2...v1.0.3) (2025-06-27)
 
 
