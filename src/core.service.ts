@@ -17,9 +17,9 @@ import {
   MrzDataRequestMessage,
   MrzDataSubmitMessage,
   TextMessage,
-} from '@2060.io/service-agent-model'
-import { ApiClient, ApiVersion } from '@2060.io/service-agent-client'
-import { ConnectionEntity, CredentialService, EventHandler } from '@2060.io/service-agent-nestjs-client'
+} from '@2060.io/vs-agent-model'
+import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
+import { ConnectionEntity, CredentialService, EventHandler } from '@2060.io/vs-agent-nestjs-client'
 import { MrtdCapabilities } from '@2060.io/credo-ts-didcomm-mrtd'
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { WebRtcPeerEntity, SessionEntity } from '@/models'
@@ -240,7 +240,8 @@ export class CoreService implements EventHandler, OnModuleInit {
         case StateStep.MRZ:
           if (content instanceof MrzDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
-              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang) // TODO: When MRZ can checked add to the message "Congratulations, your document is compatible."
+              await this.sendText(session.connectionId, 'MRZ_SUCCESSFUL', session.lang)
+              // TODO: When MRZ can checked add to the message "Congratulations, your document is compatible."
               session = await this.sendEMrtdRequest(session)
               // TODO: is a MRZ valid?
             } else {
@@ -251,7 +252,27 @@ export class CoreService implements EventHandler, OnModuleInit {
         case StateStep.EMRTD:
           if (content instanceof EMrtdDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
+              // validate authenticity and integrity
+              const { dataGroups } = content
+              const verification = dataGroups?.verification
+
+              if (verification) {
+                const isVerified = verification?.authenticity === true && verification?.integrity === true
+
+                if (!isVerified) {
+                  this.logger.warn(
+                    `[eMRTD] Verification failed. authenticity=${String(verification?.authenticity)} integrity=${String(verification?.integrity)}`,
+                  )
+                  await this.sendText(session.connectionId, 'EMRTD_VERIFICATION_FAILED', session.lang)
+                  await this.sendMenuSelection(session)
+                  break
+                }
+              } else {
+                this.logger.log('[eMRTD] No verification provided; proceeding without checks')
+              }
+
               session.mrzData = content.dataGroups.processed.mrzString
+
               await this.sendText(session.connectionId, 'EMRTD_SUCCESSFUL', session.lang)
               session.state = StateStep.VERIFICATION
               const credentialIssuanceDate = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`

@@ -9,6 +9,7 @@
   "CALL_VISION_ERROR":"Ocurrió un error al intentar iniciar la llamada o verificar tu identidad. Por favor, revisa tu conexión a Internet y vuelve a intentarlo...",
   "MRZ_SUCCESSFUL":"Documento de identidad leído con éxito.",
   "EMRTD_SUCCESSFUL":"Documento de identidad leído con éxito.",
+  "EMRTD_VERIFICATION_FAILED": "No fue posible verificar el documento de identidad. Por favor, inténtalo de nuevo.",
   "VERIFICATION_SUCCESSFUL":"Verificación exitosa.",
   "MRZ_INVALID":"Parece que el MRZ no es válido. Por favor, vuelve a escanear tu documento e inténtalo de nuevo.",
   "MRTD_FAILED":"No fue posible verificar tu documento. Motivo: <reason>.",
