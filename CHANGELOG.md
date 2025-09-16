@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.1.0...v1.2.0) (2025-09-16)
+
+
+### Features
+
+* eMRTD authenticity verification ([2128f54](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/2128f545c3f27d7fd87d3b51a06300ce71f3adaa))
+
 ## [1.1.0](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.0.3...v1.1.0) (2025-09-16)
 
 
