@@ -252,7 +252,7 @@ export class CoreService implements EventHandler, OnModuleInit {
         case StateStep.EMRTD:
           if (content instanceof EMrtdDataSubmitMessage) {
             if (content.state === MrtdSubmitState.Submitted) {
-              //validate authenticity and integrity
+              // validate authenticity and integrity
               const { dataGroups } = content
               const verification = dataGroups?.verification
 
