@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.2.0...v1.2.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* health port ([#87](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/87)) ([f564a96](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/f564a9602957c3b5aa72f9f24038c48aaf8d6340))
+
 ## [1.2.0](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.1.0...v1.2.0) (2025-09-16)
 
 
