@@ -88,7 +88,7 @@ spec:
             livenessProbe:
               httpGet:
                 path: /health
-                port: {{ .Values.containerPort }}
+                port: {{ .Values.backend.port }}
               initialDelaySeconds: 30
               periodSeconds: 60
               timeoutSeconds: 5
@@ -96,7 +96,7 @@ spec:
             readinessProbe:
               httpGet:
                 path: /health
-                port: {{ .Values.containerPort }}
+                port: {{ .Values.backend.port }}
               initialDelaySeconds: 15
               periodSeconds: 60
               timeoutSeconds: 5
