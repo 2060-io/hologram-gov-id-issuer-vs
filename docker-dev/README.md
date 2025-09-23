@@ -135,7 +135,7 @@ verify containers are started:
 $ docker ps
 CONTAINER ID   IMAGE                                                 COMMAND                  CREATED         STATUS         PORTS                                                                                                               NAMES
 e5a115362594   2060-unic-id-dts                "docker-entrypoint.s…"   4 hours ago   Exited (137) 4 hours ago             unic-id-dts
-100b146e717c   io2060/2060-service-agent:dev   "/bin/sh -c 'yarn st…"   3 seconds ago   Up 3 seconds   0.0.0.0:3000-3001->3000-3001/tcp                                                                                    docker-service-agent-1
+100b146e717c   io2060/2060-service-agent:dev   "/bin/sh -c 'pnpm st…"   3 seconds ago   Up 3 seconds   0.0.0.0:3000-3001->3000-3001/tcp                                                                                    docker-service-agent-1
 12b7355f9b34   postgres:15.2                                         "docker-entrypoint.s…"   3 seconds ago   Up 3 seconds   0.0.0.0:5432->5432/tcp                                                                                              docker-postgres-1
 ```
 

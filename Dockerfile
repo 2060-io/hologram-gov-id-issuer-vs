@@ -3,12 +3,13 @@ FROM node:22-alpine
 WORKDIR /www
 ENV RUN_MODE="docker"
 
-COPY package.json yarn.lock ./
+RUN corepack enable
+COPY package.json pnpm-lock.yaml .npmrc ./
 
-RUN yarn install
+RUN pnpm install
 
 COPY tsconfig.json tsconfig.build.json nest-cli.json ./
 COPY ./src ./src
 
-RUN yarn build
-CMD yarn start
+RUN pnpm build
+CMD pnpm start
