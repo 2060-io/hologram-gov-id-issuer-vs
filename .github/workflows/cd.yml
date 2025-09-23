@@ -23,15 +23,6 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
 
-      - name: Setup node v20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: |
-          yarn install
-
       - uses: codfish/semantic-release-action@v3
         id: semantic
         with:

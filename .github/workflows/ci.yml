@@ -19,26 +19,30 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
 
-      - name: Setup node v20
+      - name: Setup node v22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+
+      - name: Corepack pnpm
+        run: |
+          corepack enable
 
       - name: Install dependencies
         run: |
-          yarn install --frozen-lockfile
+          pnpm install --frozen-lockfile
 
       - name: Build
         run: |
-          yarn build
+          pnpm build
 
       - name: Check Format
         run: |
-          yarn check-format
+          pnpm check-format
 
       - name: Check Types
         run: |
-          yarn check-types
+          pnpm check-types
 
       - name: Validate Helm chart
         run: helm lint ./charts
