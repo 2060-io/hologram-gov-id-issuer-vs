@@ -9,40 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
+  ci:
+    uses: 2060-io/organization/.github/workflows/2060-linter-call.yml@main
+    with:
+      charts-dir: ./charts
 
-    steps:
-      - name: Checkout hologram-gov-id-issuer-vs
-        uses: actions/checkout@v4
-      
-      - name: Setup Helm
-        uses: azure/setup-helm@v3
-
-      - name: Setup node v22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Corepack pnpm
-        run: |
-          corepack enable
-
-      - name: Install dependencies
-        run: |
-          pnpm install --frozen-lockfile
-
-      - name: Build
-        run: |
-          pnpm build
-
-      - name: Check Format
-        run: |
-          pnpm check-format
-
-      - name: Check Types
-        run: |
-          pnpm check-types
-
-      - name: Validate Helm chart
-        run: helm lint ./charts
