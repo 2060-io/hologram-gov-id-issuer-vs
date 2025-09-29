@@ -10,7 +10,7 @@ on:
 
 jobs:
   ci:
-    uses: 2060-io/organization/.github/workflows/2060-linter-call.yml@ci/update-ci-flows
+    uses: 2060-io/organization/.github/workflows/2060-linter-call.yml@main
     with:
       charts-dir: ./charts
 
