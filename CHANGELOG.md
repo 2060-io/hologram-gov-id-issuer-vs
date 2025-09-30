@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.2.0...v1.3.0) (2025-09-30)
+
+
+### Features
+
+* update yarn to pnpm ([#90](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/90)) ([f658e2f](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/f658e2f483a8535f46eead034a23a1b76aa87858))
+
+
+### Bug Fixes
+
+* health port ([#87](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/87)) ([f564a96](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/f564a9602957c3b5aa72f9f24038c48aaf8d6340))
+* support sha-512 for eMRTD verification ([#93](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/93)) ([cd3b9d0](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/cd3b9d0c8a59df109d03e2d286071646d7cb7d09))
+
 ## [1.2.0](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.1.0...v1.2.0) (2025-09-16)
 
 
