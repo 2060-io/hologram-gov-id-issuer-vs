@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.3.0...v1.3.1) (2025-10-22)
+
+
+### Bug Fixes
+
+* update vs agent ([#97](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/97)) ([518a7b5](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/518a7b528ed9d83396d6f7a027f54eb7fc591ed0))
+* update vs agent unstable version ([#95](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/95)) ([1912799](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/19127994359c43012e1f740969cba24d609048ec))
+
 ## [1.3.0](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.2.0...v1.3.0) (2025-09-30)
 
 
