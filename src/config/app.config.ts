@@ -68,4 +68,14 @@ export default registerAs('appConfig', () => ({
    * @type {number}
    */
   verificationTimeout: parseInt(process.env.ID_VERIFICATION_TIMEOUT_SECONDS) || 900,
+
+  /**
+   * Credential Schema ID that defines the structure and attributes of the credential.
+   * This JSON Schema Credential was created directly in the Gov-ID service API
+   * at https://dm.gov-id-org.demos.dev.2060.io.
+   * Defaults to a testnet schema ID if CREDENTIAL_SCHEMA_ID is not set.
+   * @type {string}
+   */
+  credentialSchemaId:
+    process.env.CREDENTIAL_SCHEMA_ID || 'https://dm.gov-id-org.demos.dev.2060.io/vt/schemas-gov-id-jsc.json',
 }))

@@ -12,14 +12,14 @@ importers:
         specifier: ^0.0.17
         version: 0.0.17(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(typescript@5.9.2)
       '@2060.io/vs-agent-client':
-        specifier: ^1.5.0
-        version: 1.5.0(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+        specifier: 1.6.0-dev.16
+        version: 1.6.0-dev.16(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
       '@2060.io/vs-agent-model':
-        specifier: ^1.5.0
-        version: 1.5.0(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+        specifier: 1.6.0-dev.16
+        version: 1.6.0-dev.16(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
       '@2060.io/vs-agent-nestjs-client':
-        specifier: ^1.5.0
-        version: 1.5.0(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(pg@8.16.3)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+        specifier: 1.6.0-dev.16
+        version: 1.6.0-dev.16(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(pg@8.16.3)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
       '@credo-ts/core':
         specifier: ^0.5.11
         version: 0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
@@ -160,18 +160,18 @@ packages:
   '@2060.io/credo-ts-didcomm-receipts@0.0.7':
     resolution: {integrity: sha512-PTl636yjq9xglqFe1GPzic/4QI6Zu/2HQ94ToDY9mmEo0g7eRQ4S/0pEEHZdWdBY3WYIsZUd3Y78QGi/ZrzAqg==}
 
-  '@2060.io/vs-agent-client@1.5.0':
-    resolution: {integrity: sha512-MQOnAsQY+nNpFqIZIxL1xYH6VCWreEhI753iZ6+t/3f8uO3UarvLxNIjwyr0eUdTRnm7SkcvNhZv6KdWdhEFWQ==}
+  '@2060.io/vs-agent-client@1.6.0-dev.16':
+    resolution: {integrity: sha512-KBnzzvQbswrsrH0jC0TA+RGES5wMPlQqFKejSLhVNs0fCrgXsSUL2+hUOTHmmGN+UOOQzqveP9QG/eT6n5/Mmg==}
     peerDependencies:
       '@credo-ts/core': 0.5.18-alpha-20250930143725
 
-  '@2060.io/vs-agent-model@1.5.0':
-    resolution: {integrity: sha512-wvyluGnYPvyoQfYyB+dQ57dSLq5vKTZHJaVyel3VF903gJtJ1C/74jecaT2oU8DREqc9uNcz83n30kTbN2Tv/w==}
+  '@2060.io/vs-agent-model@1.6.0-dev.16':
+    resolution: {integrity: sha512-J/pyLsKGEQzYidrfJ3kF9RjrIVfoe6nrLUMQG8ld69zRjGxOYDzcnBRm4iJJpt7vwjfRJ+SInqmQukiM6m/utw==}
     peerDependencies:
       '@credo-ts/core': 0.5.18-alpha-20250930143725
 
-  '@2060.io/vs-agent-nestjs-client@1.5.0':
-    resolution: {integrity: sha512-XQpH2ax589dZUFoFYj1EBcvdJRrYWCzU+wDFhnVT3rPmhDGwlrWkhcAvHeaicsSfO7W+6PitNkadFlf2Euvzsw==}
+  '@2060.io/vs-agent-nestjs-client@1.6.0-dev.16':
+    resolution: {integrity: sha512-vLdIozHqrc9RAKf/e0He+zNDvpBvVJvWj8oAVrx4dekqgLtLBrtmKZwbWQ18SECvmV4OWxaw5+ZlAnv82T0l4A==}
     peerDependencies:
       '@nestjs/common': ^10.0.0
       '@nestjs/core': ^10.0.0
@@ -5521,9 +5521,9 @@ snapshots:
       - typescript
       - web-streams-polyfill
 
-  '@2060.io/vs-agent-client@1.5.0(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
+  '@2060.io/vs-agent-client@1.6.0-dev.16(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
     dependencies:
-      '@2060.io/vs-agent-model': 1.5.0(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      '@2060.io/vs-agent-model': 1.6.0-dev.16(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
       '@credo-ts/core': 0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
       class-transformer: 0.5.1
       class-validator: 0.14.1
@@ -5538,9 +5538,9 @@ snapshots:
       - typescript
       - web-streams-polyfill
 
-  '@2060.io/vs-agent-client@1.5.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
+  '@2060.io/vs-agent-client@1.6.0-dev.16(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
     dependencies:
-      '@2060.io/vs-agent-model': 1.5.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      '@2060.io/vs-agent-model': 1.6.0-dev.16(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
       '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
       class-transformer: 0.5.1
       class-validator: 0.14.1
@@ -5555,7 +5555,7 @@ snapshots:
       - typescript
       - web-streams-polyfill
 
-  '@2060.io/vs-agent-model@1.5.0(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
+  '@2060.io/vs-agent-model@1.6.0-dev.16(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
     dependencies:
       '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(typescript@5.9.2)
       '@2060.io/credo-ts-didcomm-receipts': 0.0.7(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
@@ -5572,7 +5572,7 @@ snapshots:
       - typescript
       - web-streams-polyfill
 
-  '@2060.io/vs-agent-model@1.5.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
+  '@2060.io/vs-agent-model@1.6.0-dev.16(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
     dependencies:
       '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(typescript@5.9.2)
       '@2060.io/credo-ts-didcomm-receipts': 0.0.7(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
@@ -5589,11 +5589,11 @@ snapshots:
       - typescript
       - web-streams-polyfill
 
-  '@2060.io/vs-agent-nestjs-client@1.5.0(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(pg@8.16.3)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
+  '@2060.io/vs-agent-nestjs-client@1.6.0-dev.16(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(pg@8.16.3)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
     dependencies:
       '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(typescript@5.9.2)
-      '@2060.io/vs-agent-client': 1.5.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
-      '@2060.io/vs-agent-model': 1.5.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      '@2060.io/vs-agent-client': 1.6.0-dev.16(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      '@2060.io/vs-agent-model': 1.6.0-dev.16(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
       '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
       '@nestjs/common': 10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@10.4.20)(reflect-metadata@0.2.2)(rxjs@7.8.2)

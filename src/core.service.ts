@@ -2,7 +2,6 @@ import {
   BaseMessage,
   CallOfferRequestMessage,
   CallRejectRequestMessage,
-  Claim,
   ContextualMenuItem,
   ContextualMenuSelectMessage,
   ContextualMenuUpdateMessage,
@@ -21,7 +20,7 @@ import {
 import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
 import { ConnectionEntity, CredentialService, EventHandler } from '@2060.io/vs-agent-nestjs-client'
 import { MrtdCapabilities } from '@2060.io/credo-ts-didcomm-mrtd'
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { WebRtcPeerEntity, SessionEntity } from '@/models'
 import { CredentialState, JsonTransformer, utils } from '@credo-ts/core'
 import { Cmd, MenuSelectEnum, PeerType, StateStep } from '@/common'
@@ -34,7 +33,7 @@ import { ConfigService } from '@nestjs/config'
 import { whereAlpha3 } from 'iso-3166-1'
 
 @Injectable()
-export class CoreService implements EventHandler, OnModuleInit {
+export class CoreService implements EventHandler {
   private readonly apiClient: ApiClient
   private readonly logger = new Logger(CoreService.name)
 
@@ -51,31 +50,6 @@ export class CoreService implements EventHandler, OnModuleInit {
   ) {
     const baseUrl = configService.get<string>('appConfig.serviceAgentAdminUrl')
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
-  }
-
-  async onModuleInit() {
-    await this.credentialService.createType(
-      'Gov ID',
-      '1.0',
-      [
-        'documentType',
-        'documentNumber',
-        'documentIssuingState',
-        'firstName',
-        'lastName',
-        'sex',
-        'nationality',
-        'birthDate',
-        'credentialIssuanceDate',
-        'documentExpirationDate',
-        'facePhoto',
-        'mrzData',
-      ],
-      {
-        supportRevocation: true,
-        maximumCredentialNumber: 1000,
-      },
-    )
   }
 
   async inputMessage(message: BaseMessage): Promise<void> {
@@ -498,12 +472,11 @@ export class CoreService implements EventHandler, OnModuleInit {
 
   // Generate credential and delete if it exists
   private async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
-    const claims: Claim[] = Object.entries(session.credentialClaims).map(
-      ([name, value]) => new Claim({ name, value }),
-    )
-    await this.credentialService.issue(session.connectionId, claims, {
+    const jsonSchemaCredential = this.configService.get<string>('appConfig.credentialSchemaId')
+    await this.credentialService.issue(session.connectionId, session.credentialClaims, {
       refId: session.mrzData,
       revokeIfAlreadyIssued: true,
+      jsonSchemaCredential,
     })
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
 
