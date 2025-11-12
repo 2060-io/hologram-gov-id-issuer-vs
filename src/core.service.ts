@@ -504,8 +504,8 @@ export class CoreService implements EventHandler, OnModuleInit {
     await this.credentialService.issue(session.connectionId, session.credentialClaims, {
       refId: session.mrzData,
       revokeIfAlreadyIssued: true,
-      jsonSchemaCredential
-    });
+      jsonSchemaCredential,
+    })
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
 
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(session.credentialClaims))

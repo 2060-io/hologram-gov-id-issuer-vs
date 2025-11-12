@@ -76,5 +76,7 @@ export default registerAs('appConfig', () => ({
    * Defaults to a testnet schema ID if CREDENTIAL_SCHEMA_ID is not set.
    * @type {string}
    */
-  credentialSchemaId: process.env.CREDENTIAL_SCHEMA_ID || 'https://dm.gov-id-org.demos.dev.2060.io/vt/schemas-government-id-jsc.json',
+  credentialSchemaId:
+    process.env.CREDENTIAL_SCHEMA_ID ||
+    'https://dm.gov-id-org.demos.dev.2060.io/vt/schemas-government-id-jsc.json',
 }))
