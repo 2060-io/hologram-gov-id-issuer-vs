@@ -2,7 +2,6 @@ import {
   BaseMessage,
   CallOfferRequestMessage,
   CallRejectRequestMessage,
-  Claim,
   ContextualMenuItem,
   ContextualMenuSelectMessage,
   ContextualMenuUpdateMessage,
@@ -54,6 +53,9 @@ export class CoreService implements EventHandler, OnModuleInit {
   }
 
   async onModuleInit() {
+    // TODO: Deprecated — this call will be removed in a future release.
+    // The credential type definition is now handled via CREDENTIAL_SCHEMA_ID
+    // and should not be created manually within the Gov ID Issuer.
     await this.credentialService.createType(
       'Gov ID',
       '1.0',
@@ -498,13 +500,12 @@ export class CoreService implements EventHandler, OnModuleInit {
 
   // Generate credential and delete if it exists
   private async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
-    const claims: Claim[] = Object.entries(session.credentialClaims).map(
-      ([name, value]) => new Claim({ name, value }),
-    )
-    await this.credentialService.issue(session.connectionId, claims, {
+    const jsonSchemaCredential = this.configService.get<string>('appConfig.credentialSchemaId')
+    await this.credentialService.issue(session.connectionId, session.credentialClaims, {
       refId: session.mrzData,
       revokeIfAlreadyIssued: true,
-    })
+      jsonSchemaCredential
+    });
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
 
     this.logger.debug('sendCredential with claims: ' + JSON.stringify(session.credentialClaims))

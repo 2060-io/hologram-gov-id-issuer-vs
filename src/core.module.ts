@@ -40,7 +40,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
       inject: [ConfigService],
     }),
   ],
-  controllers: [],
   providers: [CoreService],
   exports: [TypeOrmModule, CoreService],
 })
