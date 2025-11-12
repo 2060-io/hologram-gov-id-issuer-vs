@@ -10,17 +10,14 @@ services:
       - 2800:3000
       - 2801:3001
     environment:
-      - AGENT_PUBLIC_DID=did:web:p2801.ovpndev.2060.io
-      - AGENT_ENDPOINT=wss://p2801.ovpndev.2060.io
-      - AGENT_INVITATION_IMAGE_URL=https://p2802.ovpndev.2060.io/avatar.png
+      - AGENT_PUBLIC_DID=did:webvh:p2801.ovpndev.2060.io
+      - AGENT_INVITATION_IMAGE_URL=https://s3.minio.dev.2060.io/public/gov-id-issuer.png
       - AGENT_LABEL=Gov Id Issuer
-      - PUBLIC_API_BASE_URL=https://cb8adb85c7e7.ngrok-free.app
       - USE_CORS=true
       - EVENTS_BASE_URL=https://p2802.ovpndev.2060.io
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=gaia
       - POSTGRES_PASSWORD=2060demo
-      - AGENT_INVITATION_BASE_URL=https://hologram.zone/
       - REDIS_HOST=redis
 
   hologram-gov-id-issuer-app:
