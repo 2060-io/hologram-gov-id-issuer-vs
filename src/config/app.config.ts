@@ -77,5 +77,5 @@ export default registerAs('appConfig', () => ({
    * @type {string}
    */
   credentialSchemaId:
-    process.env.CREDENTIAL_SCHEMA_ID || 'https://dm.gov-id-org.demos.dev.2060.io/vt/schemas-gov-id-jsc.json',
+    process.env.CREDENTIAL_SCHEMA_ID || 'https://dm.gov-id-tr.demos.dev.2060.io/vt/schemas-gov-id-jsc.json',
 }))
