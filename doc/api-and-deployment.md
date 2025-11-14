@@ -25,6 +25,7 @@ To deploy the service locally, ensure that the environment variables in the appl
 | `WEBRTC_SERVER_URL`                   | URL for the WebRTC Service                     | `http://localhost.com/`     |
 | `PUBLIC_BASE_URL`              | Public-facing base URL for the service         | `http://localhost.com/`      |
 | `ID_VERIFICATION_TIMEOUT_SECONDS` | Timeout for ID verification in seconds       | `900`                                |
+| `CREDENTIAL_SCHEMA_ID` | Schema identifier defining the credential structure       | `https://dm.gov-id-tr.demos.dev.2060.io/vt/schemas-gov-id-jsc.json`                                |
 | `LOG_LEVEL`                    | Logging verbosity level (1-5)                  | `3`                                  |
 
 Once everything is set up correctly, you just need to navigate to the `docker-dev` folder and run the command to start Docker Compose. This will bring up all the necessary components that coexist with the project. 
