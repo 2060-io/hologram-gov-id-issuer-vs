@@ -472,11 +472,11 @@ export class CoreService implements EventHandler {
 
   // Generate credential and delete if it exists
   private async sendCredentialData(session: SessionEntity): Promise<SessionEntity> {
-    const jsonSchemaCredential = this.configService.get<string>('appConfig.credentialSchemaId')
+    const jsonSchemaCredentialId = this.configService.get<string>('appConfig.credentialSchemaId')
     await this.credentialService.issue(session.connectionId, session.credentialClaims, {
       refId: session.mrzData,
       revokeIfAlreadyIssued: true,
-      jsonSchemaCredential,
+      jsonSchemaCredentialId,
     })
     await this.sendText(session.connectionId, 'CREDENTIAL_OFFER', session.lang)
 
