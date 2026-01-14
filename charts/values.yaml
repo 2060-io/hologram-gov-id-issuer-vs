@@ -25,6 +25,7 @@ backend:
   port: 2903 # Port for the backend service
   timeout: 900 # Timeout for ID verification in seconds, defined in the backend service for resetting the ID verification process
   logLevel: 3 # Log level for the backend service, default only errors are logged, set to 3 for debug logs
+  credentialSchemaId: https://dm.gov-id-tr.{{ .Values.global.domain }}/vt/schemas-gov-id-jsc.json
 
 # If you want to use the issuer-vs chart, you can enable it by setting the following:
 # vs-agent-chart.enabled: true
