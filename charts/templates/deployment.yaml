@@ -82,7 +82,7 @@ spec:
             - name: ID_VERIFICATION_TIMEOUT_SECONDS
               value: "{{ .Values.backend.timeout }}"
             - name: CREDENTIAL_SCHEMA_ID
-              value: "{{ .Values.backend.credentialSchemaId }}"
+              value: "{{ tpl .Values.backend.credentialSchemaId . }}"
             - name: LOG_LEVEL
               value: "{{ .Values.backend.logLevel }}"
             ports:
