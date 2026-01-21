@@ -10,19 +10,10 @@ importers:
     dependencies:
       '@2060.io/credo-ts-didcomm-mrtd':
         specifier: ^0.0.17
-        version: 0.0.17(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(typescript@5.9.2)
-      '@2060.io/vs-agent-client':
-        specifier: ^1.6.0
-        version: 1.6.0(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
-      '@2060.io/vs-agent-model':
-        specifier: ^1.6.0
-        version: 1.6.0(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
-      '@2060.io/vs-agent-nestjs-client':
-        specifier: ^1.6.0
-        version: 1.6.0(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(pg@8.16.3)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+        version: 0.0.17(@credo-ts/core@0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3))(typescript@5.9.2)
       '@credo-ts/core':
-        specifier: ^0.5.11
-        version: 0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
+        specifier: ^0.5.13
+        version: 0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
       '@nestjs/axios':
         specifier: ^3.1.1
         version: 3.1.3(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.12.2)(rxjs@7.8.2)
@@ -47,6 +38,15 @@ importers:
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
+      '@verana-labs/vs-agent-client':
+        specifier: ^1.7.0
+        version: 1.7.0(@credo-ts/core@0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      '@verana-labs/vs-agent-model':
+        specifier: ^1.7.0
+        version: 1.7.0(@credo-ts/core@0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      '@verana-labs/vs-agent-nestjs-client':
+        specifier: ^1.7.0
+        version: 1.7.0(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(pg@8.16.3)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
       axios:
         specifier: ^1.7.7
         version: 1.12.2
@@ -159,22 +159,6 @@ packages:
 
   '@2060.io/credo-ts-didcomm-receipts@0.0.7':
     resolution: {integrity: sha512-PTl636yjq9xglqFe1GPzic/4QI6Zu/2HQ94ToDY9mmEo0g7eRQ4S/0pEEHZdWdBY3WYIsZUd3Y78QGi/ZrzAqg==}
-
-  '@2060.io/vs-agent-client@1.6.0':
-    resolution: {integrity: sha512-dC9S6m8V8pFJHJp4PUSO1qwDT/GxhHlddqFTgaxtsraHkMIs9Y/NkAfqwNPrbPWibdFJjzApgbRVZ9yndlGTgw==}
-    peerDependencies:
-      '@credo-ts/core': 0.5.18-alpha-20250930143725
-
-  '@2060.io/vs-agent-model@1.6.0':
-    resolution: {integrity: sha512-2tloSsX7JwvdmtAPB4gv8pzlMy2tMV+XtaBKVN1MsqgtqkzmMejX7fNyHCWTiXm5bytSOH3Gpz5Iwqs8FMQZOg==}
-    peerDependencies:
-      '@credo-ts/core': 0.5.18-alpha-20250930143725
-
-  '@2060.io/vs-agent-nestjs-client@1.6.0':
-    resolution: {integrity: sha512-3/B05XGP0t5OORLMzjybWay/CGYFF1OtdegmzwcK8Ao1kHuzqLP0BMCkgnb+OHz/HBgWF8rM9udV3+y655nbJg==}
-    peerDependencies:
-      '@nestjs/common': ^10.0.0
-      '@nestjs/core': ^10.0.0
 
   '@angular-devkit/core@17.3.11':
     resolution: {integrity: sha512-vTNDYNsLIWpYk2I969LMQFH29GTsLzxNk/0cLw5q56ARF0v5sIWfHYwGTS88jdDqIpuuettcSczbxeA7EuAmqQ==}
@@ -725,9 +709,6 @@ packages:
 
   '@credo-ts/core@0.5.13':
     resolution: {integrity: sha512-TBmcbL7ftEF+7ccxJDFYeCObK8ap8McefJe+zwXqXFerfCH2RHxK45Vyfw5ltPoVxkud05fohjzoWWTZgYQkEQ==}
-
-  '@credo-ts/core@0.5.17':
-    resolution: {integrity: sha512-oZRj6b34PQDlKOzaw0u0WI7ayjbZAVFW07wJNcRIO2vfs1RRl4Obcr7mg365F1l+W5E1UbLizJf5uCeQr/dW4Q==}
 
   '@credo-ts/core@0.5.18-alpha-20250930143725':
     resolution: {integrity: sha512-bQ6rjnE4NSnQbiUMYN2nzP4Ci4NOWc/t5PFGsJ+Lcqh6EPqsLrevavG1CwIjE5npL/9BaydFWghxQS4spcyeYQ==}
@@ -1404,32 +1385,62 @@ packages:
   '@peculiar/asn1-cms@2.5.0':
     resolution: {integrity: sha512-p0SjJ3TuuleIvjPM4aYfvYw8Fk1Hn/zAVyPJZTtZ2eE9/MIer6/18ROxX6N/e6edVSfvuZBqhxAj3YgsmSjQ/A==}
 
+  '@peculiar/asn1-cms@2.6.0':
+    resolution: {integrity: sha512-2uZqP+ggSncESeUF/9Su8rWqGclEfEiz1SyU02WX5fUONFfkjzS2Z/F1Li0ofSmf4JqYXIOdCAZqIXAIBAT1OA==}
+
   '@peculiar/asn1-csr@2.5.0':
     resolution: {integrity: sha512-ioigvA6WSYN9h/YssMmmoIwgl3RvZlAYx4A/9jD2qaqXZwGcNlAxaw54eSx2QG1Yu7YyBC5Rku3nNoHrQ16YsQ==}
+
+  '@peculiar/asn1-csr@2.6.0':
+    resolution: {integrity: sha512-BeWIu5VpTIhfRysfEp73SGbwjjoLL/JWXhJ/9mo4vXnz3tRGm+NGm3KNcRzQ9VMVqwYS2RHlolz21svzRXIHPQ==}
 
   '@peculiar/asn1-ecc@2.5.0':
     resolution: {integrity: sha512-t4eYGNhXtLRxaP50h3sfO6aJebUCDGQACoeexcelL4roMFRRVgB20yBIu2LxsPh/tdW9I282gNgMOyg3ywg/mg==}
 
+  '@peculiar/asn1-ecc@2.6.0':
+    resolution: {integrity: sha512-FF3LMGq6SfAOwUG2sKpPXblibn6XnEIKa+SryvUl5Pik+WR9rmRA3OCiwz8R3lVXnYnyRkSZsSLdml8H3UiOcw==}
+
   '@peculiar/asn1-pfx@2.5.0':
     resolution: {integrity: sha512-Vj0d0wxJZA+Ztqfb7W+/iu8Uasw6hhKtCdLKXLG/P3kEPIQpqGI4P4YXlROfl7gOCqFIbgsj1HzFIFwQ5s20ug==}
+
+  '@peculiar/asn1-pfx@2.6.0':
+    resolution: {integrity: sha512-rtUvtf+tyKGgokHHmZzeUojRZJYPxoD/jaN1+VAB4kKR7tXrnDCA/RAWXAIhMJJC+7W27IIRGe9djvxKgsldCQ==}
 
   '@peculiar/asn1-pkcs8@2.5.0':
     resolution: {integrity: sha512-L7599HTI2SLlitlpEP8oAPaJgYssByI4eCwQq2C9eC90otFpm8MRn66PpbKviweAlhinWQ3ZjDD2KIVtx7PaVw==}
 
+  '@peculiar/asn1-pkcs8@2.6.0':
+    resolution: {integrity: sha512-KyQ4D8G/NrS7Fw3XCJrngxmjwO/3htnA0lL9gDICvEQ+GJ+EPFqldcJQTwPIdvx98Tua+WjkdKHSC0/Km7T+lA==}
+
   '@peculiar/asn1-pkcs9@2.5.0':
     resolution: {integrity: sha512-UgqSMBLNLR5TzEZ5ZzxR45Nk6VJrammxd60WMSkofyNzd3DQLSNycGWSK5Xg3UTYbXcDFyG8pA/7/y/ztVCa6A==}
+
+  '@peculiar/asn1-pkcs9@2.6.0':
+    resolution: {integrity: sha512-b78OQ6OciW0aqZxdzliXGYHASeCvvw5caqidbpQRYW2mBtXIX2WhofNXTEe7NyxTb0P6J62kAAWLwn0HuMF1Fw==}
 
   '@peculiar/asn1-rsa@2.5.0':
     resolution: {integrity: sha512-qMZ/vweiTHy9syrkkqWFvbT3eLoedvamcUdnnvwyyUNv5FgFXA3KP8td+ATibnlZ0EANW5PYRm8E6MJzEB/72Q==}
 
+  '@peculiar/asn1-rsa@2.6.0':
+    resolution: {integrity: sha512-Nu4C19tsrTsCp9fDrH+sdcOKoVfdfoQQ7S3VqjJU6vedR7tY3RLkQ5oguOIB3zFW33USDUuYZnPEQYySlgha4w==}
+
   '@peculiar/asn1-schema@2.5.0':
     resolution: {integrity: sha512-YM/nFfskFJSlHqv59ed6dZlLZqtZQwjRVJ4bBAiWV08Oc+1rSd5lDZcBEx0lGDHfSoH3UziI2pXt2UM33KerPQ==}
+
+  '@peculiar/asn1-schema@2.6.0':
+    resolution: {integrity: sha512-xNLYLBFTBKkCzEZIw842BxytQQATQv+lDTCEMZ8C196iJcJJMBUZxrhSTxLaohMyKK8QlzRNTRkUmanucnDSqg==}
 
   '@peculiar/asn1-x509-attr@2.5.0':
     resolution: {integrity: sha512-9f0hPOxiJDoG/bfNLAFven+Bd4gwz/VzrCIIWc1025LEI4BXO0U5fOCTNDPbbp2ll+UzqKsZ3g61mpBp74gk9A==}
 
+  '@peculiar/asn1-x509-attr@2.6.0':
+    resolution: {integrity: sha512-MuIAXFX3/dc8gmoZBkwJWxUWOSvG4MMDntXhrOZpJVMkYX+MYc/rUAU2uJOved9iJEoiUx7//3D8oG83a78UJA==}
+
   '@peculiar/asn1-x509@2.5.0':
     resolution: {integrity: sha512-CpwtMCTJvfvYTFMuiME5IH+8qmDe3yEWzKHe7OOADbGfq7ohxeLaXwQo0q4du3qs0AII3UbLCvb9NF/6q0oTKQ==}
+
+  '@peculiar/asn1-x509@2.6.0':
+    resolution: {integrity: sha512-uzYbPEpoQiBoTq0/+jZtpM6Gq6zADBx+JNFP3yqRgziWBxQ/Dt/HcuvRfm9zJTPdRcBqPNdaRHTVwpyiq6iNMA==}
 
   '@peculiar/json-schema@1.1.12':
     resolution: {integrity: sha512-coUfuoMeIB7B8/NMekxaDzLhaYmp0HZNPEjYRm9goRou8UZIC3z21s0sL9AWoCw4EG876QyO3kYrc61WNF9B/w==}
@@ -1441,6 +1452,10 @@ packages:
 
   '@peculiar/x509@1.14.0':
     resolution: {integrity: sha512-Yc4PDxN3OrxUPiXgU63c+ZRXKGE8YKF2McTciYhUHFtHVB0KMnjeFSU0qpztGhsp4P0uKix4+J2xEpIEDu8oXg==}
+
+  '@peculiar/x509@1.14.3':
+    resolution: {integrity: sha512-C2Xj8FZ0uHWeCXXqX5B4/gVFQmtSkiuOolzAgutjTfseNOHT3pUjljDZsTSxXFGgio54bCzVFqmEOUrIVk8RDA==}
+    engines: {node: '>=20.0.0'}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -1801,6 +1816,22 @@ packages:
     resolution: {integrity: sha512-TQMCz2pFJMfpNxmSfX1VSfTjwUIFx/mL+p1bnfM1xjjdla7Z+KnGMW/EhFbpckp3LyWAH4PgOsMwOMnIN+MBFg==}
     peerDependencies:
       '@urql/core': ^5.0.0
+
+  '@verana-labs/vs-agent-client@1.7.0':
+    resolution: {integrity: sha512-sJi1KvPVkLs9Wl/PyRcNNSQGS9p+t+D5QFuO/YR0sgiwJoTu76aASpVndpN2H7oDPqoG8zzpO5Fgb4iTYvavgw==}
+    peerDependencies:
+      '@credo-ts/core': 0.5.18-alpha-20250930143725
+
+  '@verana-labs/vs-agent-model@1.7.0':
+    resolution: {integrity: sha512-YpkE4tRiOgi5zQ85wa1iYAllEzK0tmIqS8nAOa3bEG2lObO+YXVGYARJdlfqobPxQBDNs9tE94olog5xB9/zUg==}
+    peerDependencies:
+      '@credo-ts/core': 0.5.18-alpha-20250930143725
+
+  '@verana-labs/vs-agent-nestjs-client@1.7.0':
+    resolution: {integrity: sha512-KIbQ1x5ZnOKy4tJRKx7PfLx6CBcGqwNZlLrAXknW+bLv/jM7eW/NHm6/Ku5BKqFfMN3viRha5kZbt1fubKZrYw==}
+    peerDependencies:
+      '@nestjs/common': ^10.0.0
+      '@nestjs/core': ^10.0.0
 
   '@webassemblyjs/ast@1.14.1':
     resolution: {integrity: sha512-nuBEDgQfm1ccRp/8bCQrx1frohyufl4JlbMMZ4P1wpeOfDhF6FQkxZJ1b/e+PLwr6X1Nhw6OLme5usuBWYBvuQ==}
@@ -4885,6 +4916,7 @@ packages:
   tar@7.4.4:
     resolution: {integrity: sha512-O1z7ajPkjTgEgmTGz0v9X4eqeEXTDREPTO77pVC1Nbs86feBU1Zhdg+edzavPmYW1olxkwsqA2v4uOw6E8LeDg==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   temp-dir@2.0.0:
     resolution: {integrity: sha512-aoBAniQmmwtcKp/7BzsH8Cxzv8OL736p7v1ihGb5e9DJ9kTwGWHrQrVB5+lfVDzfGrdRzXch+ig7LHaY1JTOrg==}
@@ -5036,8 +5068,8 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
-  tslog@4.9.3:
-    resolution: {integrity: sha512-oDWuGVONxhVEBtschLf2cs/Jy8i7h1T+CpdkTNWQgdAF7DhRo2G8vMCgILKe7ojdEkLhICWgI1LYSSKaJsRgcw==}
+  tslog@4.10.2:
+    resolution: {integrity: sha512-XuELoRpMR+sq8fuWwX7P0bcj+PRNiicOKDEb3fGNURhxWVyykCi9BNq7c4uVz7h7P0sj8qgBsr5SWS6yBClq3g==}
     engines: {node: '>=16'}
 
   tsyringe@4.10.0:
@@ -5281,6 +5313,9 @@ packages:
   web-did-resolver@2.0.30:
     resolution: {integrity: sha512-lsv0T+y/zD1bEVkcNfcppk4hQXBlqqoXfYcRG4183Yv53FkY29HNPGErwkNI/AG+lxxsUIR77JqS6pn9uHw/Vw==}
 
+  web-did-resolver@2.0.32:
+    resolution: {integrity: sha512-L91/ApTmDjgzS0UDstTKn3kN/1hlQBnVcUN8K29e3xhVBpPktHYC6uvVAQ8ohbIg9D6wrrbaBQvfRArDxgJG2g==}
+
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
@@ -5467,11 +5502,11 @@ snapshots:
   '@0no-co/graphql.web@1.2.0':
     optional: true
 
-  '@2060.io/credo-ts-didcomm-mrtd@0.0.17(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(typescript@5.9.2)':
+  '@2060.io/credo-ts-didcomm-mrtd@0.0.17(@credo-ts/core@0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3))(typescript@5.9.2)':
     dependencies:
-      '@credo-ts/core': 0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
+      '@credo-ts/core': 0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
       '@li0ard/tsemrtd': 0.2.2(typescript@5.9.2)
-      '@peculiar/x509': 1.14.0
+      '@peculiar/x509': 1.14.3
       '@types/pkijs': 3.0.1
       asn1js: 3.0.6
       class-transformer: 0.5.1
@@ -5489,7 +5524,7 @@ snapshots:
     dependencies:
       '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
       '@li0ard/tsemrtd': 0.2.2(typescript@5.9.2)
-      '@peculiar/x509': 1.14.0
+      '@peculiar/x509': 1.14.3
       '@types/pkijs': 3.0.1
       asn1js: 3.0.6
       class-transformer: 0.5.1
@@ -5518,114 +5553,6 @@ snapshots:
       - expo
       - react-native
       - supports-color
-      - typescript
-      - web-streams-polyfill
-
-  '@2060.io/vs-agent-client@1.6.0(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
-    dependencies:
-      '@2060.io/vs-agent-model': 1.6.0(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
-      '@credo-ts/core': 0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
-      class-transformer: 0.5.1
-      class-validator: 0.14.1
-      express: 4.21.2
-      tslog: 4.9.3
-    transitivePeerDependencies:
-      - domexception
-      - encoding
-      - expo
-      - react-native
-      - supports-color
-      - typescript
-      - web-streams-polyfill
-
-  '@2060.io/vs-agent-client@1.6.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
-    dependencies:
-      '@2060.io/vs-agent-model': 1.6.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
-      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
-      class-transformer: 0.5.1
-      class-validator: 0.14.1
-      express: 4.21.2
-      tslog: 4.9.3
-    transitivePeerDependencies:
-      - domexception
-      - encoding
-      - expo
-      - react-native
-      - supports-color
-      - typescript
-      - web-streams-polyfill
-
-  '@2060.io/vs-agent-model@1.6.0(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
-    dependencies:
-      '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(typescript@5.9.2)
-      '@2060.io/credo-ts-didcomm-receipts': 0.0.7(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
-      '@credo-ts/core': 0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
-      class-transformer: 0.5.1
-      class-validator: 0.14.1
-      mrz: 4.2.1
-    transitivePeerDependencies:
-      - domexception
-      - encoding
-      - expo
-      - react-native
-      - supports-color
-      - typescript
-      - web-streams-polyfill
-
-  '@2060.io/vs-agent-model@1.6.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
-    dependencies:
-      '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(typescript@5.9.2)
-      '@2060.io/credo-ts-didcomm-receipts': 0.0.7(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
-      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
-      class-transformer: 0.5.1
-      class-validator: 0.14.1
-      mrz: 4.2.1
-    transitivePeerDependencies:
-      - domexception
-      - encoding
-      - expo
-      - react-native
-      - supports-color
-      - typescript
-      - web-streams-polyfill
-
-  '@2060.io/vs-agent-nestjs-client@1.6.0(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(pg@8.16.3)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
-    dependencies:
-      '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(typescript@5.9.2)
-      '@2060.io/vs-agent-client': 1.6.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
-      '@2060.io/vs-agent-model': 1.6.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
-      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
-      '@nestjs/common': 10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core': 10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@10.4.20)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/platform-express': 10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)
-      '@nestjs/typeorm': 10.0.2(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.27(pg@8.16.3)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2)))
-      reflect-metadata: 0.2.2
-      rhea: 3.0.4
-      rxjs: 7.8.2
-      typeorm: 0.3.27(pg@8.16.3)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2))
-    transitivePeerDependencies:
-      - '@google-cloud/spanner'
-      - '@sap/hana-client'
-      - babel-plugin-macros
-      - better-sqlite3
-      - domexception
-      - encoding
-      - expo
-      - ioredis
-      - mongodb
-      - mssql
-      - mysql2
-      - oracledb
-      - pg
-      - pg-native
-      - pg-query-stream
-      - react-native
-      - redis
-      - sql.js
-      - sqlite3
-      - supports-color
-      - ts-node
-      - typeorm-aurora-data-api-driver
       - typescript
       - web-streams-polyfill
 
@@ -6374,10 +6301,10 @@ snapshots:
       '@multiformats/base-x': 4.0.1
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
-      '@peculiar/asn1-ecc': 2.5.0
-      '@peculiar/asn1-schema': 2.5.0
-      '@peculiar/asn1-x509': 2.5.0
-      '@peculiar/x509': 1.14.0
+      '@peculiar/asn1-ecc': 2.6.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
+      '@peculiar/x509': 1.14.3
       '@protokoll/mdoc-client': 0.2.36(typescript@5.9.2)
       '@sd-jwt/core': 0.7.2
       '@sd-jwt/decode': 0.7.2
@@ -6408,7 +6335,7 @@ snapshots:
       tsyringe: 4.10.0
       uuid: 9.0.1
       varint: 6.0.0
-      web-did-resolver: 2.0.30
+      web-did-resolver: 2.0.32
       webcrypto-core: 1.8.1
     transitivePeerDependencies:
       - domexception
@@ -6417,58 +6344,6 @@ snapshots:
       - react-native
       - supports-color
       - typescript
-      - web-streams-polyfill
-
-  '@credo-ts/core@0.5.17(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)':
-    dependencies:
-      '@animo-id/mdoc': 0.2.38
-      '@animo-id/pex': 4.1.1-alpha.0
-      '@astronautlabs/jsonpath': 1.1.2
-      '@digitalcredentials/jsonld': 6.0.0(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/vc': 6.0.1(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
-      '@multiformats/base-x': 4.0.1
-      '@noble/curves': 1.9.7
-      '@noble/hashes': 1.8.0
-      '@peculiar/asn1-ecc': 2.5.0
-      '@peculiar/asn1-schema': 2.5.0
-      '@peculiar/asn1-x509': 2.5.0
-      '@peculiar/x509': 1.14.0
-      '@sd-jwt/core': 0.7.2
-      '@sd-jwt/decode': 0.7.2
-      '@sd-jwt/jwt-status-list': 0.7.2
-      '@sd-jwt/sd-jwt-vc': 0.7.2
-      '@sd-jwt/types': 0.7.2
-      '@sd-jwt/utils': 0.7.2
-      '@sphereon/pex-models': 2.3.2
-      '@sphereon/ssi-types': 0.30.2-next.135
-      '@stablelib/ed25519': 1.0.3
-      '@types/ws': 8.18.1
-      abort-controller: 3.0.0
-      big-integer: 1.6.52
-      borc: 3.0.0
-      buffer: 6.0.3
-      class-transformer: 0.5.1
-      class-validator: 0.14.1
-      did-resolver: 4.1.0
-      lru_map: 0.4.1
-      luxon: 3.7.2
-      make-error: 1.3.6
-      object-inspect: 1.13.4
-      query-string: 7.1.3
-      reflect-metadata: 0.1.14
-      rxjs: 7.8.2
-      tsyringe: 4.10.0
-      uuid: 9.0.1
-      varint: 6.0.0
-      web-did-resolver: 2.0.30
-      webcrypto-core: 1.8.1
-    transitivePeerDependencies:
-      - domexception
-      - encoding
-      - expo
-      - react-native
-      - supports-color
       - web-streams-polyfill
 
   '@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)':
@@ -7361,9 +7236,9 @@ snapshots:
 
   '@li0ard/tsemrtd@0.2.2(typescript@5.9.2)':
     dependencies:
-      '@peculiar/asn1-cms': 2.5.0
-      '@peculiar/asn1-schema': 2.5.0
-      '@peculiar/asn1-x509': 2.5.0
+      '@peculiar/asn1-cms': 2.6.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
       node-tlv: 1.5.14
       typescript: 5.9.2
 
@@ -7553,57 +7428,113 @@ snapshots:
 
   '@peculiar/asn1-cms@2.5.0':
     dependencies:
-      '@peculiar/asn1-schema': 2.5.0
-      '@peculiar/asn1-x509': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
       '@peculiar/asn1-x509-attr': 2.5.0
+      asn1js: 3.0.6
+      tslib: 2.8.1
+
+  '@peculiar/asn1-cms@2.6.0':
+    dependencies:
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
+      '@peculiar/asn1-x509-attr': 2.6.0
       asn1js: 3.0.6
       tslib: 2.8.1
 
   '@peculiar/asn1-csr@2.5.0':
     dependencies:
-      '@peculiar/asn1-schema': 2.5.0
-      '@peculiar/asn1-x509': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
+      asn1js: 3.0.6
+      tslib: 2.8.1
+
+  '@peculiar/asn1-csr@2.6.0':
+    dependencies:
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
       asn1js: 3.0.6
       tslib: 2.8.1
 
   '@peculiar/asn1-ecc@2.5.0':
     dependencies:
-      '@peculiar/asn1-schema': 2.5.0
-      '@peculiar/asn1-x509': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
+      asn1js: 3.0.6
+      tslib: 2.8.1
+
+  '@peculiar/asn1-ecc@2.6.0':
+    dependencies:
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
       asn1js: 3.0.6
       tslib: 2.8.1
 
   '@peculiar/asn1-pfx@2.5.0':
     dependencies:
-      '@peculiar/asn1-cms': 2.5.0
-      '@peculiar/asn1-pkcs8': 2.5.0
-      '@peculiar/asn1-rsa': 2.5.0
-      '@peculiar/asn1-schema': 2.5.0
+      '@peculiar/asn1-cms': 2.6.0
+      '@peculiar/asn1-pkcs8': 2.6.0
+      '@peculiar/asn1-rsa': 2.6.0
+      '@peculiar/asn1-schema': 2.6.0
+      asn1js: 3.0.6
+      tslib: 2.8.1
+
+  '@peculiar/asn1-pfx@2.6.0':
+    dependencies:
+      '@peculiar/asn1-cms': 2.6.0
+      '@peculiar/asn1-pkcs8': 2.6.0
+      '@peculiar/asn1-rsa': 2.6.0
+      '@peculiar/asn1-schema': 2.6.0
       asn1js: 3.0.6
       tslib: 2.8.1
 
   '@peculiar/asn1-pkcs8@2.5.0':
     dependencies:
-      '@peculiar/asn1-schema': 2.5.0
-      '@peculiar/asn1-x509': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
+      asn1js: 3.0.6
+      tslib: 2.8.1
+
+  '@peculiar/asn1-pkcs8@2.6.0':
+    dependencies:
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
       asn1js: 3.0.6
       tslib: 2.8.1
 
   '@peculiar/asn1-pkcs9@2.5.0':
     dependencies:
-      '@peculiar/asn1-cms': 2.5.0
+      '@peculiar/asn1-cms': 2.6.0
       '@peculiar/asn1-pfx': 2.5.0
       '@peculiar/asn1-pkcs8': 2.5.0
-      '@peculiar/asn1-schema': 2.5.0
-      '@peculiar/asn1-x509': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
       '@peculiar/asn1-x509-attr': 2.5.0
+      asn1js: 3.0.6
+      tslib: 2.8.1
+
+  '@peculiar/asn1-pkcs9@2.6.0':
+    dependencies:
+      '@peculiar/asn1-cms': 2.6.0
+      '@peculiar/asn1-pfx': 2.6.0
+      '@peculiar/asn1-pkcs8': 2.6.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
+      '@peculiar/asn1-x509-attr': 2.6.0
       asn1js: 3.0.6
       tslib: 2.8.1
 
   '@peculiar/asn1-rsa@2.5.0':
     dependencies:
-      '@peculiar/asn1-schema': 2.5.0
-      '@peculiar/asn1-x509': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
+      asn1js: 3.0.6
+      tslib: 2.8.1
+
+  '@peculiar/asn1-rsa@2.6.0':
+    dependencies:
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
       asn1js: 3.0.6
       tslib: 2.8.1
 
@@ -7613,16 +7544,36 @@ snapshots:
       pvtsutils: 1.3.6
       tslib: 2.8.1
 
+  '@peculiar/asn1-schema@2.6.0':
+    dependencies:
+      asn1js: 3.0.6
+      pvtsutils: 1.3.6
+      tslib: 2.8.1
+
   '@peculiar/asn1-x509-attr@2.5.0':
     dependencies:
-      '@peculiar/asn1-schema': 2.5.0
-      '@peculiar/asn1-x509': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
+      asn1js: 3.0.6
+      tslib: 2.8.1
+
+  '@peculiar/asn1-x509-attr@2.6.0':
+    dependencies:
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
       asn1js: 3.0.6
       tslib: 2.8.1
 
   '@peculiar/asn1-x509@2.5.0':
     dependencies:
-      '@peculiar/asn1-schema': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
+      asn1js: 3.0.6
+      pvtsutils: 1.3.6
+      tslib: 2.8.1
+
+  '@peculiar/asn1-x509@2.6.0':
+    dependencies:
+      '@peculiar/asn1-schema': 2.6.0
       asn1js: 3.0.6
       pvtsutils: 1.3.6
       tslib: 2.8.1
@@ -7633,7 +7584,7 @@ snapshots:
 
   '@peculiar/webcrypto@1.5.0':
     dependencies:
-      '@peculiar/asn1-schema': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
       '@peculiar/json-schema': 1.1.12
       pvtsutils: 1.3.6
       tslib: 2.8.1
@@ -7643,11 +7594,25 @@ snapshots:
     dependencies:
       '@peculiar/asn1-cms': 2.5.0
       '@peculiar/asn1-csr': 2.5.0
-      '@peculiar/asn1-ecc': 2.5.0
+      '@peculiar/asn1-ecc': 2.6.0
       '@peculiar/asn1-pkcs9': 2.5.0
       '@peculiar/asn1-rsa': 2.5.0
-      '@peculiar/asn1-schema': 2.5.0
-      '@peculiar/asn1-x509': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
+      pvtsutils: 1.3.6
+      reflect-metadata: 0.2.2
+      tslib: 2.8.1
+      tsyringe: 4.10.0
+
+  '@peculiar/x509@1.14.3':
+    dependencies:
+      '@peculiar/asn1-cms': 2.6.0
+      '@peculiar/asn1-csr': 2.6.0
+      '@peculiar/asn1-ecc': 2.6.0
+      '@peculiar/asn1-pkcs9': 2.6.0
+      '@peculiar/asn1-rsa': 2.6.0
+      '@peculiar/asn1-schema': 2.6.0
+      '@peculiar/asn1-x509': 2.6.0
       pvtsutils: 1.3.6
       reflect-metadata: 0.2.2
       tslib: 2.8.1
@@ -8186,6 +8151,114 @@ snapshots:
       '@urql/core': 5.2.0
       wonka: 6.3.5
     optional: true
+
+  '@verana-labs/vs-agent-client@1.7.0(@credo-ts/core@0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
+    dependencies:
+      '@credo-ts/core': 0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      '@verana-labs/vs-agent-model': 1.7.0(@credo-ts/core@0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      class-transformer: 0.5.1
+      class-validator: 0.14.1
+      express: 4.21.2
+      tslog: 4.10.2
+    transitivePeerDependencies:
+      - domexception
+      - encoding
+      - expo
+      - react-native
+      - supports-color
+      - typescript
+      - web-streams-polyfill
+
+  '@verana-labs/vs-agent-client@1.7.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
+    dependencies:
+      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
+      '@verana-labs/vs-agent-model': 1.7.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      class-transformer: 0.5.1
+      class-validator: 0.14.1
+      express: 4.21.2
+      tslog: 4.10.2
+    transitivePeerDependencies:
+      - domexception
+      - encoding
+      - expo
+      - react-native
+      - supports-color
+      - typescript
+      - web-streams-polyfill
+
+  '@verana-labs/vs-agent-model@1.7.0(@credo-ts/core@0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
+    dependencies:
+      '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3))(typescript@5.9.2)
+      '@2060.io/credo-ts-didcomm-receipts': 0.0.7(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      '@credo-ts/core': 0.5.13(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      class-transformer: 0.5.1
+      class-validator: 0.14.1
+      mrz: 4.2.1
+    transitivePeerDependencies:
+      - domexception
+      - encoding
+      - expo
+      - react-native
+      - supports-color
+      - typescript
+      - web-streams-polyfill
+
+  '@verana-labs/vs-agent-model@1.7.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
+    dependencies:
+      '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(typescript@5.9.2)
+      '@2060.io/credo-ts-didcomm-receipts': 0.0.7(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
+      class-transformer: 0.5.1
+      class-validator: 0.14.1
+      mrz: 4.2.1
+    transitivePeerDependencies:
+      - domexception
+      - encoding
+      - expo
+      - react-native
+      - supports-color
+      - typescript
+      - web-streams-polyfill
+
+  '@verana-labs/vs-agent-nestjs-client@1.7.0(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(pg@8.16.3)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2))(typescript@5.9.2)(web-streams-polyfill@3.3.3)':
+    dependencies:
+      '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(typescript@5.9.2)
+      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3)
+      '@nestjs/common': 10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core': 10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@10.4.20)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-express': 10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)
+      '@nestjs/typeorm': 10.0.2(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@10.4.20)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.27(pg@8.16.3)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2)))
+      '@verana-labs/vs-agent-client': 1.7.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      '@verana-labs/vs-agent-model': 1.7.0(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(web-streams-polyfill@3.3.3))(expo@54.0.10(@babel/core@7.28.4)(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(react@19.1.1))(react-native@0.81.4(@babel/core@7.28.4)(react@19.1.1))(typescript@5.9.2)(web-streams-polyfill@3.3.3)
+      reflect-metadata: 0.2.2
+      rhea: 3.0.4
+      rxjs: 7.8.2
+      typeorm: 0.3.27(pg@8.16.3)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@20.19.17)(typescript@5.9.2))
+    transitivePeerDependencies:
+      - '@google-cloud/spanner'
+      - '@sap/hana-client'
+      - babel-plugin-macros
+      - better-sqlite3
+      - domexception
+      - encoding
+      - expo
+      - ioredis
+      - mongodb
+      - mssql
+      - mysql2
+      - oracledb
+      - pg
+      - pg-native
+      - pg-query-stream
+      - react-native
+      - redis
+      - sql.js
+      - sqlite3
+      - supports-color
+      - ts-node
+      - typeorm-aurora-data-api-driver
+      - typescript
+      - web-streams-polyfill
 
   '@webassemblyjs/ast@1.14.1':
     dependencies:
@@ -12178,7 +12251,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tslog@4.9.3: {}
+  tslog@4.10.2: {}
 
   tsyringe@4.10.0:
     dependencies:
@@ -12357,11 +12430,18 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  web-did-resolver@2.0.32:
+    dependencies:
+      cross-fetch: 4.1.0
+      did-resolver: 4.1.0
+    transitivePeerDependencies:
+      - encoding
+
   web-streams-polyfill@3.3.3: {}
 
   webcrypto-core@1.8.1:
     dependencies:
-      '@peculiar/asn1-schema': 2.5.0
+      '@peculiar/asn1-schema': 2.6.0
       '@peculiar/json-schema': 1.1.12
       asn1js: 3.0.6
       pvtsutils: 1.3.6
