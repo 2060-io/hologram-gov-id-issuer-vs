@@ -194,6 +194,7 @@ export class CoreService implements EventHandler {
       case StateStep.MRZ:
       case StateStep.EMRTD:
       case StateStep.VERIFICATION:
+      case StateStep.ISSUE:
         if (selectionId === Cmd.ABORT) {
           session = await this.abortVerification(session)
         }
@@ -448,6 +449,7 @@ export class CoreService implements EventHandler {
       case StateStep.MRZ:
       case StateStep.EMRTD:
       case StateStep.VERIFICATION:
+      case StateStep.ISSUE:
         item.push(
           new ContextualMenuItem({
             id: Cmd.ABORT,
