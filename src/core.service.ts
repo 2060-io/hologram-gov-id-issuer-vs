@@ -16,9 +16,8 @@ import {
   MrzDataRequestMessage,
   MrzDataSubmitMessage,
   TextMessage,
-} from '@2060.io/vs-agent-model'
-import { ApiClient, ApiVersion } from '@2060.io/vs-agent-client'
-import { ConnectionEntity, CredentialService, EventHandler } from '@2060.io/vs-agent-nestjs-client'
+} from '@verana-labs/vs-agent-model'
+import { ApiClient, ApiVersion } from '@verana-labs/vs-agent-client'
 import { MrtdCapabilities } from '@2060.io/credo-ts-didcomm-mrtd'
 import { Injectable, Logger } from '@nestjs/common'
 import { WebRtcPeerEntity, SessionEntity } from '@/models'
@@ -31,6 +30,7 @@ import { CreateRoomRequest, WebRtcCallDataV1 } from '@/dto'
 import { fetch } from 'undici'
 import { ConfigService } from '@nestjs/config'
 import { whereAlpha3 } from 'iso-3166-1'
+import { ConnectionEntity, CredentialService, EventHandler } from '@verana-labs/vs-agent-nestjs-client'
 
 @Injectable()
 export class CoreService implements EventHandler {
