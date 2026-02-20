@@ -15,7 +15,6 @@ database:
   pwd: mypassword123
 
 image:
-  repository: io2060/hologram-gov-id-issuer-app
   # Tag defaults to Chart.Version if not specified
   tag: ""
 
