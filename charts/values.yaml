@@ -15,6 +15,7 @@ database:
   pwd: mypassword123
 
 image:
+  repository: ""
   # Tag defaults to Chart.Version if not specified
   tag: ""
 
