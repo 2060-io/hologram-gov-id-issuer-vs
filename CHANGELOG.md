@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.1](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.0...v1.4.1) (2026-02-20)
+
+
+### Bug Fixes
+
+* cannot cancel id verification ([#105](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/105)) ([661121b](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/661121b56debd6774d59af5b840f6bcac5145834))
+* **chats:** update vs agent version ([#107](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/107)) ([ce1d821](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/ce1d821267a5ed85d40ded517eaa856341947738))
+
 ## [1.4.0](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.3.0...v1.4.0) (2026-01-14)
 
 
