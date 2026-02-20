@@ -60,7 +60,7 @@ spec:
       spec:
          containers:
          -  name: {{ .Values.name }}-backend-container
-            image: io2060/hologram-gov-id-issuer-app:{{ .Chart.Version }}
+            image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.Version }}
             imagePullPolicy: Always
             env:
             - name: AGENT_PORT
