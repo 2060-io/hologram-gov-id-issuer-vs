@@ -48,7 +48,7 @@ vs-agent-chart:
     enabled: false # Set to true if you want to use a database
     host: localhost
     user: govidissuer
-    pwd: mypassword123
+    existingSecret: custom-secrets
   redis: 
     enabled: false # Set to true if you want to use redis
 
@@ -64,7 +64,10 @@ vs-agent-chart:
     - name: POSTGRES_USER
       value: "govidissuer"
     - name: POSTGRES_PASSWORD
-      value: "mypassword123"
+      valueFrom:
+        secretKeyRef:
+          name: custom-secrets
+          key: POSTGRES_PASSWORD
     - name: REDIS_HOST
       value: "localhost"
     # uncomment the following line if you want to use redis with a password
