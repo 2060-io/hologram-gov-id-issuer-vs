@@ -12,7 +12,10 @@ replicas: 1
 database:
   host: issuer
   user: govidissuer
-  pwd: mypassword123
+  # Use either 'pwd' (plain text, not recommended for production) or 'existingSecret'
+  # pwd: mypassword123
+  existingSecret: ""    # Name of an existing K8s Secret with key POSTGRES_PASSWORD
+  existingSecretKey: POSTGRES_PASSWORD
 
 image:
   repository: ""

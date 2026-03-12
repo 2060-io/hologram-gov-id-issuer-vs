@@ -72,7 +72,14 @@ spec:
             - name: POSTGRES_USER
               value: {{ .Values.database.user }}
             - name: POSTGRES_PASSWORD
+              {{- if .Values.database.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret }}
+                  key: {{ .Values.database.existingSecretKey | default "POSTGRES_PASSWORD" }}
+              {{- else }}
               value: {{ .Values.database.pwd }}
+              {{- end }}
             - name: VISION_URL
               value: "{{ tpl .Values.backend.vision . }}"
             - name: WEBRTC_SERVER_URL
