@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.2](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.1...v1.4.2) (2026-03-12)
+
+
+### Bug Fixes
+
+* **charts:** use chart version with secrets ([#108](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/108)) ([39c8c94](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/39c8c941d30edff80881b757249846cb562350c8))
+* **chart:** update deployment ([#110](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/110)) ([20b4dc7](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/20b4dc70c231e59cac2614051af1f48272093055))
+
 ## [1.4.1](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.0...v1.4.1) (2026-02-20)
 
 
