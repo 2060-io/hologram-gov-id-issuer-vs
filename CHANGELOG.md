@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.3](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.2...v1.4.3) (2026-04-13)
+
+
+### Bug Fixes
+
+* production dockerfile ([#113](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/113)) ([8bc3455](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/8bc3455e995012660d07131d4505fdeacffdcf6e))
+* use production CMD in Dockerfile to prevent EMFILE errors ([210e18e](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/210e18ed8a67367752d7b3a8a36a2699cb9dbfde))
+* use production CMD in Dockerfile to prevent EMFILE errors ([a29d5c5](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/a29d5c5a9b80a1de4fc0ecba8c48c55147ffedcb))
+
 ## [1.4.2](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.1...v1.4.2) (2026-03-12)
 
 
