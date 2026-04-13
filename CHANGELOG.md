@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.4](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.3...v1.4.4) (2026-04-13)
+
+
+### Bug Fixes
+
+* use production deployment ([#114](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/114)) ([79c761f](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/79c761f8d548b527823eda0b65707c9b6f171283))
+
 ## [1.4.3](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.2...v1.4.3) (2026-04-13)
 
 
