@@ -12,4 +12,4 @@ COPY tsconfig.json tsconfig.build.json nest-cli.json ./
 COPY ./src ./src
 
 RUN pnpm build
-CMD ["node", "dist/main"]
+CMD ["node", "build/main"]
