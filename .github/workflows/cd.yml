@@ -3,103 +3,86 @@ name: Continuous Deployment
 on:
   push:
     branches: [main, 'release/**']
-
   workflow_dispatch:
 
-env:
-  DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
-  DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
-  IMAGE_NAME: hologram-gov-id-issuer-app
-  IMAGE_TAG: ${{ github.ref == 'refs/heads/main' && 'dev' || github.ref }}
-
 jobs:
-  build:
+  versioning:
+    name: Resolve version
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: 2060-io/organization/.github/workflows/resolve-version-call.yml@main
+    secrets: inherit
+
+  build-and-push:
+    name: Build and push Docker image
+    needs: versioning
+    if: needs.versioning.outputs.new-release-published == 'true'
     runs-on: ubuntu-latest
+    env:
+      DH_USERNAME: ${{ secrets.DOCKER_HUB_LOGIN }}
+      DH_TOKEN: ${{ secrets.DOCKER_HUB_PWD }}
+      IMAGE_NAME: hologram-gov-id-issuer-app
+      RELEASE_VERSION: ${{ needs.versioning.outputs.release-version }}
+      RELEASE_TYPE: ${{ needs.versioning.outputs.release-type }}
+      RELEASE_MAJOR: ${{ needs.versioning.outputs.release-major }}
+      RELEASE_MINOR: ${{ needs.versioning.outputs.release-minor }}
+      RELEASE_PATCH: ${{ needs.versioning.outputs.release-patch }}
 
     steps:
-      - name: Checkout service-agent
-        uses: actions/checkout@v4
-      
-      - name: Setup Helm
-        uses: azure/setup-helm@v3
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: codfish/semantic-release-action@v3
-        id: semantic
-        with:
-          branches: |
-            [
-              'release',
-              { 
-                name: 'main',
-                prerelease: 'dev'
-              }
-            ]
-          plugins: |
-            [
-              [
-                "@semantic-release/commit-analyzer",
-                {
-                  "preset": "angular",
-                  "releaseRules": [
-                    {
-                      "type": "refactor",
-                      "release": "patch"
-                    }
-                  ]
-                }
-              ],
-              [
-                "@semantic-release/npm",
-                {
-                  "npmPublish": false
-                }
-              ],
-              "@semantic-release/release-notes-generator",
-            ]
+      - name: Setup Helm
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
+
+      - name: Resolve image tags
+        run: |
+          # Normalize version (strip a possible leading "v")
+          VERSION="${RELEASE_VERSION#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          # Stable releases get clean tags, dev (prerelease) builds get a -dev suffix
+          if [ "$RELEASE_TYPE" = "stable" ]; then
+            echo "SUFFIX=" >> "$GITHUB_ENV"
+          else
+            echo "SUFFIX=-dev" >> "$GITHUB_ENV"
+          fi
 
       - name: Log in to Docker Hub
-        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
           echo "$DH_TOKEN" | docker login -u "$DH_USERNAME" --password-stdin
 
       - name: Build Docker image
-        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
- 
+          docker build -f Dockerfile -t $DH_USERNAME/$IMAGE_NAME:v$VERSION .
+
       - name: Add tags to Docker image and push to Docker Hub
-        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}-$IMAGE_TAG
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}-$IMAGE_TAG
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}-$IMAGE_TAG
-            docker tag $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG $DH_USERNAME/$IMAGE_NAME:v$RELEASE_VERSION
-            docker push $DH_USERNAME/$IMAGE_NAME:$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR-$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR-$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR.${RELEASE_PATCH:0:1}-$IMAGE_TAG
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_VERSION
-     
-      - name: Add tags to Docker image and push to Docker Hub (specific to releases)
-        if: github.ref == 'refs/heads/release' && steps.semantic.outputs.new-release-published == 'true'
-        run: |
-            docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR
-            docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR
-            docker tag $DH_USERNAME/$IMAGE_NAME:${GITHUB_REF##*/} $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.${RELEASE_MINOR}.${RELEASE_PATCH:0:1}
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR
-            docker push $DH_USERNAME/$IMAGE_NAME:v$RELEASE_MAJOR.$RELEASE_MINOR.${RELEASE_PATCH:0:1}
+          BASE="$DH_USERNAME/$IMAGE_NAME:v$VERSION"
+
+          docker tag "$BASE" "$DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}${SUFFIX}"
+          docker tag "$BASE" "$DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}"
+          docker tag "$BASE" "$DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH}${SUFFIX}"
+
+          docker push "$DH_USERNAME/$IMAGE_NAME:v$VERSION"
+          docker push "$DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}${SUFFIX}"
+          docker push "$DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}${SUFFIX}"
+          docker push "$DH_USERNAME/$IMAGE_NAME:v${RELEASE_MAJOR}.${RELEASE_MINOR}.${RELEASE_PATCH}${SUFFIX}"
+
+          # Moving tag for the latest dev build
+          if [ "$RELEASE_TYPE" != "stable" ]; then
+            docker tag "$BASE" "$DH_USERNAME/$IMAGE_NAME:dev"
+            docker push "$DH_USERNAME/$IMAGE_NAME:dev"
+          fi
 
       - name: Log in to Docker Hub Helm Registry
-        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
           echo "$DH_TOKEN" | helm registry login -u "$DH_USERNAME" --password-stdin docker.io
 
       - name: Push Helm chart to Docker Hub OCI repo
-        if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          sed -i "s/^version:.*/version: v$RELEASE_VERSION/" ./charts/Chart.yaml
+          sed -i "s/^version:.*/version: v$VERSION/" ./charts/Chart.yaml
           CHART_NAME=$(grep '^name:' ./charts/Chart.yaml | awk '{print $2}')
           helm dependency update ./charts
           helm package ./charts -d ./charts
-          helm push ./charts/$CHART_NAME-v$RELEASE_VERSION.tgz oci://docker.io/$DH_USERNAME
+          helm push ./charts/$CHART_NAME-v$VERSION.tgz oci://docker.io/$DH_USERNAME
