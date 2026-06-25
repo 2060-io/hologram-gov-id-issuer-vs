@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.5](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.4...v1.4.5) (2026-06-25)
+
+
+### Bug Fixes
+
+* solve problem semantic release ([#116](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/116)) ([ce43328](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/ce4332878ceffca1e3c15aa5357bbf883829a6c1))
+
 ## [1.4.4](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.3...v1.4.4) (2026-04-13)
 
 
