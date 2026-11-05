@@ -4,7 +4,7 @@ import { WebRtcPeerEntity, SessionEntity } from '@/models'
 import { InjectRepository } from '@nestjs/typeorm'
 import { JoinCallRequest, NotificationRequest } from '@/dto'
 import { Repository } from 'typeorm'
-import { utils } from '@credo-ts/core'
+import { randomUUID } from 'crypto'
 import { instanceToPlain } from 'class-transformer'
 import { ConfigService } from '@nestjs/config'
 import { CoreService } from '@/core.service'
@@ -31,7 +31,7 @@ export class WebrtcService {
       })
 
       const crv = new WebRtcPeerEntity()
-      const peerId = utils.uuid()
+      const peerId = randomUUID()
       crv.id = peerId
       crv.connectionId = null
       crv.roomId = peer.roomId

@@ -70,12 +70,12 @@ export default registerAs('appConfig', () => ({
   verificationTimeout: parseInt(process.env.ID_VERIFICATION_TIMEOUT_SECONDS) || 900,
 
   /**
-   * Credential Schema ID that defines the structure and attributes of the credential.
-   * This JSON Schema Credential was created directly in the Gov-ID service API
-   * at https://dm.gov-id-org.demos.dev.2060.io.
-   * Defaults to a testnet schema ID if CREDENTIAL_SCHEMA_ID is not set.
+   * Identifier (URL) of the JSON Schema Credential (VTJSC) of the passport credential schema,
+   * as the ecosystem that owns the schema publishes it. The VS Agent must hold an ISSUER
+   * participant for that schema. The service creates the AnonCreds credential definition for
+   * it (`relatedJsonSchemaCredentialId`) when none exists yet.
+   * Read from JSON_SCHEMA_CREDENTIAL_ID; CREDENTIAL_SCHEMA_ID is still accepted as a fallback.
    * @type {string}
    */
-  credentialSchemaId:
-    process.env.CREDENTIAL_SCHEMA_ID || 'https://dm.gov-id-tr.demos.dev.2060.io/vt/schemas-gov-id-jsc.json',
+  jsonSchemaCredentialId: process.env.JSON_SCHEMA_CREDENTIAL_ID || process.env.CREDENTIAL_SCHEMA_ID,
 }))
