@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.4...v1.5.0) (2026-11-05)
+
+
+### Features
+
+* port the passport issuer to the VS Agent v2 Admin API ([#118](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/118)) ([792dc78](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/792dc788aaf59fe17d12309bcc1894429fd4bfda))
+
+
+### Bug Fixes
+
+* solve problem semantic release ([#116](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/116)) ([ce43328](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/ce4332878ceffca1e3c15aa5357bbf883829a6c1))
+
 ## [1.4.4](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.3...v1.4.4) (2026-04-13)
 
 
