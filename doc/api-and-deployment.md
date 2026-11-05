@@ -17,7 +17,7 @@ To deploy the service locally, ensure that the environment variables in the appl
 | **Variable**                   | **Description**                                | **default**                          |
 |--------------------------------|------------------------------------------------|--------------------------------------|
 | `AGENT_PORT`                   | The port on which the agent runs               | `5000`                               |
-| `SERVICE_AGENT_ADMIN_URL` | Base URL for the service agent admin API       | `http://localhost.com`      |
+| `SERVICE_AGENT_ADMIN_URL` | Base URL of the VS Agent v2 Admin API (the client appends `/v2`) | `http://localhost:3000`      |
 | `POSTGRES_HOST`                | Hostname for the PostgreSQL database           | `postgres`                           |
 | `POSTGRES_USER`                | Username for the PostgreSQL database           | `gaia`                               |
 | `POSTGRES_PASSWORD`            | Password for the PostgreSQL database           | `password`                           |
@@ -25,7 +25,8 @@ To deploy the service locally, ensure that the environment variables in the appl
 | `WEBRTC_SERVER_URL`                   | URL for the WebRTC Service                     | `http://localhost.com/`     |
 | `PUBLIC_BASE_URL`              | Public-facing base URL for the service         | `http://localhost.com/`      |
 | `ID_VERIFICATION_TIMEOUT_SECONDS` | Timeout for ID verification in seconds       | `900`                                |
-| `CREDENTIAL_SCHEMA_ID` | Schema identifier defining the credential structure       | `https://dm.gov-id-tr.demos.dev.2060.io/vt/schemas-gov-id-jsc.json`                                |
+| `JSON_SCHEMA_CREDENTIAL_ID` | URL of the JSON Schema Credential (VTJSC) of the passport credential. The VS Agent must hold an ISSUER participant for it; the service creates the AnonCreds credential definition when none exists. `CREDENTIAL_SCHEMA_ID` is accepted as a fallback | none (required) |
+| `EVENTS_WEBHOOK_API_KEY` | Optional. Same value as the VS Agent `EVENTS_WEBHOOK_API_KEY`: `POST /events` then requires `Authorization: Bearer <key>` | unset |
 | `LOG_LEVEL`                    | Logging verbosity level (1-5)                  | `3`                                  |
 
 Once everything is set up correctly, you just need to navigate to the `docker-dev` folder and run the command to start Docker Compose. This will bring up all the necessary components that coexist with the project. 
@@ -45,7 +46,7 @@ Vision Service
 - Token management to identify different connections.
 - List associated images.
 
-Additionally, the required endpoints for coexistence with the [2060 Service Agent](https://github.com/2060-io/2060-service-agent) are provided. Keep in mind that this connection is mandatory for any chatbot that intends to utilize a DIDComm agent.
+Additionally, the service exposes `POST /events`, the events webhook of the [VS Agent](https://github.com/verana-labs/vs-agent) v2: set the agent's `EVENTS_WEBHOOK_URL` to `<backend base URL>/events`. Keep in mind that this connection is mandatory for any chatbot that intends to utilize a DIDComm agent.
 
 ### WebRTC Service
 The RESTful API includes the following options:

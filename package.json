@@ -22,8 +22,6 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
-    "@2060.io/credo-ts-didcomm-mrtd": "^0.0.17",
-    "@credo-ts/core": "^0.5.13",
     "@nestjs/axios": "^3.1.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.3",
@@ -32,13 +30,13 @@
     "@nestjs/swagger": "^8.0.7",
     "@nestjs/typeorm": "^10.0.2",
     "@types/uuid": "^10.0.0",
-    "@verana-labs/vs-agent-client": "^1.7.0",
-    "@verana-labs/vs-agent-model": "^1.7.0",
-    "@verana-labs/vs-agent-nestjs-client": "^1.7.0",
+    "@verana-labs/vs-agent-client": "2.0.0-dev.105",
+    "@verana-labs/vs-agent-nestjs-client": "2.0.0-dev.105",
     "axios": "^1.7.7",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "iso-3166-1": "^2.1.1",
+    "mrz": "^4.2.0",
     "nestjs-i18n": "^10.5.0",
     "pg": "^8.13.1",
     "reflect-metadata": "^0.2.0",
@@ -79,6 +77,9 @@
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

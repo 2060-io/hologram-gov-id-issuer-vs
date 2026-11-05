@@ -88,8 +88,15 @@ spec:
               value: "https://{{ tpl .Values.ingress.host . }}"
             - name: ID_VERIFICATION_TIMEOUT_SECONDS
               value: "{{ .Values.backend.timeout }}"
-            - name: CREDENTIAL_SCHEMA_ID
-              value: "{{ tpl .Values.backend.credentialSchemaId . }}"
+            - name: JSON_SCHEMA_CREDENTIAL_ID
+              value: "{{ tpl .Values.backend.jsonSchemaCredentialId . }}"
+            {{- if .Values.backend.eventsWebhookApiKey.existingSecret }}
+            - name: EVENTS_WEBHOOK_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.eventsWebhookApiKey.existingSecret }}
+                  key: {{ .Values.backend.eventsWebhookApiKey.existingSecretKey | default "EVENTS_WEBHOOK_API_KEY" }}
+            {{- end }}
             - name: LOG_LEVEL
               value: "{{ .Values.backend.logLevel }}"
             ports:

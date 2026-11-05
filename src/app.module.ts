@@ -30,15 +30,14 @@ import { CoreModule } from '@/core.module'
       isGlobal: true,
       load: [appConfig],
     }),
+    // VS Agent v2: the agent posts every event envelope to POST /events (its EVENTS_WEBHOOK_URL)
     EventsModule.register({
+      url: process.env.SERVICE_AGENT_ADMIN_URL || 'http://localhost:3000',
+      webhookApiKey: process.env.EVENTS_WEBHOOK_API_KEY || undefined,
+      eventHandler: CoreService,
       modules: {
-        messages: true,
         connections: true,
         credentials: true,
-      },
-      options: {
-        eventHandler: CoreService,
-        url: process.env.SERVICE_AGENT_ADMIN_URL,
       },
     }),
   ],

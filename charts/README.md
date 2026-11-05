@@ -57,17 +57,25 @@ The `values.yaml` file contains the default configuration for the chart. Below a
 | `backend.vision`   | URL for the Vision service             | `https://vision.example.io` |
 | `backend.timeout`  | Timeout for backend requests (seconds) | `900`                       |
 | `backend.logLevel` | Log level for the backend              | `3`                         |
+| `backend.vsAgentAdminUrl` | URL of the VS Agent v2 Admin API | `http://issuer:3000`        |
+| `backend.jsonSchemaCredentialId` | VTJSC URL of the passport credential schema (required) | `""` |
+| `backend.eventsWebhookApiKey.existingSecret` | Secret holding the optional events webhook key | `""` |
 
 ---
 
 ### 🤖 vs-agent-chart Settings
 
-| Key                               | Description                  | Default Value                       |
-| --------------------------------- | ---------------------------- | ----------------------------------- |
-| `vs-agent-chart.enabled`          | Enable the vs-agent service  | `false`                             |
-| `vs-agent-chart.database.enabled` | Enable database for vs-agent | `false`                             |
-| `vs-agent-chart.didcommLabel`     | Name of the didcomm agent    | `test-issuer`                       |
-| `vs-agent-chart.eventsBaseUrl`    | Base URL for events          | `https://issuer-vs.example.io` |
+The dependency is the VS Agent v2 chart (`vs-agent-chart` `v2.0.0-dev.105`, Admin API `/v2`). Its full list of values is in the [vs-agent chart](https://github.com/verana-labs/vs-agent/tree/main/charts/vs-agent).
+
+| Key                                       | Description                                                        | Default Value                    |
+| ----------------------------------------- | ------------------------------------------------------------------ | -------------------------------- |
+| `vs-agent-chart.enabled`                  | Enable the vs-agent service                                        | `false`                          |
+| `vs-agent-chart.image.repository` / `tag` | VS Agent image with the MRTD plugin                                | `veranalabs/vs-agent-mrtd` / `v2.0.0-dev.105` |
+| `vs-agent-chart.eventsWebhookUrl`         | Where the agent posts events: the backend `POST /events`           | `http://issuer-vs:2903/events`   |
+| `vs-agent-chart.adminApiTrustedNetworks`  | CIDR blocks allowed to call the Admin API; must include the backend pod | `""`                        |
+| `vs-agent-chart.veranaCorporationId`, `veranaRpcEndpointUrl`, `veranaIndexerBaseUrl`, `veranaChainId`, `trustedEcsEcosystemDids` | Verana network settings required by the agent | `""` |
+| `vs-agent-chart.database.enabled`         | Enable the PostgreSQL sidecar (also used by the backend)           | `false`                          |
+| `vs-agent-chart.extraEnv`                 | Must provide `VERANA_ACCOUNT_MNEMONIC` from a Secret               | see `values.yaml`                |
 
 ## Enabling Dependencies
 If you want to enable additional services, update the `values.yaml` file and set the corresponding `enabled` field to `true`. For more information about these services, refer to their respective repositories:

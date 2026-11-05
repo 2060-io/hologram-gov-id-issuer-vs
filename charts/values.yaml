@@ -29,39 +29,65 @@ ingress:
 backend:
   webrtc: https://webrtc.{{ .Values.global.domain }} # URL for the webrtc server
   vision: https://vision.{{ .Values.global.domain }} # URL for the vision service
-  vsAgentAdminUrl: http://issuer:3000 # URL for the vs-agent admin interface
+  vsAgentAdminUrl: http://issuer:3000 # URL for the vs-agent v2 Admin API (the client appends /v2)
   port: 2903 # Port for the backend service
   timeout: 900 # Timeout for ID verification in seconds, defined in the backend service for resetting the ID verification process
   logLevel: 3 # Log level for the backend service, default only errors are logged, set to 3 for debug logs
-  credentialSchemaId: https://dm.gov-id-tr.{{ .Values.global.domain }}/vt/schemas-gov-id-jsc.json
+  # Identifier (URL) of the JSON Schema Credential (VTJSC) of the passport credential schema, published by the
+  # ecosystem that owns the schema. The VS Agent must hold an ISSUER participant for it. The backend creates the
+  # AnonCreds credential definition for this VTJSC at startup when none exists. Required.
+  jsonSchemaCredentialId: ""
+  # Optional: shared secret of the events webhook. When set, the backend rejects event deliveries without
+  # "Authorization: Bearer <key>". Set the same secret as EVENTS_WEBHOOK_API_KEY in vs-agent-chart.extraEnv.
+  eventsWebhookApiKey:
+    existingSecret: "" # Name of an existing K8s Secret holding the key
+    existingSecretKey: EVENTS_WEBHOOK_API_KEY
 
 # If you want to use the issuer-vs chart, you can enable it by setting the following:
 # vs-agent-chart.enabled: true
+# The v2 chart needs the Verana network values and the VERANA_ACCOUNT_MNEMONIC secret: the agent refuses to
+# start without them. See https://github.com/verana-labs/vs-agent/tree/main/charts/vs-agent
 vs-agent-chart:
   enabled: false
   name: issuer
-  didcommLabel: test-issuer
-  eventsBaseUrl: http://issuer-vs:2903
-  didcommInvitationImageUrl: https://i.unic-id-issuer.{{ .Values.global.domain }}/avatar.png
+  # The passport flow needs the MRTD protocol: use the vs-agent-mrtd image (chat + mrtd plugins)
+  image:
+    repository: veranalabs/vs-agent-mrtd
+    tag: v2.0.0-dev.105
+  # Events webhook: the agent posts every event envelope to the backend's POST /events.
+  # Rendered in the subchart context, so spell out the backend service (name) and port (backend.port).
+  eventsWebhookUrl: "http://issuer-vs:2903/events"
   ingress:
     host: "{{ .Values.name }}.{{ .Values.global.domain }}" # Host for the vs agent service
     tlsSecret: public.{{ .Values.name }}.{{ .Values.global.domain }}-cert # TLS secret for the vs agent service
 
+  # The backend calls the Admin API from another pod. In adminApiAuthMode "internal" the agent answers 403 to
+  # every caller outside these CIDR blocks (default 127.0.0.0/8,::1/128). Set the pod CIDR of your cluster here,
+  # and keep the source address of any public ingress outside it. Required for the backend to work.
+  adminApiTrustedNetworks: ""
+
+  # Verana network (required by the agent)
+  veranaCorporationId: "" # VPR Corporation.id of the corporation that operates this agent
+  veranaRpcEndpointUrl: "" # e.g. "https://rpc.testnet.verana.network"
+  veranaIndexerBaseUrl: "" # e.g. "https://idx.testnet.verana.network"
+  veranaChainId: "" # e.g. the chain id of the network above
+  trustedEcsEcosystemDids: "" # Comma-separated ECS ecosystem DIDs (agentMode standalone)
+
+  # PostgreSQL sidecar; the backend also uses it (database.host above points to the vs-agent service)
   database:
     enabled: false # Set to true if you want to use a database
-    host: localhost
     user: govidissuer
     existingSecret: custom-secrets
-  redis: 
-    enabled: false # Set to true if you want to use redis
+    secretPwdKey: POSTGRES_PASSWORD
 
   # Recomended extra environment variables for the vs-agent
   # to work with the issuer-vs chart
-  extraEnv: 
-    - name: ANONCREDS_SERVICE_BASE_URL
-      value: "https://{{ .Values.name }}.{{ .Values.global.domain }}"
-    - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
-      value: "true"
+  extraEnv:
+    - name: VERANA_ACCOUNT_MNEMONIC
+      valueFrom:
+        secretKeyRef:
+          name: custom-secrets
+          key: VERANA_ACCOUNT_MNEMONIC
     - name: POSTGRES_HOST
       value: "localhost"
     - name: POSTGRES_USER
@@ -71,11 +97,12 @@ vs-agent-chart:
         secretKeyRef:
           name: custom-secrets
           key: POSTGRES_PASSWORD
-    - name: REDIS_HOST
-      value: "localhost"
-    # uncomment the following line if you want to use redis with a password
-    # - name: REDIS_pASSWORD
-    #   value: "mypassword123"
+    # uncomment to authenticate event deliveries (same secret as backend.eventsWebhookApiKey)
+    # - name: EVENTS_WEBHOOK_API_KEY
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: custom-secrets
+    #       key: EVENTS_WEBHOOK_API_KEY
 
 # If you want to use the vision-service chart, you can enable it by setting the following:
 # vision-service-chart.enabled: true
