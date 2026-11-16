@@ -491,8 +491,12 @@ export class CoreService implements EventHandler, OnModuleInit {
   private async sendEMrtdRequest(session: SessionEntity): Promise<SessionEntity> {
     session.state = StateStep.EMRTD
     await this.sendText(session.connectionId, 'EMRTD_REQUEST', session.lang)
-    // The v2 request carries no thread id: the agent starts a new MRTD thread on the connection.
-    await this.apiClient.didcomm.requestEmrtdData({ connectionId: session.connectionId })
+    // The request names the MRZ exchange as its parent thread: the wallet reads the chip with
+    // the MRZ of that exchange, and finds none without it ("MRZ information not found").
+    await this.apiClient.didcomm.requestEmrtdData({
+      connectionId: session.connectionId,
+      parentThreadId: session.threadId ?? undefined,
+    })
     return await this.sessionRepository.save(session)
   }
 
