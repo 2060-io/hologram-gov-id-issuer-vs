@@ -128,7 +128,10 @@ describe('CoreService (VS Agent v2 events)', () => {
     )
 
     expect(texts()).toEqual(['msg.MRZ_SUCCESSFUL', 'msg.EMRTD_REQUEST'])
-    expect(didcomm.requestEmrtdData).toHaveBeenCalledWith({ connectionId: CONNECTION_ID })
+    expect(didcomm.requestEmrtdData).toHaveBeenCalledWith({
+      connectionId: CONNECTION_ID,
+      parentThreadId: 'thread-1',
+    })
     expect(session().state).toBe(StateStep.EMRTD)
   })
 

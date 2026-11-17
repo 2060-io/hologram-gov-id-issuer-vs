@@ -65,12 +65,12 @@ The `values.yaml` file contains the default configuration for the chart. Below a
 
 ### 🤖 vs-agent-chart Settings
 
-The dependency is the VS Agent v2 chart (`vs-agent-chart` `v2.0.0-dev.105`, Admin API `/v2`). Its full list of values is in the [vs-agent chart](https://github.com/verana-labs/vs-agent/tree/main/charts/vs-agent).
+The dependency is the VS Agent v2 chart (`vs-agent-chart` `v2.0.0-dev.113`, Admin API `/v2`). Its full list of values is in the [vs-agent chart](https://github.com/verana-labs/vs-agent/tree/main/charts/vs-agent).
 
 | Key                                       | Description                                                        | Default Value                    |
 | ----------------------------------------- | ------------------------------------------------------------------ | -------------------------------- |
 | `vs-agent-chart.enabled`                  | Enable the vs-agent service                                        | `false`                          |
-| `vs-agent-chart.image.repository` / `tag` | VS Agent image with the MRTD plugin                                | `veranalabs/vs-agent-mrtd` / `v2.0.0-dev.105` |
+| `vs-agent-chart.image.repository` / `tag` | VS Agent image with the MRTD plugin                                | `veranalabs/vs-agent-mrtd` / `v2.0.0-dev.113` |
 | `vs-agent-chart.eventsWebhookUrl`         | Where the agent posts events: the backend `POST /events`           | `http://issuer-vs:2903/events`   |
 | `vs-agent-chart.adminApiTrustedNetworks`  | CIDR blocks allowed to call the Admin API; must include the backend pod | `""`                        |
 | `vs-agent-chart.veranaCorporationId`, `veranaRpcEndpointUrl`, `veranaIndexerBaseUrl`, `veranaChainId`, `trustedEcsEcosystemDids` | Verana network settings required by the agent | `""` |

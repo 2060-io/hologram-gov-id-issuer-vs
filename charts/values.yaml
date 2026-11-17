@@ -53,7 +53,7 @@ vs-agent-chart:
   # The passport flow needs the MRTD protocol: use the vs-agent-mrtd image (chat + mrtd plugins)
   image:
     repository: veranalabs/vs-agent-mrtd
-    tag: v2.0.0-dev.105
+    tag: v2.0.0-dev.113
   # Events webhook: the agent posts every event envelope to the backend's POST /events.
   # Rendered in the subchart context, so spell out the backend service (name) and port (backend.port).
   eventsWebhookUrl: "http://issuer-vs:2903/events"
