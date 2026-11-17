@@ -3,7 +3,7 @@ version: '3'
 services:
   vs-agent:
     # VS Agent v2 with the MRTD plugin (chat + mrtd)
-    image: veranalabs/vs-agent-mrtd:v2.0.0-dev.105
+    image: veranalabs/vs-agent-mrtd:v2.0.0-dev.113
     restart: always
     networks:
       - chatbot
