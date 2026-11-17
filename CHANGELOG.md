@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.5.0...v1.5.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* the eMRTD request names the MRZ exchange as its parent thread ([#119](https://github.com/2060-io/hologram-gov-id-issuer-vs/issues/119)) ([74150f7](https://github.com/2060-io/hologram-gov-id-issuer-vs/commit/74150f78d5ce2e1a8e5b86fbe10d0c1a61b01e0b))
+
 ## [1.5.0](https://github.com/2060-io/hologram-gov-id-issuer-vs/compare/v1.4.4...v1.5.0) (2026-11-05)
 
 
